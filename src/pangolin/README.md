@@ -4,19 +4,19 @@ Graph Pattern Mining (GPM) Framework on CPU and GPU
 Quick Start
 -----------
 
-Go to each sub-directory, e.g. src/triangle, and then
+Go to each sub-directory, e.g. src/clique, and then
 
     $ make
 
 Find out commandline format by running executable without argument:
 
     $ cd bin
-    $ ./tc_omp_base
+    $ ./clique_omp_base
 
 Run 4-cliques on an undirected graph:
 
     $ cd bin
-    $ ./tc_omp_base /inputs/citeseer/graph
+    $ ./clique_omp_base /inputs/citeseer/graph 4
 
 To control the number of threads, set the following environment variable:
 
