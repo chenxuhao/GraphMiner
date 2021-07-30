@@ -4,6 +4,10 @@ Graph Pattern Mining (GPM) Framework on CPU and GPU
 Quick Start
 -----------
 
+Setup CUB library:
+
+    $ git submodule update --init --recursive
+
 Create the bin directory:
 
     $ mkdir bin
