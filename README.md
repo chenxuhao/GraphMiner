@@ -4,18 +4,21 @@ Graph Pattern Mining (GPM) Framework on CPU and GPU
 Quick Start
 -----------
 
+Create the bin directory:
+
+    $ mkdir bin
+
 Go to each sub-directory, e.g. src/triangle, and then
 
-    $ make
+    $ cd src/triangle; make
 
 Find out commandline format by running executable without argument:
 
-    $ cd bin
+    $ cd ../../bin
     $ ./tc_omp_base
 
-Run 4-cliques on an undirected graph:
+Run triangle counting on an undirected graph:
 
-    $ cd bin
     $ ./tc_omp_base /inputs/citeseer/graph
 
 To control the number of threads, set the following environment variable:
