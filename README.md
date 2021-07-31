@@ -1,5 +1,6 @@
 # GraphMiner
 Graph Pattern Mining (GPM) Framework on CPU and GPU [1].
+Pangolin source code is in src/pangolin/.
 
 [1] Xuhao Chen, Roshan Dathathri, Gurbinder Gill, Keshav Pingali,
 Pangolin: An Efficient and Flexible Graph Pattern Mining System on CPU and GPU, VLDB 2020
@@ -10,7 +11,7 @@ Quick Start
 
 Install CUDA 11.1.1 and GCC 8.3.1. 
 If CUDA version < 11.0, enable CUB in the Makefile.
-Pangolin code is in src/pangolin/.
+Note: the latest official CUB requires CUDA 11+. For CUDA version < 11.0, use CUB v1.8.0.
 
 Setup CUB library:
 
