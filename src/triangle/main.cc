@@ -21,7 +21,6 @@ int main(int argc, char *argv[]) {
   uint64_t total = 0;
   TCSolver(g, total, n_devices, chunk_size);
   std::cout << "total_num_triangles = " << total << "\n";
-  //TCVerifier(g, total);
   return 0;
 }
 

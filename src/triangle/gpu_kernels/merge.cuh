@@ -1,4 +1,3 @@
-
 __global__ void merge_warp_edge(eidType ne, GraphGPU g, AccType *total) {
   __shared__ typename BlockReduce::TempStorage temp_storage;
   int thread_id   = blockIdx.x * blockDim.x + threadIdx.x; // global thread index

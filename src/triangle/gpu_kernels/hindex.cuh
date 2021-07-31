@@ -1,4 +1,3 @@
-
 __forceinline__ __device__ void init_bin_counts(int id, int offset, vidType *bin_counts) {
   for (auto i = id + offset; i < offset + NUM_BUCKETS; i += WARP_SIZE)
     bin_counts[i] = 0;
