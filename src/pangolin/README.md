@@ -1,8 +1,14 @@
-# GraphMiner
-Graph Pattern Mining (GPM) Framework on CPU and GPU
+# Pangolin 
+
+Graph Pattern Mining (GPM) Framework on CPU and GPU [1].
+
+[1] Xuhao Chen, Roshan Dathathri, Gurbinder Gill, Keshav Pingali,
+Pangolin: An Efficient and Flexible Graph Pattern Mining System on CPU and GPU, VLDB 2020
 
 Quick Start
 -----------
+
+Install CUDA 11.1.1 and GCC 8.3.1. If CUDA version < 11.0, enable CUB in the Makefile.
 
 Go to each sub-directory, e.g. src/clique, and then
 
@@ -10,17 +16,12 @@ Go to each sub-directory, e.g. src/clique, and then
 
 Find out commandline format by running executable without argument:
 
-    $ cd bin
-    $ ./clique_omp_base
+    $ cd bin/pangolin/
+    $ ./kcl_base
 
 Run 4-cliques on an undirected graph:
 
-    $ cd bin
-    $ ./clique_omp_base /inputs/citeseer/graph 4
-
-To control the number of threads, set the following environment variable:
-
-    $ export OMP_NUM_THREADS=[ number of cores in system ]
+    $ ./kcl_base ../../inputs/citeseer/graph 4
 
 
 Graph Loading

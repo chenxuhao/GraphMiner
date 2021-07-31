@@ -1,5 +1,5 @@
 include ../common.mk
-INCLUDES+=-I $(CUB_DIR)
+#INCLUDES+=-I $(CUB_DIR)
 CXXFLAGS+=-std=c++11
 SRC=main.cc
 OBJS=main.o VertexSet.o

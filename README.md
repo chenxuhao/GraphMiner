@@ -1,16 +1,20 @@
 # GraphMiner
-Graph Pattern Mining (GPM) Framework on CPU and GPU
+Graph Pattern Mining (GPM) Framework on CPU and GPU [1].
+
+[1] Xuhao Chen, Roshan Dathathri, Gurbinder Gill, Keshav Pingali,
+Pangolin: An Efficient and Flexible Graph Pattern Mining System on CPU and GPU, VLDB 2020
+
 
 Quick Start
 -----------
 
+Install CUDA 11.1.1 and GCC 8.3.1. 
+If CUDA version < 11.0, enable CUB in the Makefile.
+Pangolin code is in src/pangolin/.
+
 Setup CUB library:
 
     $ git submodule update --init --recursive
-
-Create the bin directory:
-
-    $ mkdir bin
 
 Go to each sub-directory, e.g. src/triangle, and then
 
@@ -23,7 +27,7 @@ Find out commandline format by running executable without argument:
 
 Run triangle counting on an undirected graph:
 
-    $ ./tc_omp_base /inputs/citeseer/graph
+    $ ./tc_omp_base ../inputs/citeseer/graph
 
 To control the number of threads, set the following environment variable:
 

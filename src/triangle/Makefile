@@ -1,5 +1,6 @@
 include ../common.mk
-INCLUDES+=-I$(CUB_DIR) -I./gpu_kernels
+INCLUDES+=-I./gpu_kernels
+#INCLUDES+=-I$(CUB_DIR)
 OBJS=main.o verifier.o VertexSet.o
 all: tc_omp_base tc_gpu_base tc_multigpu 
 
