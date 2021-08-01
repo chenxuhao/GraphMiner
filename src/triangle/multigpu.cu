@@ -5,7 +5,6 @@
 #include "timer.h"
 #include "edgelist.h"
 #include "graph_gpu.h"
-#include "operations.cuh"
 #include "cuda_launch_config.hpp"
 //#define EVEN_SPLIT
 

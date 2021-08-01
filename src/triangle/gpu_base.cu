@@ -4,7 +4,6 @@
 #include "tc.h"
 #include "timer.h"
 #include "graph_gpu.h"
-#include "operations.cuh"
 #include "cuda_launch_config.hpp"
 
 #ifdef VERTEX_PAR

@@ -1,6 +1,6 @@
 #pragma once
 #include "graph.h"
-#include "operations.cuh"
+#include "search.cuh"
 #include "cutil_subset.h"
 
 class GraphGPU {

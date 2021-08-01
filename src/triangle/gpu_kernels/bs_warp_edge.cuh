@@ -8,9 +8,7 @@ __global__ void warp_edge(eidType ne, GraphGPU g, AccType *total) {
   for (eidType eid = warp_id; eid < ne; eid += num_warps) {
     auto v = g.get_src(eid);
     auto u = g.get_dst(eid);
-    vidType v_size = g.getOutDegree(v);
-    vidType u_size = g.getOutDegree(u);
-    count += intersect_num(g.N(v), v_size, g.N(u), u_size);
+    count += g.warp_intersect_cache(v, u);
   }
   AccType block_num = BlockReduce(temp_storage).Sum(count);
   if (threadIdx.x == 0) atomicAdd(total, block_num);
