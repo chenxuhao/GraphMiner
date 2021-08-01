@@ -3,7 +3,6 @@
 //#include "context.cuh"
 #include "../graph_gpu.h"
 #include "embedding.cuh"
-#include "../operations.cuh"
 
 __device__ void printout_embedding(unsigned level, IndexT *emb) {
   printf("embedding[");
