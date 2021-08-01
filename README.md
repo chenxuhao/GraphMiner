@@ -1,9 +1,23 @@
-# GraphMiner
-Graph Pattern Mining (GPM) Framework on CPU and GPU [1].
-Pangolin source code is in src/pangolin/.
+# GraphGPUMiner
+Graph Pattern Mining (GPM) Framework on GPU.
+
+Three existing state-of-the-art frameworks:
+
+Pangolin [1]: source code is in src/pangolin/.
+
+SgMatch [2,3]: https://github.com/guowentian/SubgraphMatchGPU
+
+Peregrine [4]: https://github.com/pdclab/peregrine
 
 [1] Xuhao Chen, Roshan Dathathri, Gurbinder Gill, Keshav Pingali,
-Pangolin: An Efficient and Flexible Graph Pattern Mining System on CPU and GPU, VLDB 2020
+Pangolin: An Efficient and Flexible Graph Pattern Mining System on CPU and GPU. VLDB 2020
+
+[2] GPU-Accelerated Subgraph Enumeration on Partitioned Graphs. SIGMOD 2020.
+
+[3] Exploiting Reuse for GPU Subgraph Enumeration. Under submission. TKDE 2020.
+
+[4] Kasra Jamshidi, Rakesh Mahadasa, Keval Vora,
+Peregrine: A Pattern-Aware Graph Mining System. EuroSys 2020
 
 
 Quick Start
