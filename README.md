@@ -25,6 +25,7 @@ Quick Start
 
 Install CUDA 11.1.1 and GCC 8.3.1. 
 If CUDA version < 11.0, enable CUB in the Makefile.
+
 Note: the latest official CUB requires CUDA 11+. For CUDA version < 11.0, use CUB v1.8.0.
 
 Setup CUB library:

@@ -1,3 +1,7 @@
+// This code is modified from AutoMine and GraphZero
+// Daniel Mawhirter and Bo Wu. SOSP 2019.
+// AutoMine: Harmonizing High-Level Abstraction and High Performance for Graph Mining
+
 #include "VertexSet.h"
 #include <cassert>
 

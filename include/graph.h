@@ -1,3 +1,7 @@
+// This code is modified from AutoMine and GraphZero
+// Daniel Mawhirter and Bo Wu. SOSP 2019.
+// AutoMine: Harmonizing High-Level Abstraction and High Performance for Graph Mining
+
 #pragma once
 #include "common.h"
 #include "scan.h"
@@ -46,7 +50,7 @@ private:
     assert(pointer != MAP_FAILED);
     close(inf);
   }
-  //std::vector<eidType> scale_accesses;
+
 public:
   Graph(std::string prefix, bool use_dag = false, bool has_vlabel = false) :
       vlabels(NULL), elabels(NULL), nnz(0) {
