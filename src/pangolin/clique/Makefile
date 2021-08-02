@@ -5,9 +5,6 @@ SRC=main.cc
 OBJS=VertexSet.o main.o
 all: kcl_base kcl_omp_base
 
-VertexSet.o: $(VPATH)/VertexSet.cc
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(VPATH)/VertexSet.cc
-
 %.o: %.cc
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $<
 

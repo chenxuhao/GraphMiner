@@ -9,14 +9,16 @@ SgMatch [2,3]: https://github.com/guowentian/SubgraphMatchGPU
 
 Peregrine [4]: https://github.com/pdclab/peregrine
 
-[1] Xuhao Chen, Roshan Dathathri, Gurbinder Gill, Keshav Pingali,
+[1] Xuhao Chen, Roshan Dathathri, Gurbinder Gill, Keshav Pingali.
 Pangolin: An Efficient and Flexible Graph Pattern Mining System on CPU and GPU. VLDB 2020
 
-[2] GPU-Accelerated Subgraph Enumeration on Partitioned Graphs. SIGMOD 2020.
+[2]	Wentian Guo, Yuchen Li, Mo Sha, Bingsheng He, Xiaokui Xiao, Kian-Lee Tan.
+GPU-Accelerated Subgraph Enumeration on Partitioned Graphs. SIGMOD 2020.
 
-[3] Exploiting Reuse for GPU Subgraph Enumeration. Under submission. TKDE 2020.
+[3] Wentian Guo, Yuchen Li, Kian-Lee Tan. 
+Exploiting Reuse for GPU Subgraph Enumeration. TKDE 2020.
 
-[4] Kasra Jamshidi, Rakesh Mahadasa, Keval Vora,
+[4] Kasra Jamshidi, Rakesh Mahadasa, Keval Vora.
 Peregrine: A Pattern-Aware Graph Mining System. EuroSys 2020
 
 

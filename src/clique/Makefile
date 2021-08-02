@@ -4,9 +4,6 @@ INCLUDES+=-I./cpu_kernels -I./gpu_kernels
 OBJS=main.o VertexSet.o
 all: clique_omp_base 
 
-VertexSet.o: $(VPATH)/VertexSet.cc
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(VPATH)/VertexSet.cc
-
 %.o: %.cc
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(LIBS) -c $<
 
