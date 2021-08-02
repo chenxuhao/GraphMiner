@@ -1,3 +1,7 @@
+// This code is modified from AutoMine and GraphZero
+// Daniel Mawhirter and Bo Wu. SOSP 2019.
+// AutoMine: Harmonizing High-Level Abstraction and High Performance for Graph Mining
+// Please do not copy or distribute without permission of the author
 
 void automine_3motif(Graph &g, std::vector<std::vector<uint64_t>> &global_counters) {
   #pragma omp parallel
