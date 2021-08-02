@@ -63,6 +63,8 @@ The graph loading infrastructure understands the following formats:
 
 + `graph.edge.bin` binary file containing the column indices
 
++ `graph.vlabel.bin` binary file containing the vertax labels (only needed for labeled graphs)
+
 
 Citation
 -------------
