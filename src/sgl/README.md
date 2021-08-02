@@ -1,4 +1,4 @@
-Triangle Counting (TC)
+Subgraph Listing (SL)
 ================================================================================
 
 DESCRIPTION 
@@ -6,15 +6,15 @@ DESCRIPTION
 
 Author: Xuhao Chen <cxh@mit.edu>
 
-This program counts the number of triangles in a given undirected graph.
+This program counts the number of embeddings isomorphic to a given pattern in a 
+given undirected graph.
 
-This implementation reduces the search space by counting each triangle only
-once. A naive implementation will count the same triangle six times because
-each of the three vertices (u, v, w) will count it in both ways. To count
-a triangle only once, this implementation only counts a triangle if u > v > w.
-To setup this total ordering among vertices, the input undirected graph is 
-converted into a directed acyclic graph (DAG). This technqiue is well known
-as orientation.
+This implementation reduces the search space by counting each embedding only once.
+This is done by establishing partial ordering among vertices in the input graph.
+To find embeddings, we start from each vertex v, and iteratively add one more 
+vertex from its neighborhood. We use a connectivity map to record the neighborhood
+connectivity. Meanwhile, a matching order specific to the pattern is used to avoid
+graph isomorphism test.
 
 INPUT
 --------------------------------------------------------------------------------
@@ -36,14 +36,14 @@ BUILD
 
 2. Or run make at the top-level directory
 
-  - tc_omp_base : one thread per vertex using OpenMP
+  - sgl_omp_base : one thread per vertex using OpenMP
 
 RUN
 --------------------------------------------------------------------------------
 
-The following are example command lines:
+The following is an example command line:
 
-`$ ../../bin/tc_omp_base ../../inputs/citeseer/graph`
+`$ ../../bin/sgl_omp_base ../../inputs/citeseer/graph diamond`
 
 PERFORMANCE
 --------------------------------------------------------------------------------

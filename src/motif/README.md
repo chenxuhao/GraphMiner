@@ -1,4 +1,4 @@
-Triangle Counting (TC)
+k-Motif Counting (k-MC)
 ================================================================================
 
 DESCRIPTION 
@@ -6,27 +6,23 @@ DESCRIPTION
 
 Author: Xuhao Chen <cxh@mit.edu>
 
-This program counts the number of triangles in a given undirected graph.
+This program counts the number of k-motifs in a given undirected graph.
 
-This implementation reduces the search space by counting each triangle only
-once. A naive implementation will count the same triangle six times because
-each of the three vertices (u, v, w) will count it in both ways. To count
-a triangle only once, this implementation only counts a triangle if u > v > w.
-To setup this total ordering among vertices, the input undirected graph is 
-converted into a directed acyclic graph (DAG). This technqiue is well known
-as orientation.
+This implementation reduces the search space by counting each k-motif only once.
+This is done by establish partial orders among vertices in the input graph.
+Meanwhile, each motif has a matching order which avoids graph isomorphism test.
+An advanced optimization, called formula-based local counting, is used
+to significantly prune the enumeration space. Only triangles are enumerated
+in 3-motif counting. Similarly only 4-cliques and 4-cycles are enumerated
+in 4-motif counting.
 
 INPUT
 --------------------------------------------------------------------------------
 
 The input graph is preprocessed internally to meet these requirements:
-
   - to be undirected
-
   - no self-loops
-
   - no duplicate edges (or else will be counted as multiple triangles)
-
   - neighborhoods are sorted by vertex identifiers
 
 BUILD
@@ -36,14 +32,17 @@ BUILD
 
 2. Or run make at the top-level directory
 
-  - tc_omp_base : one thread per vertex using OpenMP
+  - motif_omp_base : one thread per vertex using OpenMP
+  - motif_omp_formula: formula-based local counting using OpenMP
 
 RUN
 --------------------------------------------------------------------------------
 
-The following are example command lines:
+The following is an example command line.
 
-`$ ../../bin/tc_omp_base ../../inputs/citeseer/graph`
+`$ ../../bin/motif_omp_base ../../inputs/citeseer/graph 3`
+
+`$ ../../bin/motif_omp_formula ../../inputs/citeseer/graph 4`
 
 PERFORMANCE
 --------------------------------------------------------------------------------
