@@ -18,3 +18,4 @@ else
 endif
 LIBS += -lgomp
 INCLUDES = -I../../../include
+VPATH=../../common

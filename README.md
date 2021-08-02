@@ -61,8 +61,8 @@ The graph loading infrastructure understands the following formats:
 + `graph.edge.bin` binary file containing the column indices
 
 
-CITATION
-================================================================================
+Citation
+-------------
 
 Please cite the following paper if you use this code:
 

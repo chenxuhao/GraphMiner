@@ -4,6 +4,9 @@ INCLUDES+=-I./gpu_kernels
 OBJS=main.o VertexSet.o
 all: tc_omp_base tc_gpu_base tc_multigpu 
 
+VertexSet.o: $(VPATH)/VertexSet.cc
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(VPATH)/VertexSet.cc
+
 %.o: %.cc
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $<
 
