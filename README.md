@@ -21,6 +21,7 @@ The document is organized as follows:
 * [CUDA toolkit](https://developer.nvidia.com/cuda-toolkit) 11.1.1 or greater.
 * GCC 8.3.1.
 * CUB. if CUDA version < 11.0, enable CUB in the Makefile.
+
 Note: the latest official CUB requires CUDA 11+. For CUDA version < 11.0, use CUB v1.8.0.
 
 ### Quick Start ###
@@ -150,6 +151,17 @@ Please cite the following paper if you use this code:
   author={Chen, Xuhao and Dathathri, Roshan and Gill, Gurbinder and Hoang, Loc and Pingali, Keshav},
   booktitle={Proceedings of the ACM International Conference on Supercomputing},
   pages={378--391},
+  year={2021}
+}
+```
+
+```
+@inproceedings{DeepGalois,
+  title={Efficient Distribution for Deep Learning on Large Graphs},
+  author={Hoang, Loc and Chen, Xuhao and Lee, Hochan and Dathathri, Roshan and Gill, Gurbinder and Pingali, Keshav},
+  booktitle={Workshop on Graph Neural Networks and Systems},
+  volume={},
+  pages={1-9},
   year={2021}
 }
 ```
