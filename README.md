@@ -133,6 +133,27 @@ Please cite the following paper if you use this code:
 }
 ```
 
+```
+@inproceedings{DistTC,
+  title={DistTC: High performance distributed triangle counting},
+  author={Hoang, Loc and Jatala, Vishwesh and Chen, Xuhao and Agarwal, Udit and Dathathri, Roshan and Gill, Gurbinder and Pingali, Keshav},
+  booktitle={2019 IEEE High Performance Extreme Computing Conference (HPEC)},
+  pages={1--7},
+  year={2019},
+  organization={IEEE}
+}
+```
+
+```
+@inproceedings{Sandslash,
+  title={Sandslash: a two-level framework for efficient graph pattern mining},
+  author={Chen, Xuhao and Dathathri, Roshan and Gill, Gurbinder and Hoang, Loc and Pingali, Keshav},
+  booktitle={Proceedings of the ACM International Conference on Supercomputing},
+  pages={378--391},
+  year={2021}
+}
+```
+
 ## Developers ##
 
 * `Xuhao Chen`, Postdoc, MIT, cxh@mit.edu
