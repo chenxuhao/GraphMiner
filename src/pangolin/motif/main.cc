@@ -22,7 +22,8 @@ void printout_motifs(std::vector<uint64_t> &counters) {
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {
-    printf("Usage: %s <filename> [max_size(3)]\n", argv[0]);
+    std::cout << "Usage: " << argv[0] << "<graph> [max_size(3)]\n";
+    std::cout << "Example: ./bin/pangolin/" << argv[0] << " ./inputs/citeseer/graph 3\n";
     exit(1);
   } 
   Graph g(argv[1], 0);

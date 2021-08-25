@@ -4,7 +4,8 @@
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {
-    printf("Usage: %s <filename> [max_size(3)] [min_support(5000)]\n", argv[0]);
+    std::cout << "Usage: " << argv[0] << "<graph> [max_size(3)] [min_support(5000)]\n";
+    std::cout << "Example: ./bin/pangolin/" << argv[0] << " ./inputs/citeseer/graph 3 5000\n";
     exit(1);
   } 
   Graph g(argv[1], 0, 1);
@@ -22,7 +23,7 @@ int main(int argc, char *argv[]) {
   std::cout << "|V| " << m << " |E| " << nnz << "\n";
   int num_freqent_patterns = 0;
   FsmSolver(g, k, minsup, nlabels, num_freqent_patterns);
-  std::cout << "\nNumber of frequent patterns: " << num_freqent_patterns << "\n";
+  std::cout << "Number of frequent patterns: " << num_freqent_patterns << "\n";
   return 0;
 }
 

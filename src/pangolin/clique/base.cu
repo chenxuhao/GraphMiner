@@ -166,7 +166,7 @@ void KclSolver(Graph &g, unsigned k, uint64_t &total) {
   AccType zero = 0;
   size_t chunk_length = (nnz - 1) / N_CHUNK + 1;
   CUDA_SAFE_CALL(cudaMalloc((void **)&d_total, sizeof(AccType)));
-  printf("Launching CUDA TC solver (%d CTAs, %d threads/CTA) ...\n", nblocks, nthreads);
+  std::cout << "CUDA " << k << "-clique listing/counting (" << nblocks << " CTAs, " << nthreads << " threads/CTA)\n";
 
   Timer t;
   t.Start();
@@ -220,7 +220,7 @@ void KclSolver(Graph &g, unsigned k, uint64_t &total) {
   CUDA_SAFE_CALL(cudaDeviceSynchronize());
   t.Stop();
 
-  printf("runtime [cuda_base] = %f sec\n", t.Seconds());
+  std::cout << "runtime [gpu_base] = " << t.Seconds() << " sec\n";
   CUDA_SAFE_CALL(cudaFree(d_total));
 }
 

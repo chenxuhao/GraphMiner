@@ -20,7 +20,7 @@ void FsmSolver(Graph &g, unsigned k, unsigned minsup, int npatterns, int &total_
   miner.set_threshold(minsup);
   EmbeddingList emb_list;
   emb_list.init(g, k+1);
-  printf("Launching OpenMP Fsm solver (%d threads) ...\n", num_threads);
+  std::cout << "OpenMP " << k << "-FSM (" << num_threads << " threads)\n";
 
   Timer t;
   t.Start();
@@ -54,6 +54,6 @@ void FsmSolver(Graph &g, unsigned k, unsigned minsup, int npatterns, int &total_
   }
   t.Stop();
   std::cout << "\n\tNumber of frequent patterns (minsup=" << minsup << "): " << total_num << "\n\n";
-  printf("runtime [%s] = %f ms.\n", FSM_VARIANT, t.Millisecs());
+  std::cout << "runtime [omp_base] = " << t.Seconds() << " sec\n";
 }
 

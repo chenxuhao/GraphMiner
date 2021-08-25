@@ -5,18 +5,18 @@
 
 int main(int argc, char *argv[]) {
   if (argc < 3) {
-    printf("Usage: %s <graph> <k>\n", argv[0]);
+    std::cout << "Usage: " << argv[0] << "<graph> <k>\n";
+    std::cout << "Example: ./bin/pangolin/" << argv[0] << " ./inputs/citeseer/graph 4\n";
     exit(1);
   }
-  std::cout << "k-clique listing (BFS exploration)\n";
-  Graph g(argv[1], 1); // use DAG
   unsigned k = atoi(argv[2]);
+  std::cout << k << "-clique Listing with undirected graphs\n";
+  Graph g(argv[1], 1); // use DAG
   auto m = g.size();
   auto nnz = g.sizeEdges();
   std::cout << "|V| " << m << " |E| " << nnz << "\n";
   uint64_t total = 0;
   KclSolver(g, k, total);
-  //KCLVerifier(g, k, total);
   std::cout << "\ntotal_num_cliques = " << total << "\n\n";
   return 0;
 }

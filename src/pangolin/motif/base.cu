@@ -118,7 +118,7 @@ void MotifSolver(Graph &g, unsigned k, std::vector<uint64_t> &counts) {
   int nnz = g.num_edges();
   int nthreads = BLOCK_SIZE;
   int nblocks = DIVIDE_INTO(m, nthreads);
-  printf("Launching CUDA TC solver (%d CTAs, %d threads/CTA) ...\n", nblocks, nthreads);
+  std::cout << "CUDA " << k << "-motifs counting (" << nblocks << " CTAs, " << nthreads << " threads/CTA)\n";
   GraphGPU gg(g);
   EmbeddingList emb_list;
   emb_list.init(nnz, k, false);
@@ -162,12 +162,12 @@ void MotifSolver(Graph &g, unsigned k, std::vector<uint64_t> &counts) {
     aggregate<<<nblocks, nthreads>>>(num_emb, level, npatterns, gg, emb_list, d_accumulators);
     CUDA_SAFE_CALL(cudaDeviceSynchronize());
   } else {
-    printf("Not supported\n");
+    std::cout << "Not supported\n";
   }
   CUDA_SAFE_CALL(cudaDeviceSynchronize());
   t.Stop();
 
-  printf("runtime [cuda_bfs] = %f sec\n", t.Seconds());
+  std::cout << "runtime [gpu_base] = " << t.Seconds() << " sec\n";
   CUDA_SAFE_CALL(cudaMemcpy(h_accumulators, d_accumulators, sizeof(AccType) * npatterns, cudaMemcpyDeviceToHost));
   CUDA_SAFE_CALL(cudaFree(d_accumulators));
   for (int i = 0; i < npatterns; i++) counts[i] = h_accumulators[i];

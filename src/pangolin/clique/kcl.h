@@ -3,28 +3,16 @@
 
 //#include "common.h"
 #include "graph.h"
-/*
-GARDENIA Benchmark Suite
-Kernel: k-Cliques Listing (k-CL)
-Author: Xuhao Chen
+// k-Cliques Listing (k-CL): list/count the number of cliques of size k 
+// Requires input graph:
+//  - no self loops
+//  - no duplicate edges
+//  - neighborhoods are sorted by vertex identifiers
 
-Will count the number of cliques of size k 
-
-Requires input graph:
-  - to be undirected
-  - no duplicate edges (or else will be counted as multiple triangles)
-  - neighborhoods are sorted by vertex identifiers
-
-This implementation reduces the search space by counting 
-each clique only once. This implementation counts cliques 
-in a directed acyclic graph (DAG).
-
-kcl_omp : one thread per vertex using OpenMP
-kcl_base: one thread per vertex using CUDA
-kcl_warp: one warp per vertex using CUDA
-*/
+// This implementation reduces the search space by counting 
+// each clique only once. This implementation counts cliques 
+// in a directed acyclic graph (DAG).
 
 #define MAX_SIZE 5
 void KclSolver(Graph &g, unsigned k, uint64_t &total);
-void KclVerifier(Graph &g, unsigned k, uint64_t test_total);
 

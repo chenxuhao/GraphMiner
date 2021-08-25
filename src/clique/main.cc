@@ -6,13 +6,13 @@
 int main(int argc, char *argv[]) {
   if (argc < 3) {
     std::cout << "Usage: " << argv[0] << "<graph> <k> [ngpu(0)] [chunk_size(1024)]\n";
-    std::cout << "Example: " << argv[0] << " /graph_inputs/mico/graph 4\n";
+    std::cout << "Example: ./bin/" << argv[0] << " ./inputs/citeseer/graph 4\n";
     exit(1);
   }
-  std::cout << "k-clique listing with undirected graphs\n";
-  if (USE_DAG) std::cout << "Using DAG (static orientation)\n";
-  Graph g(argv[1], USE_DAG); // use DAG
   int k = atoi(argv[2]);
+  std::cout << k << "-clique Listing with undirected graphs\n";
+  //if (USE_DAG) std::cout << "Using DAG (static orientation)\n";
+  Graph g(argv[1], USE_DAG); // use DAG
   int n_devices = 1;
   int chunk_size = 1024;
   if (argc > 3) n_devices = atoi(argv[3]);

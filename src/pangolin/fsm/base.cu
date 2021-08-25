@@ -24,7 +24,6 @@ __global__ void extend_alloc(unsigned m, unsigned level, GraphGPU graph, Embeddi
   if(pos < m) {
     emb_list.get_edge_embedding(level, pos, vid[tid], his[tid]);
     num_new_emb[pos] = 0;
-    //if (pos == 1) printf("src=%d, dst=%d\n", vid[tid][0], vid[tid][1]);
     for (unsigned i = 0; i < level+1; ++i) {
       IndexT src = vid[tid][i];
       IndexT row_begin = graph.edge_begin(src);
@@ -69,13 +68,11 @@ __global__ void init_aggregate(unsigned m, unsigned num_emb, GraphGPU graph, Emb
     IndexT dst = emb_list.get_vid(1, pos);
     BYTE src_label = graph.getData(src);
     BYTE dst_label = graph.getData(dst);
-    //if (pos == 1) printf("src=%d, dst=%d, src_label=%d, dst_label=%d\n", src, dst, src_label, dst_label);
     int pid = 0;
     if (src_label <= dst_label)
       pid = get_init_pattern_id(src_label, dst_label, nlabels);
     else pid = get_init_pattern_id(dst_label, src_label, nlabels);
     pids[pos] = pid;
-    //if (pos == 1) printf("pid = %d\n", pid);
     if (src_label < dst_label) {
       small_sets.set(pid, src);
       large_sets.set(pid, dst);
@@ -336,7 +333,7 @@ void FsmSolver(Graph &g, unsigned k, unsigned minsup, int nlabels, int &total_nu
   unsigned *d_num_new_patterns;
   unsigned h_num_new_patterns = 0;
   CUDA_SAFE_CALL(cudaMalloc((void **)&d_num_new_patterns, sizeof(unsigned)));
-  printf("Launching CUDA TC solver (%d CTAs, %d threads/CTA) ...\n", nblocks, nthreads);
+  std::cout << "CUDA " << k << "-FSM (" << nblocks << " CTAs, " << nthreads << " threads/CTA)\n";
 
   Timer t;
   t.Start();
@@ -440,6 +437,6 @@ void FsmSolver(Graph &g, unsigned k, unsigned minsup, int nlabels, int &total_nu
   CUDA_SAFE_CALL(cudaDeviceSynchronize());
   t.Stop();
 
-  printf("runtime [cuda_base] = %f ms.\n", t.Millisecs());
+  std::cout << "runtime [gpu_base] = " << t.Seconds() << " sec\n";
 }
 
