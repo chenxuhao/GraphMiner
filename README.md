@@ -10,8 +10,8 @@ The document is organized as follows:
 * [Quick start](#quick-start)
 * [Supported graph formats](#supported-graph-formats)
 * [Code Documentation](#code-documentation)
-* [Notes](#notes)
 * [Reporting bugs and contributing](#reporting-bugs-and-contributing)
+* [Notes](#notes)
 * [Publications](#publications)
 * [Developers](#developers)
 * [License](#license)
@@ -74,7 +74,12 @@ Other graph input formats to be supported:
 
 The code documentation is located in the `docs` directory (*doxygen* html format).
 
-### Notes ###
+### Reporting bugs and contributing ###
+
+If you find any bugs please report them by using the repository (github **issues** panel).
+We are also ready to engage in improving and extending the framework if you request new features.
+
+## Notes ##
 
 Three existing state-of-the-art frameworks:
 
@@ -95,11 +100,6 @@ Exploiting Reuse for GPU Subgraph Enumeration. TKDE 2020.
 
 [4] Kasra Jamshidi, Rakesh Mahadasa, Keval Vora.
 Peregrine: A Pattern-Aware Graph Mining System. EuroSys 2020
-
-### Reporting bugs and contributing ###
-
-If you find any bugs please report them by using the repository (github **issues** panel).
-We are also ready to engage in improving and extending the framework if you request new features.
 
 ## Publications ##
 
