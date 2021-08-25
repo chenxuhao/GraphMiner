@@ -13,7 +13,7 @@ The document is organized as follows:
 * [Notes](#notes)
 * [Reporting bugs and contributing](#reporting-bugs-and-contributing)
 * [Publications](#publications)
-* [Developers](#hornet-developers)
+* [Developers](#developers)
 * [License](#license)
 
 ### Requirements ###
