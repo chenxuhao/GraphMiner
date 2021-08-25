@@ -172,5 +172,5 @@ Please cite the following paper if you use this code:
 
 ## License ##
 
-> Copyright (c) 2017, MIT
+> Copyright (c) 2021, MIT
 > All rights reserved.
