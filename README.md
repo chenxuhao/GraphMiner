@@ -67,7 +67,7 @@ Other graph input formats to be supported:
 * Dimacs9th (.gr), [9th DIMACS Implementation Challenge](http://www.dis.uniroma1.it/challenge9/)
 * The Koblenz Network Collection (out.< name >), [The Koblenz Network Collection](http://konect.uni-koblenz.de/)
 * Network Data Repository (.edges), [Network Data Repository](http://networkrepository.com/index.php)
-* Binary (.bin)
+* Real-World Input Graphs (Misc), [Real-World Input Graphs](http://gap.cs.berkeley.edu/datasets.html)
 
 ### Code Documentation ###
 
