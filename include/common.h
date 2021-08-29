@@ -24,6 +24,7 @@
 #include <iterator>
 #include <stdexcept>
 #include <algorithm>
+#include <unordered_map>
 
 typedef uint8_t BYTE;
 typedef uint8_t mask_t;

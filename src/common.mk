@@ -24,4 +24,5 @@ endif
 INCLUDES = -I../../include
 LIBS += -lgomp
 VPATH += ../common
+OBJS=main.o VertexSet.o graph.o
 

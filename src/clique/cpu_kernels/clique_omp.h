@@ -36,7 +36,6 @@ void automine_4clique_sb(Graph &g, uint64_t &total) {
   uint64_t counter = 0;
   #pragma omp parallel for schedule(dynamic, 1) reduction(+:counter)
   for (vidType v0 = 0; v0 < g.V(); v0++) {
-    uint64_t local_counter = 0;
     auto y0 = g.N(v0);
     for (auto v1 : y0) {
       if (v1 >= v0) break;
@@ -113,7 +112,7 @@ void automine_5clique(Graph &g, uint64_t &total) {
   total = counter;
 }
 
-void automine_kclique(Graph &g, unsigned k, uint64_t &total) {
+void kclique(Graph &g, unsigned k, uint64_t &total) {
   std::cout << "Running AutoMine k-clique solver\n";
   if (k == 3) {
 #if USE_DAG == 1
