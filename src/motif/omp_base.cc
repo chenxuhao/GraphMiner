@@ -2,7 +2,7 @@
 // Contact: Xuhao Chen <cxh@mit.edu>
 
 #include "motif.h"
-#include "automine_base.h"
+#include "motif_base.h"
 
 void MotifSolver(Graph &g, int k, std::vector<uint64_t> &total, int, int) {
   int num_threads = 1;

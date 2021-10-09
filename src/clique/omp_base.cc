@@ -2,7 +2,8 @@
 // Contact: Xuhao Chen <cxh@mit.edu>
 
 #include "clique.h"
-#include "clique_omp.h"
+#include "clique_base.h"
+#include "clique_cmap.h"
 
 void CliqueSolver(Graph &g, int k, uint64_t &total, int, int) {
   int num_threads = 1;

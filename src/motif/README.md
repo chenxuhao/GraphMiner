@@ -33,7 +33,7 @@ BUILD
 2. Or run make at the top-level directory
 
   - motif_omp_base : one thread per vertex using OpenMP
-  - motif_omp_formula: formula-based local counting using OpenMP
+  - motif_omp_formula: formula-based local counting using OpenMP, see details in the Sandslash paper
 
 RUN
 --------------------------------------------------------------------------------

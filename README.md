@@ -81,13 +81,17 @@ We are also ready to engage in improving and extending the framework if you requ
 
 ## Notes ##
 
-Three existing state-of-the-art frameworks:
+Existing state-of-the-art frameworks:
 
-Pangolin [1]: source code is in src/pangolin/.
+Pangolin [1]: source code is in src/pangolin/
 
 SgMatch [2,3]: https://github.com/guowentian/SubgraphMatchGPU
 
 Peregrine [4]: https://github.com/pdclab/peregrine
+
+Sandslash [5]: source code is in src/*/cpu_kernels/*_cmap.h
+
+FlexMiner [6]: The CPU baseline code is in */cpu_kernels/*_base.h
 
 [1] Xuhao Chen, Roshan Dathathri, Gurbinder Gill, Keshav Pingali.
 Pangolin: An Efficient and Flexible Graph Pattern Mining System on CPU and GPU. VLDB 2020
@@ -100,6 +104,12 @@ Exploiting Reuse for GPU Subgraph Enumeration. TKDE 2020.
 
 [4] Kasra Jamshidi, Rakesh Mahadasa, Keval Vora.
 Peregrine: A Pattern-Aware Graph Mining System. EuroSys 2020
+
+[5] Xuhao Chen, Roshan Dathathri, Gurbinder Gill, Loc Hoang, Keshav Pingali.
+Sandslash: A Two-Level Framework for Efficient Graph Pattern Mining, ICS 2021
+
+[6] Xuhao Chen, Tianhao Huang, Shuotao Xu, Thomas Bourgeat, Chanwoo Chung, Arvind
+FlexMiner: A Pattern-Aware Accelerator for Graph Pattern Mining, ISCA 2021
 
 ## Publications ##
 
