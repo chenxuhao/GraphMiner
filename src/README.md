@@ -1,9 +1,9 @@
 This folder constains Pangolin source code in ./pangolin
 
-The Sandslash code is contained in */cpu_kernels/*_cmap.h
+The Sandslash code is contained in \*/cpu_kernels/\*_cmap.h
 For example, clique/cpu_kernels/clique_cmap.h
 
-The CPU baseline code used in FlexMiner is in */cpu_kernels/*_base.h
+The CPU baseline code used in FlexMiner is in \*/cpu_kernels/\*_base.h
 
 ```
 @article{Pangolin,

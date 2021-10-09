@@ -89,9 +89,9 @@ SgMatch [2,3]: https://github.com/guowentian/SubgraphMatchGPU
 
 Peregrine [4]: https://github.com/pdclab/peregrine
 
-Sandslash [5]: source code is in src/*/cpu_kernels/*_cmap.h
+Sandslash [5]: source code is in src/\*/cpu_kernels/\*_cmap.h
 
-FlexMiner [6]: The CPU baseline code is in */cpu_kernels/*_base.h
+FlexMiner [6]: The CPU baseline code is in \*/cpu_kernels/\*_base.h
 
 [1] Xuhao Chen, Roshan Dathathri, Gurbinder Gill, Keshav Pingali.
 Pangolin: An Efficient and Flexible Graph Pattern Mining System on CPU and GPU. VLDB 2020
