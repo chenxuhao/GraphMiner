@@ -43,6 +43,8 @@ Run triangle counting on an undirected graph:
 
     $ ./tc_omp_base ../inputs/citeseer/graph
 
+You can find the corret output in the README of each benchmark [see here for triangle](https://github.com/chenxuhao/GraphMiner/blob/master/src/triangle/README.md).
+
 To control the number of threads, set the following environment variable:
 
     $ export OMP_NUM_THREADS=[ number of cores in system ]
@@ -59,6 +61,8 @@ The graph loading infrastructure understands the following formats:
 + `graph.edge.bin` binary file containing the column indices
 
 + `graph.vlabel.bin` binary file containing the vertax labels (only needed for labeled graphs)
+
+An example graph is in inputs/citeseer
 
 Other graph input formats to be supported:
 
@@ -97,6 +101,8 @@ DistTC [7]: source code is in src/triangle/
 
 DeepGalois [8]: to be available soon
 
+GraphPi [9]: https://github.com/thu-pacman/GraphPi
+
 [1] Xuhao Chen, Roshan Dathathri, Gurbinder Gill, Keshav Pingali.
 Pangolin: An Efficient and Flexible Graph Pattern Mining System on CPU and GPU. VLDB 2020
 
@@ -112,14 +118,17 @@ Peregrine: A Pattern-Aware Graph Mining System. EuroSys 2020
 [5] Xuhao Chen, Roshan Dathathri, Gurbinder Gill, Loc Hoang, Keshav Pingali.
 Sandslash: A Two-Level Framework for Efficient Graph Pattern Mining, ICS 2021
 
-[6] Xuhao Chen, Tianhao Huang, Shuotao Xu, Thomas Bourgeat, Chanwoo Chung, Arvind
+[6] Xuhao Chen, Tianhao Huang, Shuotao Xu, Thomas Bourgeat, Chanwoo Chung, Arvind.
 FlexMiner: A Pattern-Aware Accelerator for Graph Pattern Mining, ISCA 2021
 
-[7] Loc Hoang, Vishwesh Jatala, Xuhao Chen, Udit Agarwal, Roshan Dathathri, Grubinder Gill, Keshav Pingali,
+[7] Loc Hoang, Vishwesh Jatala, Xuhao Chen, Udit Agarwal, Roshan Dathathri, Grubinder Gill, Keshav Pingali.
 DistTC: High Performance Distributed Triangle Counting, HPEC 2019
 
-[8] Loc Hoang, Xuhao Chen, Hochan Lee, Roshan Dathathri, Gurbinder Gill, Keshav Pingali,
+[8] Loc Hoang, Xuhao Chen, Hochan Lee, Roshan Dathathri, Gurbinder Gill, Keshav Pingali.
 Efficient Distribution for Deep Learning on Large Graphs, GNNSys 2021
+
+[9] Tianhui Shi, Mingshu Zhai, Yi Xu, Jidong Zhai. 
+GraphPi: high performance graph pattern matching through effective redundancy elimination. SC 2020
 
 ## Publications ##
 
