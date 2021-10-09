@@ -1,6 +1,6 @@
-# GraphGPUMiner #
+# GraphMiner #
 
-This repository provides the Graph Pattern Mining (GPM) Framework on GPU.
+This repository provides the code for state-of-the-art Graph Pattern Mining (GPM) Frameworks including Pangolin, Sandslash and FlexMiner.
 
 ## Getting Started ##
 
