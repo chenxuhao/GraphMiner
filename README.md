@@ -91,7 +91,11 @@ Peregrine [4]: https://github.com/pdclab/peregrine
 
 Sandslash [5]: source code is in src/\*/cpu_kernels/\*_cmap.h
 
-FlexMiner [6]: The CPU baseline code is in \*/cpu_kernels/\*_base.h
+FlexMiner [6]: the CPU baseline code is in \*/cpu_kernels/\*_base.h
+
+DistTC [7]: source code is in src/triangle/
+
+DeepGalois [8]: to be available soon
 
 [1] Xuhao Chen, Roshan Dathathri, Gurbinder Gill, Keshav Pingali.
 Pangolin: An Efficient and Flexible Graph Pattern Mining System on CPU and GPU. VLDB 2020
@@ -110,6 +114,12 @@ Sandslash: A Two-Level Framework for Efficient Graph Pattern Mining, ICS 2021
 
 [6] Xuhao Chen, Tianhao Huang, Shuotao Xu, Thomas Bourgeat, Chanwoo Chung, Arvind
 FlexMiner: A Pattern-Aware Accelerator for Graph Pattern Mining, ISCA 2021
+
+[7] Loc Hoang, Vishwesh Jatala, Xuhao Chen, Udit Agarwal, Roshan Dathathri, Grubinder Gill, Keshav Pingali,
+DistTC: High Performance Distributed Triangle Counting, HPEC 2019
+
+[8] Loc Hoang, Xuhao Chen, Hochan Lee, Roshan Dathathri, Gurbinder Gill, Keshav Pingali,
+Efficient Distribution for Deep Learning on Large Graphs, GNNSys 2021
 
 ## Publications ##
 
@@ -166,11 +176,22 @@ Please cite the following paper if you use this code:
 ```
 
 ```
+@inproceedings{hoang2019disttc,
+  title={DistTC: High performance distributed triangle counting},
+  author={Hoang, Loc and Jatala, Vishwesh and Chen, Xuhao and Agarwal, Udit and Dathathri, Roshan and Gill, Gurbinder and Pingali, Keshav},
+  booktitle={2019 IEEE High Performance Extreme Computing Conference (HPEC)},
+  pages={1--7},
+  year={2019},
+  organization={IEEE}
+}
+```
+
+```
 @inproceedings{DeepGalois,
   title={Efficient Distribution for Deep Learning on Large Graphs},
   author={Hoang, Loc and Chen, Xuhao and Lee, Hochan and Dathathri, Roshan and Gill, Gurbinder and Pingali, Keshav},
   booktitle={Workshop on Graph Neural Networks and Systems},
-  volume={},
+  volume={1050},
   pages={1-9},
   year={2021}
 }
