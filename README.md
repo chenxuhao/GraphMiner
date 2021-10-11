@@ -99,7 +99,7 @@ FlexMiner [6]: the CPU baseline code is in \*/cpu_kernels/\*_base.h
 
 DistTC [7]: source code is in src/triangle/
 
-DeepGalois [8]: to be available soon
+DeepGalois [8]: https://github.mit.edu/csg/DeepGraphBench
 
 GraphPi [9]: https://github.com/thu-pacman/GraphPi
 
