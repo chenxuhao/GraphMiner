@@ -1,7 +1,7 @@
 include ../common.mk
 INCLUDES+=-I$(CUB_DIR)
 INCLUDES+=-I./ -I./dfscode
-all: fsm_omp_base fsm_gpu_base
+all: fsm_omp_base 
 
 %.o: %.cc
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $<
