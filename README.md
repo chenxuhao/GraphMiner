@@ -1,6 +1,20 @@
-# GraphMiner #
+# GraphMinerBench #
 
-This repository provides the code for state-of-the-art Graph Pattern Mining (GPM) Frameworks including Pangolin, Sandslash and FlexMiner.
+GraphMinerBench is a C++ implemented Benchmark Suite for Graph Pattern Mining (GPM), based on the implementations of state-of-the-art GPM Frameworks including Pangolin [1], Sandslash [2] and FlexMiner [3]. GraphMinerBench supports both multicore CPU and GPU, and is parallelized using OpenMP and CUDA respectively. 
+
+Unlike those GPM frameworks, GraphMinerBench is inherently designed for benchmarking hardware architecture design.
+It includes various GPM workloads (e.g., TC, k-CL, SgL, k-MC, FSM) as well as representative graph datasets (e.g., Mico, Patents, Youtube, LiveJournal, Orkut, Twitter, Friendster). 
+
+Please contat [the author](http://people.csail.mit.edu/xchen/) for accessing the datasets.
+
+[1] Xuhao Chen, Roshan Dathathri, Gurbinder Gill, Keshav Pingali.
+[Pangolin: An Efficient and Flexible Graph Pattern Mining System on CPU and GPU](http://www.vldb.org/pvldb/vol13/p1190-chen.pdf). VLDB 2020
+
+[2] Xuhao Chen, Roshan Dathathri, Gurbinder Gill, Loc Hoang, Keshav Pingali.
+[Sandslash: A Two-Level Framework for Efficient Graph Pattern Mining](http://people.csail.mit.edu/xchen/docs/ics-2021.pdf), ICS 2021
+
+[3] Xuhao Chen, Tianhao Huang, Shuotao Xu, Thomas Bourgeat, Chanwoo Chung, Arvind.
+[FlexMiner: A Pattern-Aware Accelerator for Graph Pattern Mining](http://people.csail.mit.edu/xchen/docs/isca-2021.pdf), ISCA 2021
 
 ## Getting Started ##
 
