@@ -222,7 +222,8 @@ Please cite the following paper if you use this code:
 
 ## Developers ##
 
-* `Xuhao Chen`, Postdoc, MIT, cxh@mit.edu
+* [Xuhao Chen](http://people.csail.mit.edu/xchen/), Research Scientist, MIT, cxh@mit.edu
+* [Tianhao Huang](https://nicsefc.ee.tsinghua.edu.cn/people/tianhao-h/), PhD student, MIT
 
 ## License ##
 
