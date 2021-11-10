@@ -3,9 +3,10 @@
 GraphMinerBench is a C++ implemented Benchmark Suite for Graph Pattern Mining (GPM), based on the implementations of state-of-the-art GPM Frameworks including Pangolin [1], Sandslash [2] and FlexMiner [3]. GraphMinerBench supports both multicore CPU and GPU, and is parallelized using OpenMP and CUDA respectively. 
 
 Unlike those GPM frameworks, GraphMinerBench is inherently designed for benchmarking hardware architecture design.
-It includes various GPM workloads (e.g., TC, k-CL, SgL, k-MC, FSM) as well as representative graph datasets (e.g., Mico, Patents, Youtube, LiveJournal, Orkut, Twitter, Friendster). 
+It includes various GPM workloads (e.g., TC, k-CL, SgL, k-MC, FSM) as well as representative graph datasets (Mico, Patents, Youtube, LiveJournal, Orkut, Twitter, Friendster). 
 
-Please contat [the author](http://people.csail.mit.edu/xchen/) for accessing the datasets.
+Some datasets are available [here](https://www.dropbox.com/sh/i1jq1uwtkcd2qo0/AADJck_u3kx7FeSR5BvdrkqYa?dl=0).
+Please contat [the author](http://people.csail.mit.edu/xchen/) for larger datasets.
 
 [1] Xuhao Chen, Roshan Dathathri, Gurbinder Gill, Keshav Pingali.
 [Pangolin: An Efficient and Flexible Graph Pattern Mining System on CPU and GPU](http://www.vldb.org/pvldb/vol13/p1190-chen.pdf). VLDB 2020
