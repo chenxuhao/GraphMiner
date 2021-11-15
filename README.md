@@ -58,7 +58,7 @@ Run triangle counting on an undirected graph:
 
     $ ./tc_omp_base ../inputs/citeseer/graph
 
-You can find the corret output in the README of each benchmark [see here for triangle](https://github.com/chenxuhao/GraphMiner/blob/master/src/triangle/README.md).
+You can find the expected outputs in the README of each benchmark [see here for triangle](https://github.com/chenxuhao/GraphMiner/blob/master/src/triangle/README.md).
 
 To control the number of threads, set the following environment variable:
 
