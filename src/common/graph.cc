@@ -1,4 +1,68 @@
 #include "graph.h"
+#include "scan.h"
+
+Graph::Graph(std::string prefix, bool use_dag, bool has_vlabel) :
+    vlabels(NULL), elabels(NULL), nnz(0) {
+  VertexSet::release_buffers();
+  std::ifstream f_meta((prefix + ".meta.txt").c_str());
+  assert(f_meta);
+  int vid_size;
+  f_meta >> n_vertices >> n_edges >> vid_size >> max_degree;
+  assert(sizeof(vidType) == vid_size);
+  f_meta.close();
+  // read row pointers
+  if (map_vertices) map_file(prefix + ".vertex.bin", vertices, n_vertices+1);
+  else read_file(prefix + ".vertex.bin", vertices, n_vertices+1);
+  // read column indices
+  if (map_edges) map_file(prefix + ".edge.bin", edges, n_edges);
+  else read_file(prefix + ".edge.bin", edges, n_edges);
+  num_vertex_classes = 0;
+  // read vertex labels
+  if (has_vlabel) {
+    std::string vlabel_filename = prefix + ".vlabel.bin";
+    ifstream f_vlabel(vlabel_filename.c_str());
+    if (f_vlabel.good()) {
+      if (map_vlabels) map_file(vlabel_filename, vlabels, n_vertices);
+      else read_file(vlabel_filename, vlabels, n_vertices);
+      std::set<vlabel_t> labels;
+      for (vidType v = 0; v < n_vertices; v++)
+        labels.insert(vlabels[v]);
+      num_vertex_classes = labels.size();
+    } else {
+      std::cout << "WARNING: vertex label file not exist; generating random labels\n";
+      num_vertex_classes = 4;
+      vlabels = new vlabel_t[n_vertices];
+      for (vidType v = 0; v < n_vertices; v++) {
+        vlabels[v] = rand() % num_vertex_classes + 1;
+      }
+    }
+  }
+  if (max_degree == 0 || max_degree>=n_vertices) exit(1);
+  if (use_dag) orientation();
+  VertexSet::MAX_DEGREE = std::max(max_degree, VertexSet::MAX_DEGREE);
+  labels_frequency_.clear();
+}
+
+Graph::~Graph() {
+  if (map_edges) munmap(edges, n_edges*sizeof(vidType));
+  else custom_free(edges, n_edges);
+  if (map_vertices) {
+    munmap(vertices, (n_vertices+1)*sizeof(eidType));
+  } else custom_free(vertices, n_vertices+1);
+  if (vlabels != NULL) delete [] vlabels;
+}
+
+VertexSet Graph::N(vidType vid) const {
+  assert(vid >= 0);
+  assert(vid < n_vertices);
+  eidType begin = vertices[vid], end = vertices[vid+1];
+  if (begin > end) {
+    fprintf(stderr, "vertex %u bounds error: [%lu, %lu)\n", vid, begin, end);
+    exit(1);
+  }
+  assert(end <= n_edges);
+  return VertexSet(edges + begin, end - begin, vid);
+}
 
 void Graph::orientation() {
   std::cout << "Orientation enabled, using DAG\n";
@@ -48,7 +112,7 @@ void Graph::orientation() {
   std::cout << "Time on generating the DAG: " << t.Seconds() << " sec\n";
 }
 
-void Graph::print_graph() {
+void Graph::print_graph() const {
   std::cout << "Printing the graph: \n";
   for (vidType n = 0; n < n_vertices; n++) {
     std::cout << "vertex " << n << ": degree = " 
@@ -59,12 +123,13 @@ void Graph::print_graph() {
   }
 }
 
-size_t Graph::init_edgelist(bool sym_break, bool ascend) {
+eidType Graph::init_edgelist(bool sym_break, bool ascend) {
   Timer t;
   t.Start();
   if (nnz != 0) return nnz; // already initialized
   nnz = E();
   if (sym_break) nnz = nnz/2;
+  sizes.resize(V());
   src_list = new vidType[nnz];
   if (sym_break) dst_list = new vidType[nnz];
   else dst_list = edges;
@@ -79,107 +144,17 @@ size_t Graph::init_edgelist(bool sym_break, bool ascend) {
       }
       src_list[i] = v;
       if (sym_break) dst_list[i] = u;
+      sizes[v] ++;
       i ++;
     }
   }
-  assert(i == nnz);
+  //assert(i == nnz);
   t.Stop();
   std::cout << "Time on generating the edgelist: " << t.Seconds() << " sec\n";
   return nnz;
 }
 
-inline int Graph::smallest_score_id(size_t n, int64_t* scores) {
-  int id = 0;
-  auto min_score = scores[0];
-  for (size_t i = 1; i < n; i++) {
-    if (scores[i] < min_score) {
-      min_score = scores[i];
-      id = i;
-    }
-  }
-  return id;
-}
-
-// split tasks into n subsets
-std::vector<eidType> Graph::split_edgelist(int n, std::vector<vidType*> &src_ptrs, std::vector<vidType*> &dst_ptrs, int stride) {
-  assert(nnz > 8192); // if edgelist is too small, no need to split
-  //std::cout << "split edgelist\n";
-  Timer t;
-  t.Start();
-  srcs.resize(n);
-  dsts.resize(n);
-  int64_t* scores = new int64_t[n];
-  std::fill(scores, scores+n, 0);
-  //size_t init_stride = nnz / 4 / n;
-  size_t init_stride = stride;
-  size_t pos = 0;
-  for (int i = 0; i < n; i++) {
-    srcs[i].resize(init_stride);
-    dsts[i].resize(init_stride);
-  }
-  //std::cout << "assign the first chunk, size = " << init_stride << "\n";
-  for (int i = 0; i < n; i++) {
-    #pragma omp parallel for reduction(+:scores[i])
-    for (size_t j = i*init_stride; j < (i+1)*init_stride; j++) {
-      assert(j < nnz);
-      auto src = src_list[j];
-      auto dst = dst_list[j];
-      scores[i] += get_degree(src) + get_degree(dst);
-    }
-  }
-  for (int i = 0; i < n; i++) {
-      //srcs[i].push_back(src);
-      //dsts[i].push_back(dst);
-      std::copy(src_list+pos, src_list+pos+init_stride, srcs[i].begin());
-      std::copy(dst_list+pos, dst_list+pos+init_stride, dsts[i].begin());
-    pos += init_stride;
-  }
-  assert(pos < nnz);
-  auto id = smallest_score_id(n, scores);
-  //std::cout << "assign one chunk a time\n";
-  while (pos + stride < nnz) {
-    #pragma omp parallel for reduction(+:scores[id])
-    for (int j = 0; j < stride; j++) {
-      auto src = src_list[pos+j];
-      auto dst = dst_list[pos+j];
-      //srcs[id].push_back(src);
-      //dsts[id].push_back(dst);
-      scores[id] += get_degree(src) + get_degree(dst);
-    }
-    auto curr_size = srcs[id].size();
-    srcs[id].resize(curr_size+stride);
-    dsts[id].resize(curr_size+stride);
-    std::copy(src_list+pos, src_list+pos+stride, &srcs[id][curr_size]);
-    std::copy(dst_list+pos, dst_list+pos+stride, &dsts[id][curr_size]);
-    pos += stride;
-    id = smallest_score_id(n, scores);
-  }
-  //std::cout << "assign the last chunk\n";
-  while (pos < nnz) {
-    srcs[id].push_back(src_list[pos]);
-    dsts[id].push_back(dst_list[pos]);
-    pos++;
-  }
-  std::vector<eidType> lens(n);
-  size_t total_len = 0;
-  src_ptrs.resize(n);
-  dst_ptrs.resize(n);
-  //std::cout << "pass results\n";
-  for (int i = 0; i < n; i++) {
-    src_ptrs[i] = srcs[i].data();
-    dst_ptrs[i] = dsts[i].data();
-    assert(srcs[i].size() == dsts[i].size());
-    lens[i] = srcs[i].size();
-    total_len += lens[i];
-    std::cout << "partition " << i << " edgelist size = " << lens[i] << "\n";
-  }
-  assert(total_len == nnz);
-  t.Stop();
-  std::cout << "Time on splitting edgelist to GPUs: " << t.Seconds() << " sec\n";
-  return lens;
-}
-
-bool Graph::is_connected(vidType v, vidType u) {
+bool Graph::is_connected(vidType v, vidType u) const {
   auto v_deg = get_degree(v);
   auto u_deg = get_degree(u);
   bool found;
@@ -191,11 +166,11 @@ bool Graph::is_connected(vidType v, vidType u) {
   return found;
 }
 
-bool Graph::is_connected(std::vector<vidType> sg) {
+bool Graph::is_connected(std::vector<vidType> sg) const {
   return false;
 }
 
-bool Graph::binary_search(vidType key, eidType begin, eidType end) {
+bool Graph::binary_search(vidType key, eidType begin, eidType end) const {
   auto l = begin;
   auto r = end-1;
   while (r >= l) { 
@@ -223,5 +198,91 @@ vidType Graph::intersect_num(vidType v, vidType u, vlabel_t label) {
     if (a == b && vlabels[a] == label) num++;
   }
   return num;
+}
+
+void Graph::BuildReverseIndex() {
+  if (labels_frequency_.empty()) computeLabelsFrequency();
+  int nl = num_vertex_classes;
+  if (max_label == num_vertex_classes) nl += 1;
+  reverse_index_.resize(size());
+  reverse_index_offsets_.resize(nl+1);
+  reverse_index_offsets_[0] = 0;
+  vidType total = 0;
+  for (int i = 0; i < nl; ++i) {
+    total += labels_frequency_[i];
+    reverse_index_offsets_[i+1] = total;
+    //std::cout << "label " << i << " frequency: " << labels_frequency_[i] << "\n";
+  }
+  std::vector<eidType> start(nl);
+  for (int i = 0; i < nl; ++i) {
+    start[i] = reverse_index_offsets_[i];
+    //std::cout << "label " << i << " start: " << start[i] << "\n";
+  }
+  for (vidType i = 0; i < size(); ++i) {
+    auto vl = vlabels[i];
+    reverse_index_[start[vl]++] = i;
+  }
+}
+
+#pragma omp declare reduction(vec_plus : std::vector<int> : \
+    std::transform(omp_out.begin(), omp_out.end(), omp_in.begin(), omp_out.begin(), std::plus<int>())) \
+    initializer(omp_priv = decltype(omp_orig)(omp_orig.size()))
+void Graph::computeLabelsFrequency() {
+  labels_frequency_.resize(num_vertex_classes+1);
+  std::fill(labels_frequency_.begin(), labels_frequency_.end(), 0);
+  //max_label = int(*std::max_element(vlabels, vlabels+size()));
+  #pragma omp parallel for reduction(max:max_label)
+  for (int i = 0; i < size(); ++i) {
+    max_label = max_label > vlabels[i] ? max_label : vlabels[i];
+  }
+  #pragma omp parallel for reduction(vec_plus:labels_frequency_)
+  for (vidType v = 0; v < size(); ++v) {
+    int label = int(get_vlabel(v));
+    assert(label <= num_vertex_classes);
+    labels_frequency_[label] += 1;
+  }
+  max_label_frequency_ = int(*std::max_element(labels_frequency_.begin(), labels_frequency_.end()));
+  //std::cout << "max_label = " << max_label << "\n";
+  //std::cout << "max_label_frequency_ = " << max_label_frequency_ << "\n";
+  //for (size_t i = 0; i < labels_frequency_.size(); ++i)
+  //  std::cout << "label " << i << " vertex frequency: " << labels_frequency_[i] << "\n";
+}
+
+int Graph::get_frequent_labels(int threshold) {
+  int num = 0;
+  for (size_t i = 0; i < labels_frequency_.size(); ++i)
+    if (labels_frequency_[i] > threshold)
+      num++;
+  return num;
+}
+
+bool Graph::is_freq_vertex(vidType v, int threshold) {
+  assert(v >= 0 && v < size());
+  auto label = int(vlabels[v]);
+  assert(label <= num_vertex_classes);
+  if (labels_frequency_[label] >= threshold) return true;
+  return false;
+}
+
+void Graph::BuildNLF() {
+  //std::cout << "Building NLF map for the data graph\n";
+  nlf_.resize(size());
+  #pragma omp parallel for
+  for (vidType v = 0; v < size(); ++v) {
+    for (auto u : N(v)) {
+      auto vl = get_vlabel(u);
+      if (nlf_[v].find(vl) == nlf_[v].end())
+        nlf_[v][vl] = 0;
+      nlf_[v][vl] += 1;
+    }
+  }
+}
+
+void Graph::print_meta_data() const {
+  std::cout << "|V|: " << n_vertices << ", |E|: " << n_edges << ", Max Degree: " << max_degree << "\n";
+  if (num_vertex_classes > 0) {
+    std::cout << "|\u03A3|: " << num_vertex_classes
+              << ", Max Label Frequency: " << max_label_frequency_ << "\n";
+  }
 }
 

@@ -1,5 +1,5 @@
 #pragma once
-#include <cusparse_v2.h>
+#include <cuda_runtime.h>
 
 #  define CUDA_SAFE_CALL_NO_SYNC( call) {                                      \
     cudaError err = call;                                                      \
@@ -25,40 +25,6 @@
 #define SHFL_DOWN(a,b) __shfl_down(a,b)
 #define SHFL(a,b) __shfl(a,b)
 #endif
-
-template <typename T>
-__forceinline__ __device__ T warp_reduce(T val) {
-  T sum = val;
-  sum += SHFL_DOWN(sum, 16);
-  sum += SHFL_DOWN(sum, 8);
-  sum += SHFL_DOWN(sum, 4);
-  sum += SHFL_DOWN(sum, 2);
-  sum += SHFL_DOWN(sum, 1);
-  sum  = SHFL(sum, 0);
-  return sum;
-}
-
-__forceinline__ __device__ void warp_reduce_iterative(vidType &val) {
-  for (int offset = 16; offset > 0; offset /= 2)
-    val += __shfl_down_sync(FULL_MASK, val, offset);
-  val  = SHFL(val, 0);
-}
-
-// from http://forums.nvidia.com/index.php?showtopic=186669
-static __device__ unsigned get_smid(void) {
-  unsigned ret;
-  asm("mov.u32 %0, %smid;" : "=r"(ret) );
-  return ret;
-}
-
-#define VLIST_CACHE_SIZE 256
-__forceinline__ __device__ void warp_load_mem_to_shm(vidType* from, vidType* to, vidType len) {
-  unsigned thread_lane = threadIdx.x & (WARP_SIZE-1);            // thread index within the warp
-  for (vidType id = thread_lane; id < len; id += WARP_SIZE) {
-    to[id] = from[id];
-  }
-  __syncwarp();
-}
 
 // you must first call the cudaGetDeviceProperties() function, then pass
 // the devProp structure returned to this function:
@@ -97,10 +63,10 @@ int getSPcores(cudaDeviceProp devProp) {
   return cores;
 }
 
-static size_t print_device_info(bool print_all) {
+static size_t print_device_info(bool print_all, bool disable = false) {
   int deviceCount = 0;
   CUDA_SAFE_CALL(cudaGetDeviceCount(&deviceCount));
-  printf("Found %d devices\n", deviceCount);
+  if (!disable) printf("Found %d devices\n", deviceCount);
   // Another way to get the # of cores: #include <helper_cuda.h> in this link:
   // https://github.com/NVIDIA/cuda-samples/blob/6be514679b201c8a0f0cda050bc7c01c8cda32ec/Common/helper_cuda.h
   //int CUDACores = _ConvertSMVer2Cores(props.major, props.minor) * props.multiProcessorCount;
@@ -109,6 +75,8 @@ static size_t print_device_info(bool print_all) {
     cudaDeviceProp prop;
     CUDA_SAFE_CALL(cudaSetDevice(device));
     CUDA_SAFE_CALL(cudaGetDeviceProperties(&prop, device));
+    if (device == 0) mem_size = prop.totalGlobalMem;
+    if (disable) break;
     printf("  Device[%d]: %s\n", device, prop.name);
     if (device == 0 || print_all) {
       printf("  Compute capability: %d.%d\n", prop.major, prop.minor);
@@ -123,7 +91,6 @@ static size_t print_device_info(bool print_all) {
       printf("  Memory Bus Width: %d bits\n", prop.memoryBusWidth);
       //printf("  Maximum memory pitch: %u\n", prop.memPitch);
       printf("  Peak Memory Bandwidth: %.2f GB/s\n\n", 2.0*prop.memoryClockRate*(prop.memoryBusWidth/8)/1.0e6);
-      mem_size = prop.totalGlobalMem;
     }
   }
   return mem_size;
