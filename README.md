@@ -17,6 +17,9 @@ Please contat [the author](http://people.csail.mit.edu/xchen/) for larger datase
 [3] Xuhao Chen, Tianhao Huang, Shuotao Xu, Thomas Bourgeat, Chanwoo Chung, Arvind.
 [FlexMiner: A Pattern-Aware Accelerator for Graph Pattern Mining](http://people.csail.mit.edu/xchen/docs/isca-2021.pdf), ISCA 2021
 
+[4] Xuhao Chen, Arvind.
+[Efficient and Scalable Graph Pattern Mining on GPUs](https://arxiv.org/pdf/2112.09761.pdf)
+
 ## Getting Started ##
 
 The document is organized as follows:
@@ -114,7 +117,7 @@ FlexMiner [6]: the CPU baseline code is in \*/cpu_kernels/\*_base.h
 
 DistTC [7]: source code is in src/triangle/
 
-DeepGalois [8]: https://github.mit.edu/csg/DeepGraphBench
+DeepGalois [8]: https://github.com/chenxuhao/GraphAIBench
 
 GraphPi [9]: https://github.com/thu-pacman/GraphPi
 
