@@ -1,7 +1,7 @@
 include ../common.mk
 #INCLUDES+=-I$(CUB_DIR) 
 INCLUDES+=-I./cpu_kernels -I./gpu_kernels
-all: motif_omp_base
+all: motif_omp_base motif_gpu_base
 
 %.o: %.cc
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $<
