@@ -19,3 +19,4 @@ endif
 LIBS += -lgomp
 INCLUDES = -I../../../include
 VPATH=../../common
+OBJS=graph.o VertexSet.o main.o

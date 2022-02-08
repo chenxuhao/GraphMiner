@@ -1,8 +1,6 @@
 include ../common.mk
 #INCLUDES+=-I $(CUB_DIR)
 CXXFLAGS+=-std=c++11
-SRC=main.cc
-OBJS=main.o VertexSet.o
 all: fsm_base fsm_omp_base
 
 %.o: %.cc

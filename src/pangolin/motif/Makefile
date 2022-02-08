@@ -1,8 +1,6 @@
 include ../common.mk
 #INCLUDES+=-I $(CUB_DIR)
 CXXFLAGS+=-std=c++11
-SRC=main.cc
-OBJS=main.o VertexSet.o
 all: motif_base motif_omp_base
 
 %.o: %.cc
