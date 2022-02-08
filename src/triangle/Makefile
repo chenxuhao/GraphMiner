@@ -17,8 +17,8 @@ tc_gpu_base: gpu_base.o $(OBJS)
 	$(NVCC) $(NVFLAGS) $(INCLUDES) $(EXTRA) $(OBJS) gpu_base.o -o $@ $(LIBS)
 	mv $@ $(BIN)
 
-tc_multigpu: multigpu.o $(OBJS)
-	$(NVCC) $(NVFLAGS) $(INCLUDES) $(EXTRA) $(OBJS) multigpu.o -o $@ $(LIBS)
+tc_multigpu: multigpu.o scheduler.o $(OBJS)
+	$(NVCC) $(NVFLAGS) $(INCLUDES) $(EXTRA) $(OBJS) multigpu.o scheduler.o -o $@ $(LIBS)
 	mv $@ $(BIN)
 
 clean:

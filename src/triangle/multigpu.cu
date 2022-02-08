@@ -5,6 +5,7 @@
 #include "timer.h"
 #include "edgelist.h"
 #include "graph_gpu.h"
+#include "scheduler.h"
 #include "operations.cuh"
 #include "cuda_launch_config.hpp"
 //#define EVEN_SPLIT
@@ -37,7 +38,9 @@ void TCSolver(Graph &g, uint64_t &total, int n_gpus, int chunk_size) {
   num_tasks[ndevices-1] = nnz - (ndevices-1) * n_tasks_per_gpu;
 #else
   std::vector<vidType*> src_ptrs, dst_ptrs;
-  auto num_tasks = g.split_edgelist(ndevices, src_ptrs, dst_ptrs, chunk_size);
+  Scheduler scheduler;
+  //auto num_tasks = scheduler.split_edgelist(ndevices, g, src_ptrs, dst_ptrs, chunk_size);
+  auto num_tasks = scheduler.round_robin(ndevices, g, src_ptrs, dst_ptrs, chunk_size);
 #endif
 
   std::vector<GraphGPU> d_graphs(ndevices);
