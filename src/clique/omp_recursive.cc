@@ -1,7 +1,7 @@
 // Copyright 2020 Massachusetts Institute of Technology
 // Contact: Xuhao Chen <cxh@mit.edu>
 
-#include "clique.h"
+#include "graph.h"
 #include "cmap.h"
 #include "clique_base.h"
 

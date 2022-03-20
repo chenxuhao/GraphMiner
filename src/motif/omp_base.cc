@@ -1,8 +1,9 @@
 // Copyright 2020 Massachusetts Institute of Technology
 // Contact: Xuhao Chen <cxh@mit.edu>
 
-#include "motif.h"
-#include "motif_base.h"
+#include "graph.h"
+#include "pattern.hh"
+#include "automine_base.h"
 
 void MotifSolver(Graph &g, int k, std::vector<uint64_t> &total, int, int) {
   int num_threads = 1;

@@ -1,7 +1,6 @@
 // Copyright (c) 2020 MIT
 // Author: Xuhao Chen
 #include <cub/cub.cuh>
-#include "tc.h"
 #include "timer.h"
 #include "edgelist.h"
 #include "graph_gpu.h"

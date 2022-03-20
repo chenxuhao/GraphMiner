@@ -1,6 +1,19 @@
 #pragma once
 #include "utils.h"
 
+static int num_possible_patterns[] = {
+  0,
+  1,
+  1,
+  2, // size 3
+  6, // size 4
+  21, // size 5
+  112, // size 6
+  853, // size 7
+  11117, // size 8
+  261080, // size 9
+};
+
 enum Labelling {
   UNLABELLED,
   LABELLED,
@@ -12,92 +25,82 @@ class Pattern {
 private:
   std::string name_;
   bool has_label;
-  std::unordered_map<vidType, std::vector<vidType>> adj_list;
-  std::vector<uint32_t> labels;
+  std::map<vidType, VertexList> adj_list;
+  std::vector<vlabel_t> vlabels;
+  std::vector<elabel_t> elabels;
   Labelling labelling = UNLABELLED;
-  int num_labels;
+  int num_vertices;
+  int num_edges;
+  int num_vlabels;
+  int num_elabels;
+  int max_degree;
+  int core_length_;
+  int max_label;
+  int num_vertex_classes;
+  int max_label_frequency_;
+  std::vector<int> core_table;
+  std::vector<vidType> labels_frequency_;
+  std::unordered_map<vlabel_t, vidType>* nlf_;
 
 public:
-  Pattern() : Pattern("triangle", false) { }
-  Pattern(std::string name) : Pattern(name, false) { }
+  Pattern() : Pattern("", false) { }
+  Pattern(std::string name) : name_(name) { }
   Pattern(std::string filename, bool is_labeled) : 
-      name_("triangle"), has_label(is_labeled) {
+      name_(""), has_label(is_labeled), core_length_(0) {
     read_adj_file(filename);
     if (has_label) labelling = LABELLED;
     set_name();
-    num_labels = 0;
   }
   ~Pattern() {}
-  bool is_wedge() { return name_ == "wedge"; }
-  bool is_triangle() { return name_ == "triangle"; }
-  bool is_diamond() { return name_ == "diamond"; }
-  bool is_rectangle() { return name_ == "rectangle"; }
-  bool is_pentagon() { return name_ == "pentagon"; }
-  bool is_house() { return name_ == "house"; }
-  std::string get_name() { return name_; }
-  void set_name();
-  vidType num_vertices() const { return adj_list.size(); }
-  uint32_t label(uint32_t qv) const { return labels[qv-1]; }
-  uint32_t get_label(vidType v) const { return labels[v]; }
-  const std::vector<uint32_t> &get_labels() const { return labels; }
-  void set_labelling(Labelling l) { labelling = l; }
-  Labelling get_labelling() const { return labelling; }
-  int32_t num_edges() const;
-  std::vector<vidType> v_list() const;
-  std::string to_string(const std::vector<uint32_t> &given_labels) const;
-  std::string to_string() const;
-  //std::string to_string() { return name_; }
+  bool is_wedge() const { return name_ == "wedge"; }
+  bool is_triangle() const { return name_ == "triangle"; }
+  bool is_diamond() const { return name_ == "diamond"; }
+  bool is_rectangle() const { return name_ == "rectangle"; }
+  bool is_pentagon() const { return name_ == "pentagon"; }
+  bool is_house() const { return name_ == "house"; }
+  bool is_4color_square() const { return name_ == "4color-square"; }
+  bool is_connected(vidType u, vidType v) const;
   void read_adj_file(std::string inputfile);
-  int get_num_labels() {
-    if (labelling == UNLABELLED) return 0;
-    if (num_labels == 0) {
-      std::set<vlabel_t> unique_vlabels;
-      for (vidType v = 0; v < num_vertices(); v++)
-        unique_vlabels.insert(get_label(v));
-      num_labels = unique_vlabels.size();
-    }
-    assert(num_labels >= 1);
-    return num_labels;
-  }
+
+  std::string get_name() const { return name_; }
+  int size() const { return num_vertices; }
+  int sizeEdges() const { return num_edges; }
+  int get_num_vertices() const { return num_vertices; }
+  int get_num_edges() const { return num_edges; }
+  int get_degree(vidType v) const { return adj_list.at(v).size(); }
+  int get_max_degree() const { return max_degree; }
+  vlabel_t get_vlabel(vidType v) const { return vlabels[v]; } // vid starting from 0
+  elabel_t get_elabel(eidType e) const { return elabels[e]; }
+  int get_max_label_frequency() const { return max_label_frequency_; }
+  vidType getLabelsFrequency(const vlabel_t label) const { return labels_frequency_.at(label); }
+  vidType get_neighbor(vidType v, vidType i) const { return adj_list.at(v)[i]; }
+  const std::vector<vidType> &get_neighbours(vidType v) const { return adj_list.at(v); }
+  int getCoreValue(const vidType vid) const { return core_table[vid]; }
+  const std::unordered_map<vlabel_t, vidType>* getVertexNLF(const vidType id) const { return nlf_ + id; }
+  Labelling get_labelling() const { return labelling; }
+  int get2CoreSize() const { return core_length_; }
+  int get_num_labels() { return num_vertex_classes; }
+  const VertexList& N(vidType v) const { return adj_list.at(v); } 
+  VertexList v_list() const;
+  std::string to_string(const std::vector<vlabel_t> &given_labels) const;
+  std::string to_string() const;
+  void print_meta_data() const;
+
+  void set_labelling(Labelling l) { labelling = l; }
+  Pattern &add_edge(vidType u, vidType v);
+  Pattern &set_label(vidType u, vlabel_t l);
+  Pattern &remove_edge(vidType u, vidType v);
+  void set_name();
+  void BuildNLF();
+  void buildCoreTable();
+  void computeKCore();
+  void computeLabelsFrequency();
+
+  bool operator==(const Pattern &p) const { return p.vlabels == vlabels; }
+  bool operator<(const Pattern &p) const { return p.vlabels < vlabels; }
   friend std::ostream &operator <<(std::ostream &os, const Pattern &p) {
     os << p.to_string();
     return os;
-  }
-  const std::vector<vidType> &get_neighbours(vidType v) const {
-    return adj_list.at(v);
-  }
-  Pattern &add_edge(vidType u, vidType v) {
-    adj_list[u].push_back(v);
-    adj_list[v].push_back(u);
-    if (labelling == PARTIALLY_LABELLED || labelling == LABELLED) {
-      // may have added a anti-vertex: in which case we need to give it a label
-      if (v > num_vertices())
-        labels.push_back(static_cast<uint32_t>(-3)); // just some random label
-    }
-    return *this;
-  }
-  Pattern &set_label(uint32_t u, uint32_t l) {
-    //if (labelling == UNLABELLED || labelling == DISCOVER_LABELS)
-    //  labels.resize(num_vertices() + num_anti_vertices());
-    labels[u-1] = l;
-    labelling = l == static_cast<uint32_t>(-1) ? PARTIALLY_LABELLED : LABELLED;
-    return *this;
-  }
-  Pattern &remove_edge(vidType u, vidType v) {
-    //if (!is_anti_vertex(u) && !is_anti_vertex(v)) {
-      //std::erase(adj_list[u], v);
-      //std::erase(adj_list[v], u);
-    //}
-    //std::erase(anti_adj_list[u], v);
-    //std::erase(anti_adj_list[v], u);
-    return *this;
-  }
-  // checks labels: it is assumed that the two patterns have the same structure
-  bool operator==(const Pattern &p) const {
-    return p.labels == labels;
-  }
-  bool operator<(const Pattern &p) const {
-    return p.labels < labels;
   }
 };
 

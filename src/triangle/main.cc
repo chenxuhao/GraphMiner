@@ -1,6 +1,8 @@
 // Copyright 2020, MIT
 // Authors: Xuhao Chen <cxh@mit.edu>
-#include "tc.h"
+#include "graph.h"
+
+void TCSolver(Graph &g, uint64_t &total, int n_gpu, int chunk_size);
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {
@@ -8,8 +10,8 @@ int main(int argc, char *argv[]) {
     std::cout << "Example: " << argv[0] << " /graph_inputs/mico/graph\n";
     exit(1);
   }
-  std::cout << "Triangle Counting (for undirected graphs only)\n";
-  if (USE_DAG) std::cout << "Using DAG (static orientation)\n";
+  std::cout << "Triangle Counting\n";
+  //if (USE_DAG) std::cout << "Using DAG (static orientation)\n";
   Graph g(argv[1], USE_DAG); // use DAG
   int n_devices = 1;
   int chunk_size = 1024;
@@ -18,6 +20,7 @@ int main(int argc, char *argv[]) {
   auto m = g.size();
   auto nnz = g.sizeEdges();
   std::cout << "|V| " << m << " |E| " << nnz << "\n";
+  std::cout << "Maximum degree: " << g.get_max_degree() << "\n";
   uint64_t total = 0;
   TCSolver(g, total, n_devices, chunk_size);
   std::cout << "total_num_triangles = " << total << "\n";

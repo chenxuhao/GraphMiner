@@ -1,8 +1,6 @@
 // Copyright (c) 2020 MIT
 // Author: Xuhao Chen
 #include <cub/cub.cuh>
-#include "motif.h"
-#include "timer.h"
 #include "graph_gpu.h"
 #include "operations.cuh"
 #include "cuda_launch_config.hpp"

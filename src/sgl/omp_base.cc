@@ -1,4 +1,5 @@
-#include "sgl.h"
+#include "graph.h"
+#include "pattern.hh"
 #include "intersect.h"
 
 void SglSolver(Graph &g, Pattern &p, uint64_t &total, int, int) {

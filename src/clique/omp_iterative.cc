@@ -1,7 +1,7 @@
 // Copyright 2020 Massachusetts Institute of Technology
 // Contact: Xuhao Chen <cxh@mit.edu>
 
-#include "clique.h"
+#include "grpah.h"
 #include "cmap.h"
 void kclique(Graph &g, int k, uint64_t &total);
 void kclique_cmap(Graph &g, int k, uint64_t &total);

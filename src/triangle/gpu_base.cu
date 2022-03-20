@@ -1,25 +1,26 @@
 // Copyright (c) 2020 MIT
 // Author: Xuhao Chen
 #include <cub/cub.cuh>
-#include "tc.h"
 #include "timer.h"
 #include "graph_gpu.h"
+#include "operations.cuh"
+#include "cuda_profiler_api.h"
 #include "cuda_launch_config.hpp"
+
+typedef cub::BlockReduce<AccType, BLOCK_SIZE> BlockReduce;
 
 #ifdef VERTEX_PAR
 const std::string name = "gpu_vp";
+#include "bs_warp_vertex.cuh"
 #else
 #ifdef CTA_CENTRIC
 const std::string name = "gpu_cta";
+#include "bs_cta_edge.cuh"
 #else
 const std::string name = "gpu_base";
-#endif
-#endif
-
-typedef cub::BlockReduce<AccType, BLOCK_SIZE> BlockReduce;
-#include "bs_warp_vertex.cuh"
 #include "bs_warp_edge.cuh"
-#include "bs_cta_edge.cuh"
+#endif
+#endif
 
 void TCSolver(Graph &g, uint64_t &total, int, int) {
   size_t memsize = print_device_info(0);
@@ -48,6 +49,7 @@ void TCSolver(Graph &g, uint64_t &total, int, int) {
   CUDA_SAFE_CALL(cudaMemcpy(d_total, &h_total, sizeof(AccType), cudaMemcpyHostToDevice));
   CUDA_SAFE_CALL(cudaDeviceSynchronize());
 
+  cudaProfilerStart();
   Timer t;
   t.Start();
 #ifdef VERTEX_PAR
@@ -61,6 +63,7 @@ void TCSolver(Graph &g, uint64_t &total, int, int) {
 #endif
   CUDA_SAFE_CALL(cudaDeviceSynchronize());
   t.Stop();
+  cudaProfilerStop();
 
   std::cout << "runtime [" << name << "] = " << t.Seconds() << " sec\n";
   std::cout << "throughput = " << double(nnz) / t.Seconds() / 1e9 << " billion Traversed Edges Per Second (TEPS)\n";

@@ -1,8 +1,6 @@
 // Copyright (c) 2020 MIT
 // Author: Xuhao Chen
 #include <cub/cub.cuh>
-#include "motif.h"
-#include "timer.h"
 #include "graph_gpu.h"
 #include "operations.cuh"
 #include "cuda_launch_config.hpp"
@@ -10,13 +8,10 @@
 typedef cub::BlockReduce<AccType, BLOCK_SIZE> BlockReduce;
 
 #include "motif3_edge_warp.cuh"
-#ifdef FISSION
 #include "wedge_edge_warp.cuh"
 #include "triangle_edge_warp.cuh"
-#include "motif4_edge_warp_fission.cuh"
-#else
 #include "motif4_edge_warp.cuh"
-#endif
+#include "motif4_edge_warp_fission.cuh"
 
 __global__ void clear(AccType *accumulators) {
   int i = blockIdx.x * blockDim.x + threadIdx.x;

@@ -1,7 +1,10 @@
 // Copyright 2020 Massachusetts Institute of Technology
 // Contact: Xuhao Chen <cxh@mit.edu>
 
-#include "motif.h"
+#include "graph.h"
+#include "pattern.hh"
+
+void MotifSolver(Graph &g, int k, std::vector<uint64_t> &accum, int, int);
 
 int main(int argc, char *argv[]) {
   if (argc < 3) {
@@ -20,6 +23,7 @@ int main(int argc, char *argv[]) {
   auto m = g.size();
   auto nnz = g.sizeEdges();
   std::cout << "|V| " << m << " |E| " << nnz << "\n";
+  std::cout << "Maximum degree: " << g.get_max_degree() << "\n";
   int num_patterns = num_possible_patterns[k];
   std::cout << "num_patterns: " << num_patterns << "\n";
   std::vector<uint64_t> total(num_patterns, 0);

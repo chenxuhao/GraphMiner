@@ -10,7 +10,8 @@ __global__ void warp_vertex(int nv, GraphGPU g, AccType *total) {
     vidType v_size = g.getOutDegree(v);
     for (auto e = 0; e < v_size; e ++) {
       auto u = v_ptr[e];
-      count += g.warp_intersect_cache(v, u);
+      vidType u_size = g.getOutDegree(u);
+      count += intersect_num(v_ptr, v_size, g.N(u), u_size);
     }
   }
   AccType block_num = BlockReduce(temp_storage).Sum(count);
