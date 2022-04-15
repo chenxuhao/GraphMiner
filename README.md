@@ -5,8 +5,8 @@ GraphMinerBench is a C++ implemented Benchmark Suite for Graph Pattern Mining (G
 Unlike those GPM frameworks, GraphMinerBench is inherently designed for benchmarking hardware architecture design.
 It includes various GPM workloads (e.g., TC, k-CL, SgL, k-MC, FSM) as well as representative graph datasets (Mico, Patents, Youtube, LiveJournal, Orkut, Twitter, Friendster). 
 
-Some datasets are available [here](https://www.dropbox.com/sh/i1jq1uwtkcd2qo0/AADJck_u3kx7FeSR5BvdrkqYa?dl=0).
-Please contact [the author](http://people.csail.mit.edu/xchen/) for larger datasets.
+Datasets are available [here](https://www.dropbox.com/sh/i1jq1uwtkcd2qo0/AADJck_u3kx7FeSR5BvdrkqYa?dl=0).
+Please contact [the author](http://people.csail.mit.edu/xchen/) for more datasets.
 
 [1] Xuhao Chen, Roshan Dathathri, Gurbinder Gill, Keshav Pingali.
 [Pangolin: An Efficient and Flexible Graph Pattern Mining System on CPU and GPU](http://www.vldb.org/pvldb/vol13/p1190-chen.pdf). VLDB 2020
@@ -37,29 +37,34 @@ The document is organized as follows:
 ### Requirements ###
 
 * [CUDA toolkit](https://developer.nvidia.com/cuda-toolkit) 11.1.1 or greater.
-* GCC 8.3.1.
-* CUB. if CUDA version < 11.0, enable CUB in the Makefile.
-
-Note: the latest official CUB requires CUDA 11+. For CUDA version < 11.0, use CUB v1.8.0.
+* GCC 8.3.1 or greater.
 
 ### Quick Start ###
 
-Setup CUB library:
+Just make in the root directory:
 
-    $ git submodule update --init --recursive
+    $ make
 
-Go to each sub-directory, e.g. src/triangle, and then
+Or go to each sub-directory, e.g. src/triangle, and then make:
 
     $ cd src/triangle; make
+
+Binaries will be in the bin directory. 
+For example, `tc_omp_base` is the OpenMP version of triangle counting on CPU, `tc_gpu_base` is the single GPU version, and `tc_multigpu` is the multi-GPU version.
 
 Find out commandline format by running executable without argument:
 
     $ cd ../../bin
     $ ./tc_omp_base
 
-Run triangle counting on an undirected graph:
+Datasets are available [here](https://www.dropbox.com/sh/i1jq1uwtkcd2qo0/AADJck_u3kx7FeSR5BvdrkqYa?dl=0).
+Run triangle counting with an undirected toy graph on CPU:
 
     $ ./tc_omp_base ../inputs/citeseer/graph
+    
+Run subgraph listing/counting for the `diamond` pattern with the LiveJournal graph on GPU:
+
+    $./sgl_gpu_base ../inputs/livej/graph diamond
 
 You can find the expected outputs in the README of each benchmark [see here for triangle](https://github.com/chenxuhao/GraphMiner/blob/master/src/triangle/README.md).
 
