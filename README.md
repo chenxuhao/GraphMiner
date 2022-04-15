@@ -49,7 +49,7 @@ Or go to each sub-directory, e.g. src/triangle, and then make:
 
     $ cd src/triangle; make
 
-Binaries will be in the bin directory. 
+Binaries will be in the `bin` directory. 
 For example, `tc_omp_base` is the OpenMP version of triangle counting on CPU, `tc_gpu_base` is the single GPU version, and `tc_multigpu` is the multi-GPU version.
 
 Find out commandline format by running executable without argument:
@@ -112,7 +112,7 @@ Existing state-of-the-art frameworks:
 
 Pangolin [1]: source code is in src/pangolin/
 
-SgMatch [2,3]: https://github.com/guowentian/SubgraphMatchGPU
+PBE [2,3]: https://github.com/guowentian/SubgraphMatchGPU
 
 Peregrine [4]: https://github.com/pdclab/peregrine
 
