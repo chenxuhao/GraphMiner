@@ -4,8 +4,8 @@ To begin with, download the [datasets](https://www.dropbox.com/sh/i1jq1uwtkcd2qo
 The first 3 graphs (`Mico`, `Patent_citations`, `Youtube`) are vertex-labeled graphs which are used for FSM.
 Put the datasets in the `inputs` directory.
 
-On GPU, we compare with `Pangolin` (source code is in src/pangolin/) and `PBE`: https://github.com/guowentian/SubgraphMatchGPU.
-We also compare with CPU-targeted systems `Peregrine`: https://github.com/pdclab/peregrine and `GraphZero` (the OpenMP version in this repository).
+On GPU, we compare with [Pangolin](src/pangolin/) and [PBE](https://github.com/guowentian/SubgraphMatchGPU).
+We also compare with CPU-targeted systems [Peregrine](https://github.com/pdclab/peregrine) and `GraphZero` (the OpenMP version in this repository).
 
 Next, we will build G<sup>2</sup>Miner. This requires [CUDA toolkit](https://developer.nvidia.com/cuda-toolkit) 11.1.1 or greater.
 It also requires GCC 8 or greater. To install GCC 9 on Ubuntu 18.04, run:
