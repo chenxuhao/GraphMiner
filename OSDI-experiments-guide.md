@@ -4,8 +4,8 @@ To begin with, download the [datasets](https://www.dropbox.com/sh/i1jq1uwtkcd2qo
 The first 3 graphs (`Mico`, `Patent_citations`, `Youtube`) are vertex-labeled graphs which are used for FSM.
 Put the datasets in the `inputs` directory.
 
-On GPU, we compare with `Pangolin` (source code is in src/pangolin/) and `PBE`: https://github.com/guowentian/SubgraphMatchGPU.
-We also compare with CPU-targeted systems `Peregrine`: https://github.com/pdclab/peregrine and `GraphZero` (the OpenMP version in this repository).
+On GPU, we compare with [Pangolin](src/pangolin/) and [PBE](https://github.com/guowentian/SubgraphMatchGPU).
+We also compare with CPU-targeted systems [Peregrine](https://github.com/pdclab/peregrine) and `GraphZero` (the OpenMP version in this repository).
 
 Next, we will build G<sup>2</sup>Miner. This requires [CUDA toolkit](https://developer.nvidia.com/cuda-toolkit) 11.1.1 or greater.
 It also requires GCC 8 or greater. To install GCC 9 on Ubuntu 18.04, run:
@@ -114,4 +114,14 @@ $./bin/fsm_gpu_base inputs/youtube/graph 2 300  > yo-fsm-3-300.log 2>&1
 $./bin/fsm_gpu_base inputs/youtube/graph 2 500  > yo-fsm-3-500.log 2>&1
 $./bin/fsm_gpu_base inputs/youtube/graph 2 1000 > yo-fsm-3-1000.log 2>&1
 $./bin/fsm_gpu_base inputs/youtube/graph 2 5000 > yo-fsm-3-5000.log 2>&1
+```
+
+#### Multi-GPU (Figure 9 & 10)
+
+For multi-GPU execution, run the executable `xxx_multigpu` instead of `xxx_gpu_base`, and add the number of GPUs at the end of the argument list. 
+
+```
+$ bin/tc_multigpu inputs/twitter40/graph 8 > tw4-tc-8gpu.log 2>&1
+$ bin/sgl_multigpu inputs/friendster/graph rectangle 4 > fr-rectangle-4gpu.log 2>&1
+$ bin/motif_multigpu inputs/twitter20/graph 3 6 > tw2-3-motifs-6gpu.log 2>&1
 ```
