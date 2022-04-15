@@ -18,7 +18,7 @@ Please contact [the author](http://people.csail.mit.edu/xchen/) for more dataset
 [FlexMiner: A Pattern-Aware Accelerator for Graph Pattern Mining](http://people.csail.mit.edu/xchen/docs/isca-2021.pdf), ISCA 2021
 
 [4] Xuhao Chen, Arvind.
-[Efficient and Scalable Graph Pattern Mining on GPUs](https://arxiv.org/pdf/2112.09761.pdf), OSDI 2022
+[Efficient and Scalable Graph Pattern Mining on GPUs](https://arxiv.org/pdf/2112.09761.pdf), OSDI 2022 [Artifact](OSDI-experiments-guide.md)
 
 ## Getting Started ##
 
