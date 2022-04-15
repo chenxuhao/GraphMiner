@@ -115,3 +115,13 @@ $./bin/fsm_gpu_base inputs/youtube/graph 2 500  > yo-fsm-3-500.log 2>&1
 $./bin/fsm_gpu_base inputs/youtube/graph 2 1000 > yo-fsm-3-1000.log 2>&1
 $./bin/fsm_gpu_base inputs/youtube/graph 2 5000 > yo-fsm-3-5000.log 2>&1
 ```
+
+#### Multi-GPU (Figure 9 & 10)
+
+For multi-GPU execution, run the executable `xxx_multigpu` instead of `xxx_gpu_base`, and add the number of GPUs at the end of the argument list. 
+
+```
+$ bin/tc_multigpu inputs/twitter40/graph 8 > tw4-tc-8gpu.log 2>&1
+$ bin/sgl_multigpu inputs/friendster/graph rectangle 4 > fr-rectangle-4gpu.log 2>&1
+$ bin/motif_multigpu inputs/twitter20/graph 3 6 > tw2-3-motifs-6gpu.log 2>&1
+```
