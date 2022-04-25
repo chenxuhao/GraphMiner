@@ -17,7 +17,7 @@ inline InitPattern get_init_pattern(label_t src_label, label_t  dst_label) {
 
 void dfs_extend(int level, int max_size, int minsup, Graph &g, BaseEdgeEmbeddingList& emb_list, Pattern& pattern, int &total);
 
-void FsmSolver(Graph &g, int k, int minsup, int nlables, int &total) {
+void FsmSolver(Graph &g, int k, int minsup, int &total) {
   int num_threads = 1;
   #pragma omp parallel
   {
@@ -36,6 +36,7 @@ void FsmSolver(Graph &g, int k, int minsup, int nlables, int &total) {
   for (eidType eid = 0; eid < g.E(); eid++) {
     auto v = g.get_src(eid);
     auto u = g.get_dst(eid);
+    if (!g.is_freq_vertex(v, minsup) || !g.is_freq_vertex(u, minsup)) continue;
     auto v_label = g.get_vlabel(v);
     auto u_label = g.get_vlabel(u);
     auto tid = omp_get_thread_num();
@@ -81,10 +82,11 @@ void FsmSolver(Graph &g, int k, int minsup, int nlables, int &total) {
   int num_freq_embeddings = 0;
   EmbeddingLists2D init_emb_lists;
   for (eidType eid = 0; eid < g.E(); eid++) {
-    auto src = g.get_src(eid);
-    auto dst = g.get_dst(eid);
-    auto src_label = g.getData(src);
-    auto dst_label = g.getData(dst);
+    auto v = g.get_src(eid);
+    auto u = g.get_dst(eid);
+    if (!g.is_freq_vertex(v, minsup) || !g.is_freq_vertex(u, minsup)) continue;
+    auto src_label = g.getData(v);
+    auto dst_label = g.getData(u);
     if (src_label <= dst_label) {
       num_embeddings ++;
       auto key = get_init_pattern(src_label, dst_label);

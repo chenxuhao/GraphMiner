@@ -117,6 +117,11 @@ public:
 	__device__ void set_pid(IndexT id, unsigned pid) { pid_list[id] = pid; }
 	size_t size() const { return sizes[last_level]; }
 	size_t size(unsigned level) const { return sizes[level]; }
+	void add_level() {
+		last_level ++;
+		sizes[last_level] = 0;
+		assert(last_level < max_level);
+  }
 	void add_level(unsigned size) { // TODO: this size could be larger than 2^32, when running LiveJournal and even larger graphs
 		last_level ++;
 		sizes[last_level] = size;
@@ -133,6 +138,32 @@ public:
 		CUDA_SAFE_CALL(cudaMalloc((void **)&pid_list, size * sizeof(unsigned)));
 		#endif
 	}
+	void resize_last_level(unsigned size) {
+    resize_level(last_level, size);
+  }
+	void resize_level(unsigned level, unsigned size) {
+		if (sizes[level] >= size) {
+      return;
+    }
+    //std::cout << "resize level " << level << " to be " << size << "\n";
+    if (sizes[level] > 0) {
+		  CUDA_SAFE_CALL(cudaFree(h_vid_lists[level]));
+		  CUDA_SAFE_CALL(cudaFree(h_idx_lists[level]));
+		  #ifdef ENABLE_LABEL
+		  CUDA_SAFE_CALL(cudaFree(h_his_lists[level]));
+      #endif
+    }
+		CUDA_SAFE_CALL(cudaMalloc((void **)&h_vid_lists[level], size * sizeof(IndexT)));
+		CUDA_SAFE_CALL(cudaMalloc((void **)&h_idx_lists[level], size * sizeof(IndexT)));
+		CUDA_SAFE_CALL(cudaMemcpy(d_vid_lists, h_vid_lists, max_level * sizeof(IndexT*), cudaMemcpyHostToDevice));
+		CUDA_SAFE_CALL(cudaMemcpy(d_idx_lists, h_idx_lists, max_level * sizeof(IndexT*), cudaMemcpyHostToDevice));
+		#ifdef ENABLE_LABEL
+		CUDA_SAFE_CALL(cudaMalloc((void **)&h_his_lists[level], size * sizeof(BYTE)));
+		CUDA_SAFE_CALL(cudaMemcpy(d_his_lists, h_his_lists, max_level * sizeof(BYTE*), cudaMemcpyHostToDevice));
+		#endif
+    sizes[level] = size;
+	}
+
 	void remove_tail(unsigned idx) { sizes[last_level] = idx; }
 	void reset_level() {
 		for (size_t i = 2; i <= last_level; i ++) {

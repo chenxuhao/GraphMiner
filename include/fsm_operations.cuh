@@ -6,11 +6,11 @@ struct OrderedEdge {
   IndexT dst;
 };
 
-inline __device__ int get_init_pattern_id(BYTE src_label, BYTE dst_label, int nlabels) {
+inline __device__ __host__ int get_init_pattern_id(BYTE src_label, BYTE dst_label, int nlabels) {
   return (int)src_label * nlabels + (int)dst_label;
 }
 
-inline __device__ unsigned get_pattern_id(BYTE label0, BYTE label1, BYTE label2, int nlabels) {
+inline __device__ __host__ int get_pattern_id(BYTE label0, BYTE label1, BYTE label2, int nlabels) {
   return nlabels * (nlabels * label0 + label1) + label2;
 }
 

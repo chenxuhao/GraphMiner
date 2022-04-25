@@ -17,13 +17,10 @@ int main(int argc, char *argv[]) {
   std::cout << "min_support = " << minsup << "\n";
 
   Graph g(argv[1], 0, 1);
-  auto m = g.num_vertices();
-  auto nnz = g.num_edges();
-  int nlabels = g.get_vertex_classes();
-  std::cout << "|V| " << m << " |E| " << nnz << "\n";
-  std::cout << "Number of unique labels: " << nlabels << "\n";
+  g.computeLabelsFrequency();
+  g.print_meta_data();
   int num_freqent_patterns = 0;
-  FsmSolver(g, k, minsup, nlabels, num_freqent_patterns);
+  FsmSolver(g, k, minsup, num_freqent_patterns);
   std::cout << "Number of frequent patterns: " << num_freqent_patterns << "\n";
   return 0;
 }
