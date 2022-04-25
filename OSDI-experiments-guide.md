@@ -68,15 +68,15 @@ $ bin/clique_gpu_base inputs/friendster/graph 5 > fr-5-cliques.log 2>&1
 
 ```
 $ # diamond
-$ bin/sg_gpu_base inputs/livej/graph diamond        > lj-diamond.log 2>&1
-$ bin/sg_gpu_base inputs/orkut/graph diamond        > or-diamond.log 2>&1
-$ bin/sg_gpu_base inputs/twitter20/graph diamond    > tw2-diamond.log 2>&1
-$ bin/sg_gpu_base inputs/twitter40/graph diamond    > tw4-diamond.log 2>&1
-$ bin/sg_gpu_base inputs/friendster/graph diamond   > fr-diamond.log 2>&1
+$ bin/sgl_gpu_base inputs/livej/graph diamond        > lj-diamond.log 2>&1
+$ bin/sgl_gpu_base inputs/orkut/graph diamond        > or-diamond.log 2>&1
+$ bin/sgl_gpu_base inputs/twitter20/graph diamond    > tw2-diamond.log 2>&1
+$ bin/sgl_gpu_base inputs/twitter40/graph diamond    > tw4-diamond.log 2>&1
+$ bin/sgl_gpu_base inputs/friendster/graph diamond   > fr-diamond.log 2>&1
 $ # rectangle
-$ bin/sg_gpu_base inputs/livej/graph rectangle      > lj-rectangle.log 2>&1
-$ bin/sg_gpu_base inputs/orkut/graph rectangle      > or-rectangle.log 2>&1
-$ bin/sg_gpu_base inputs/friendster/graph rectangle > fr-rectangle.log 2>&1
+$ bin/sgl_gpu_base inputs/livej/graph rectangle      > lj-rectangle.log 2>&1
+$ bin/sgl_gpu_base inputs/orkut/graph rectangle      > or-rectangle.log 2>&1
+$ bin/sgl_gpu_base inputs/friendster/graph rectangle > fr-rectangle.log 2>&1
 ```
 
 #### Motif Counting (Table 7)
@@ -124,4 +124,30 @@ For multi-GPU execution, run the executable `xxx_multigpu` instead of `xxx_gpu_b
 $ bin/tc_multigpu inputs/twitter40/graph 8 > tw4-tc-8gpu.log 2>&1
 $ bin/sgl_multigpu inputs/friendster/graph rectangle 4 > fr-rectangle-4gpu.log 2>&1
 $ bin/motif_multigpu inputs/twitter20/graph 3 6 > tw2-3-motifs-6gpu.log 2>&1
+```
+
+#### Large Cliques (Table 11)
+
+```
+$ # 6-cliques
+$ bin/clique_gpu_base inputs/orkut/graph      6 > ok-6-cliques.log 2>&1
+$ bin/clique_gpu_base inputs/friendster/graph 6 > fr-6-cliques.log 2>&1
+$ # 7-cliques
+$ bin/clique_gpu_base inputs/orkut/graph      7 > ok-7-cliques.log 2>&1
+$ bin/clique_gpu_base inputs/friendster/graph 7 > fr-7-cliques.log 2>&1
+$ # 8-cliques
+$ bin/clique_gpu_base inputs/orkut/graph      8 > ok-8-cliques.log 2>&1
+$ bin/clique_gpu_base inputs/friendster/graph 8 > fr-8-cliques.log 2>&1
+```
+
+#### Warp Efficiency (Table 12)
+
+```
+$ nvprof -m "warp_execution_efficiency" bin/tc_gpu_base inputs/livej/graph > lj-tc-warp-eff.log 2>&1
+$ nvprof -m "warp_execution_efficiency" bin/tc_gpu_base inputs/orkut/graph > or-tc-warp-eff.log 2>&1
+$ nvprof -m "warp_execution_efficiency" bin/tc_gpu_base inputs/twitter2/graph > tw2-tc-warp-eff.log 2>&1
+$ nvprof -m "warp_execution_efficiency" bin/sgl_gpu_base inputs/livej/graph rectangle > lj-rectangle-warp-eff.log 2>&1
+$ nvprof -m "warp_execution_efficiency" bin/sgl_gpu_base inputs/orkut/graph rectangle > or-rectangle-warp-eff.log 2>&1
+$ nvprof -m "warp_execution_efficiency" bin/motif_gpu_base inputs/livej/graph 3 > lj-3-motifs-warp-eff.log 2>&1
+$ nvprof -m "warp_execution_efficiency" bin/motif_gpu_base inputs/orkut/graph 3 > ok-3-motifs-warp-eff.log 2>&1
 ```
