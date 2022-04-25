@@ -6,6 +6,7 @@ Put the datasets in the `inputs` directory.
 
 On GPU, we compare with [Pangolin](src/pangolin/) and [PBE](https://github.com/guowentian/SubgraphMatchGPU).
 We also compare with CPU-targeted systems [Peregrine](https://github.com/pdclab/peregrine) and `GraphZero` (the OpenMP version in this repository).
+To run PBE and Peregrine, you can find this [link](https://github.com/pdclab/peregrine/blob/master/experiments-guide.md) for Peregrine and this [link](https://github.com/guowentian/SubgraphMatchGPU/blob/master/scripts/demo.sh) for PBE.
 
 Next, we will build G<sup>2</sup>Miner. This requires [CUDA toolkit](https://developer.nvidia.com/cuda-toolkit) 11.1.1 or greater.
 It also requires GCC 8 or greater. To install GCC 9 on Ubuntu 18.04, run:
