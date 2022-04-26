@@ -8,7 +8,6 @@ int main(int argc, char *argv[]) {
     std::cout << "Example: ./bin/pangolin/" << argv[0] << " ./inputs/citeseer/graph 3 5000\n";
     exit(1);
   } 
-  Graph g(argv[1], 0, 1);
   unsigned k = 2;
   if (argc > 2) k = atoi(argv[2]);
   unsigned minsup = 5000;
@@ -16,11 +15,10 @@ int main(int argc, char *argv[]) {
   std::cout << "max_size = " << k << "\n";
   std::cout << "min_support = " << minsup << "\n";
 
-  int m = g.num_vertices();
-  int nnz = g.num_edges();
+  Graph g(argv[1], 0, 1);
+  g.computeLabelsFrequency();
   int nlabels = g.get_vertex_classes();
-  std::cout << "Number of unique labels: " << nlabels << "\n";
-  std::cout << "|V| " << m << " |E| " << nnz << "\n";
+  g.print_meta_data();
   int num_freqent_patterns = 0;
   FsmSolver(g, k, minsup, nlabels, num_freqent_patterns);
   std::cout << "Number of frequent patterns: " << num_freqent_patterns << "\n";
