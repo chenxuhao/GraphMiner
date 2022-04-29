@@ -127,7 +127,7 @@ $ bin/sgl_multigpu inputs/friendster/graph rectangle 4 > fr-rectangle-4gpu.log 2
 $ bin/motif_multigpu inputs/twitter20/graph 3 6 > tw2-3-motifs-6gpu.log 2>&1
 ```
 
-#### Large Cliques (Table 11)
+#### Large Cliques (Figure 11)
 
 ```
 $ # 6-cliques
@@ -141,7 +141,7 @@ $ bin/clique_gpu_base inputs/orkut/graph      8 > ok-8-cliques.log 2>&1
 $ bin/clique_gpu_base inputs/friendster/graph 8 > fr-8-cliques.log 2>&1
 ```
 
-#### Warp Efficiency (Table 12)
+#### Warp Efficiency (Figure 12)
 
 ```
 $ nvprof -m "warp_execution_efficiency" bin/tc_gpu_base inputs/livej/graph > lj-tc-warp-eff.log 2>&1
