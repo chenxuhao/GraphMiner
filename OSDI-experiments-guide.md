@@ -28,6 +28,10 @@ Binaries will be in the `bin` directory.
 For example, `tc_omp_base` is the OpenMP version of triangle counting on CPU, `tc_gpu_base` is the single GPU version, and `tc_multigpu` is the multi-GPU version.
 Finally, we can move on to the experiments.
 
+Note that for `motifs` and `diamond`, as mentioned in the paper, we can apply an optimization called "counting-only pruning". 
+This is why we have two versions for motifs: `motif_gpu_base` and `motif_gpu_formula`, with this optimization disabled and enabled respectively.
+To disable this optimization for Peregrine, one needs to use `match` instead of `count`, as instructed in section 2.4 in [here](https://github.com/pdclab/peregrine/blob/master/README.md). 
+
 ### Main benchmarks
 
 All these experiments were conducted on the NVIDIA V100 GPU. For CPU, we use Intel Xeon Gold 5120 2.2GHz CPUs (56 cores in total) and 190GB RAM,
