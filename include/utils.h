@@ -17,4 +17,15 @@ inline void split(const std::string& str, std::vector<std::string>& tokens, cons
   }
 }
 
+std::vector<int> PrefixSum(const std::vector<int> &degrees) {
+  std::vector<int> sums(degrees.size() + 1);
+  int total = 0;
+  for (size_t n=0; n < degrees.size(); n++) {
+    sums[n] = total;
+    total += degrees[n];
+  }
+  sums[degrees.size()] = total;
+  return sums;
+}
+
 }

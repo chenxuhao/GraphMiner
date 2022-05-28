@@ -1,14 +1,28 @@
 #include "graph.h"
 #include "scan.h"
 
-Graph::Graph(std::string prefix, bool use_dag, bool has_vlabel) :
-    vlabels(NULL), elabels(NULL), nnz(0) {
+Graph::Graph(std::string prefix, bool use_dag, bool directed, 
+             bool use_vlabel, bool use_elabel) :
+    is_directed_(directed), vlabels(NULL), elabels(NULL), nnz(0) {
+  // parse file name
+  size_t i = prefix.rfind('/', prefix.length());
+  if (i != string::npos) inputfile_path = prefix.substr(0, i);
+  i = inputfile_path.rfind('/', inputfile_path.length());
+  if (i != string::npos) name = inputfile_path.substr(i+1);
+  std::cout << "input file path: " << inputfile_path << ", graph name: " << name << "\n";
+
+  // read meta information
   VertexSet::release_buffers();
   std::ifstream f_meta((prefix + ".meta.txt").c_str());
   assert(f_meta);
-  int vid_size;
-  f_meta >> n_vertices >> n_edges >> vid_size >> max_degree;
+  int vid_size = 0, eid_size = 0, vlabel_size = 0, elabel_size = 0;
+  f_meta >> n_vertices >> n_edges >> vid_size >> eid_size >> vlabel_size >> elabel_size
+         >> max_degree >> feat_len >> num_vertex_classes >> num_edge_classes;
   assert(sizeof(vidType) == vid_size);
+  assert(sizeof(eidType) == eid_size);
+  assert(sizeof(vlabel_t) == vlabel_size);
+  assert(sizeof(elabel_t) == elabel_size);
+  assert(max_degree > 0 && max_degree < n_vertices);
   f_meta.close();
   // read row pointers
   if (map_vertices) map_file(prefix + ".vertex.bin", vertices, n_vertices+1);
@@ -16,9 +30,10 @@ Graph::Graph(std::string prefix, bool use_dag, bool has_vlabel) :
   // read column indices
   if (map_edges) map_file(prefix + ".edge.bin", edges, n_edges);
   else read_file(prefix + ".edge.bin", edges, n_edges);
-  num_vertex_classes = 0;
   // read vertex labels
-  if (has_vlabel) {
+  if (use_vlabel) {
+    assert (num_vertex_classes > 0);
+    assert (num_vertex_classes < 255); // we use 8-bit vertex label dtype
     std::string vlabel_filename = prefix + ".vlabel.bin";
     ifstream f_vlabel(vlabel_filename.c_str());
     if (f_vlabel.good()) {
@@ -27,18 +42,47 @@ Graph::Graph(std::string prefix, bool use_dag, bool has_vlabel) :
       std::set<vlabel_t> labels;
       for (vidType v = 0; v < n_vertices; v++)
         labels.insert(vlabels[v]);
-      num_vertex_classes = labels.size();
+      std::cout << "# distinct vertex labels: " << labels.size() << "\n";
+      assert(size_t(num_vertex_classes) == labels.size());
     } else {
       std::cout << "WARNING: vertex label file not exist; generating random labels\n";
-      num_vertex_classes = 4;
       vlabels = new vlabel_t[n_vertices];
       for (vidType v = 0; v < n_vertices; v++) {
         vlabels[v] = rand() % num_vertex_classes + 1;
       }
     }
+    auto max_vlabel = unsigned(*(std::max_element(vlabels, vlabels+n_vertices)));
+    std::cout << "maximum vertex label: " << max_vlabel << "\n";
   }
-  if (max_degree == 0 || max_degree>=n_vertices) exit(1);
-  if (use_dag) orientation();
+  if (use_elabel) {
+    assert (num_edge_classes > 0);
+    assert (num_edge_classes < 65535); // we use 16-bit edge label dtype
+    std::string elabel_filename = prefix + ".elabel.bin";
+    ifstream f_elabel(elabel_filename.c_str());
+    if (f_elabel.good()) {
+      if (map_elabels) map_file(elabel_filename, elabels, n_edges);
+      else read_file(elabel_filename, elabels, n_edges);
+      std::set<elabel_t> labels;
+      for (eidType e = 0; e < n_edges; e++)
+        labels.insert(elabels[e]);
+      std::cout << "# distinct edge labels: " << labels.size() << "\n";
+      assert(size_t(num_edge_classes) >= labels.size());
+    } else {
+      std::cout << "WARNING: edge label file not exist; generating random labels\n";
+      elabels = new elabel_t[n_edges];
+      for (eidType e = 0; e < n_edges; e++) {
+        elabels[e] = rand() % num_edge_classes + 1;
+      }
+    }
+    auto max_elabel = unsigned(*(std::max_element(elabels, elabels+n_edges)));
+    std::cout << "maximum edge label: " << max_elabel << "\n";
+  }
+  // orientation: convert the undirected graph into directed. Only for k-cliques. This may change max_degree.
+  if (use_dag) {
+    assert(!directed); // must be undirected before orientation
+    orientation();
+  }
+  // compute maximum degree
   VertexSet::MAX_DEGREE = std::max(max_degree, VertexSet::MAX_DEGREE);
   labels_frequency_.clear();
 }
@@ -62,6 +106,28 @@ VertexSet Graph::N(vidType vid) const {
   }
   assert(end <= n_edges);
   return VertexSet(edges + begin, end - begin, vid);
+}
+
+void Graph::allocateFrom(vidType nv, eidType ne) {
+  n_vertices = nv;
+  n_edges    = ne;
+  vertices = new eidType[nv+1];
+  edges = new vidType[ne];
+  vertices[0] = 0;
+}
+
+vidType Graph::compute_max_degree() {
+  std::cout << "computing the maximum degree\n";
+  Timer t;
+  t.Start();
+  std::vector<vidType> degrees(n_vertices, 0);
+  #pragma omp parallel for
+  for (vidType v = 0; v < n_vertices; v++) {
+    degrees[v] = vertices[v+1] - vertices[v];
+  }
+  vidType max_degree = *(std::max_element(degrees.begin(), degrees.end()));
+  t.Start();
+  return max_degree;
 }
 
 void Graph::orientation() {
@@ -264,6 +330,7 @@ bool Graph::is_freq_vertex(vidType v, int threshold) {
   return false;
 }
 
+// NLF: neighborhood label frequency
 void Graph::BuildNLF() {
   //std::cout << "Building NLF map for the data graph\n";
   nlf_.resize(size());
@@ -281,8 +348,22 @@ void Graph::BuildNLF() {
 void Graph::print_meta_data() const {
   std::cout << "|V|: " << n_vertices << ", |E|: " << n_edges << ", Max Degree: " << max_degree << "\n";
   if (num_vertex_classes > 0) {
-    std::cout << "|\u03A3|: " << num_vertex_classes
-              << ", Max Label Frequency: " << max_label_frequency_ << "\n";
+    std::cout << "vertex-|\u03A3|: " << num_vertex_classes;
+    if (!labels_frequency_.empty()) 
+      std::cout << ", Max Label Frequency: " << max_label_frequency_;
+    std::cout << "\n";
+  } else {
+    std::cout  << "This graph does not have vertex labels\n";
+  }
+  if (num_edge_classes > 0) {
+    std::cout << "edge-|\u03A3|: " << num_edge_classes << "\n";
+  } else {
+    std::cout  << "This graph does not have edge labels\n";
+  }
+  if (feat_len > 0) {
+    std::cout << "Vertex feature vector length: " << feat_len << "\n";
+  } else {
+    std::cout  << "This graph has no input vertex features\n";
   }
 }
 

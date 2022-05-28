@@ -24,11 +24,11 @@ public:
 		unsigned bytes = size * sizeof(ElementTy);
 		elements = new ElementTy[size];
 		std::memcpy(elements, emb.data(), bytes);
-		VertexId new_id = 1;
-		std::unordered_map<VertexId, VertexId> map;
+		vidType new_id = 1;
+		std::unordered_map<vidType, vidType> map;
 		for(unsigned i = 0; i < size; i++) {
 			auto& element = elements[i];
-			VertexId old_id = element.get_vid();
+			vidType old_id = element.get_vid();
 			auto iterator = map.find(old_id);
 			if(iterator == map.end()) {
 				element.set_vertex_id(new_id);
@@ -43,7 +43,7 @@ public:
 		unsigned bytes = size * sizeof(ElementTy);
 		elements = new ElementTy[size];
 		std::memcpy(elements, emb.data(), bytes);
-		VertexId new_id = 1;
+		vidType new_id = 1;
 #ifdef ENABLE_LABEL
 		if (size == 3) {
 			BYTE l1 = emb.get_label(1);
@@ -56,8 +56,8 @@ public:
 				if (l1 < l2) {
 					elements[1].set_vertex_label(l2);
 					elements[2].set_vertex_label(l1);
-					VertexId v1 = emb.get_vertex(1);
-					VertexId v2 = emb.get_vertex(2);
+					vidType v1 = emb.get_vertex(1);
+					vidType v2 = emb.get_vertex(2);
 					emb.set_vertex(1, v2);
 					emb.set_vertex(2, v1);
 				}
@@ -66,9 +66,9 @@ public:
 				elements[0].set_vertex_label(l1);
 				elements[2].set_history_info(0);
 				BYTE l0 = emb.get_label(0);
-				VertexId v0 = emb.get_vertex(0);
-				VertexId v1 = emb.get_vertex(1);
-				VertexId v2 = emb.get_vertex(2);
+				vidType v0 = emb.get_vertex(0);
+				vidType v1 = emb.get_vertex(1);
+				vidType v2 = emb.get_vertex(2);
 				if (l0 < l2) {
 					elements[1].set_vertex_label(l2);
 					elements[2].set_vertex_label(l0);
@@ -82,10 +82,10 @@ public:
 			}
 		} else {
 #endif
-		std::unordered_map<VertexId, VertexId> map;
+		std::unordered_map<vidType, vidType> map;
 		for(unsigned i = 0; i < size; i++) {
 			auto& element = elements[i];
-			VertexId old_id = element.get_vid();
+			vidType old_id = element.get_vid();
 			auto iterator = map.find(old_id);
 			if(iterator == map.end()) {
 				element.set_vertex_id(new_id);

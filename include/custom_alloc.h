@@ -30,3 +30,28 @@
   }
 #endif
 
+template<typename T>
+static void read_file(std::string fname, T *& pointer, size_t length) {
+  pointer = custom_alloc_global<T>(length);
+  assert(pointer);
+  std::ifstream inf(fname.c_str(), std::ios::binary);
+  if (!inf.good()) {
+    std::cerr << "Failed to open file: " << fname << "\n";
+    exit(1);
+  }
+  inf.read(reinterpret_cast<char*>(pointer), sizeof(T) * length);
+  inf.close();
+}
+
+template<typename T>
+static void map_file(std::string fname, T *& pointer, size_t length) {
+  int inf = open(fname.c_str(), O_RDONLY, 0);
+  if (-1 == inf) {
+    std::cerr << "Failed to open file: " << fname << "\n";
+    exit(1);
+  }
+  pointer = (T*)mmap(nullptr, sizeof(T) * length, PROT_READ, MAP_SHARED, inf, 0);
+  assert(pointer != MAP_FAILED);
+  close(inf);
+}
+

@@ -31,7 +31,7 @@ void kclique(Graph &g, int k, uint64_t &total) {
   std::vector<vidType> stack(k);
   Status state = Idle;
   #pragma omp for schedule(dynamic, 1) reduction(+:counter)
-  for (VertexId v0 = 0; v0 < g.size(); v0 ++) {
+  for (vidType v0 = 0; v0 < g.size(); v0 ++) {
     int depth = 0;
     stack[0] = v0;
     state = Extending;
@@ -99,7 +99,7 @@ void kclique_cmap(Graph &g, int k, uint64_t &total) {
   //std::vector<vidType> extender(k);
   Status state = Idle;
   #pragma omp for schedule(dynamic, 1) reduction(+:counter)
-  for (VertexId v0 = 0; v0 < g.size(); v0 ++) {
+  for (vidType v0 = 0; v0 < g.size(); v0 ++) {
     //auto tid = omp_get_thread_num();
     int depth = 0;
     stack[0] = v0;

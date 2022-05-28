@@ -30,9 +30,9 @@ void TCSolver(Graph &g, uint64_t &total, int, int) {
     std::cout << "MPI OpenMP TC: " << world_size << " machines, " << num_threads << " threads per machine\n";
   }
   auto num_tasks = g.V();
-  VertexId ntasks_per_rank = num_tasks / world_size;
-  VertexId begin = ntasks_per_rank * world_rank;
-  VertexId end = ntasks_per_rank * (world_rank+1);
+  vidType ntasks_per_rank = num_tasks / world_size;
+  vidType begin = ntasks_per_rank * world_rank;
+  vidType end = ntasks_per_rank * (world_rank+1);
   if (end > num_tasks) end = num_tasks;
   std::cout << "Machine " << world_rank << " " << processor_name 
             << ": [" << begin << ", " << end << ")\n";

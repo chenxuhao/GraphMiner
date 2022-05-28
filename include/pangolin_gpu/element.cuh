@@ -1,5 +1,6 @@
 #ifndef ELEMENT_CUH_
 #define ELEMENT_CUH_
+typedef uint8_t BYTE;
 
 struct SimpleElement {
 protected:

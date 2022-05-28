@@ -1,6 +1,7 @@
 // Copyright (c) 2020 MIT
 // Author: Xuhao Chen
 #include <cub/cub.cuh>
+#include "timer.h"
 #include "graph_gpu.h"
 #include "operations.cuh"
 #include "cuda_profiler_api.h"
@@ -48,7 +49,7 @@ void TCSolver(Graph &g, uint64_t &total, int, int) {
   CUDA_SAFE_CALL(cudaMemcpy(d_total, &h_total, sizeof(AccType), cudaMemcpyHostToDevice));
   CUDA_SAFE_CALL(cudaDeviceSynchronize());
 
-  //cudaProfilerStart();
+  cudaProfilerStart();
   Timer t;
   t.Start();
 #ifdef VERTEX_PAR
@@ -62,9 +63,8 @@ void TCSolver(Graph &g, uint64_t &total, int, int) {
 #endif
   CUDA_SAFE_CALL(cudaDeviceSynchronize());
   t.Stop();
-  //cudaProfilerStop();
+  cudaProfilerStop();
 
-  CudaTest("Kernel error");
   std::cout << "runtime [" << name << "] = " << t.Seconds() << " sec\n";
   std::cout << "throughput = " << double(nnz) / t.Seconds() / 1e9 << " billion Traversed Edges Per Second (TEPS)\n";
   CUDA_SAFE_CALL(cudaMemcpy(&h_total, d_total, sizeof(AccType), cudaMemcpyDeviceToHost));

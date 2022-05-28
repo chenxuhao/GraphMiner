@@ -1,23 +1,23 @@
-static inline void update_ccodes(unsigned level, Graph &g, const VertexId u, std::vector<uint8_t> &ccodes) {
+static inline void update_ccodes(unsigned level, Graph &g, const vidType u, std::vector<uint8_t> &ccodes) {
   for (auto v : g.N(u)) {
     ccodes[v] += 1 << level;
   }
 }
 
-static inline void resume_ccodes(unsigned level, Graph &g, const VertexId u, std::vector<uint8_t> &ccodes) {
+static inline void resume_ccodes(unsigned level, Graph &g, const vidType u, std::vector<uint8_t> &ccodes) {
   for (auto v : g.N(u)) {
     ccodes[v] -= 1 << level;
   }
 }
 
-static inline void update_ccodes(unsigned level, Graph &g, const VertexId u, std::vector<uint8_t> &ccodes, const VertexId up) {
+static inline void update_ccodes(unsigned level, Graph &g, const vidType u, std::vector<uint8_t> &ccodes, const vidType up) {
   for (auto v : g.N(u)) {
     if (v >= up) break;
     ccodes[v] += 1 << level;
   }
 }
 
-static inline void resume_ccodes(unsigned level, Graph &g, const VertexId u, std::vector<uint8_t> &ccodes, const VertexId up) {
+static inline void resume_ccodes(unsigned level, Graph &g, const vidType u, std::vector<uint8_t> &ccodes, const vidType up) {
   for (auto v : g.N(u)) {
     if (v >= up) break;
     ccodes[v] -= 1 << level;

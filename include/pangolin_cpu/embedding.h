@@ -29,10 +29,11 @@
 
 typedef unsigned IndexTy;
 typedef unsigned long Ulong;
+typedef uint8_t BYTE;
 typedef std::vector<BYTE> ByteList;
 typedef std::vector<unsigned> UintList;
 typedef std::vector<Ulong> UlongList;
-typedef std::vector<VertexId> VertexList;
+typedef std::vector<vidType> VertexList;
 typedef std::vector<UintList> IndexLists;
 typedef std::vector<ByteList> ByteLists;
 typedef std::vector<VertexList> VertexLists;
@@ -46,7 +47,7 @@ public:
 	Embedding(size_t n) { elements.resize(n); }
 	Embedding(const Embedding &emb) { elements = emb.elements; }
 	~Embedding() { elements.clear(); }
-	VertexId get_vertex(unsigned i) const { return elements[i].get_vid(); }
+	vidType get_vertex(unsigned i) const { return elements[i].get_vid(); }
 	BYTE get_history(unsigned i) const { return elements[i].get_his(); }
 	BYTE get_label(unsigned i) const { return elements[i].get_vlabel(); }
 	BYTE get_key(unsigned i) const { return elements[i].get_key(); }
@@ -64,7 +65,7 @@ public:
 	const ElementTy* data() const { return elements.data(); }
 	ElementTy get_element(unsigned i) const { return elements[i]; }
 	void set_element(unsigned i, ElementTy &ele) { elements[i] = ele; }
-	void set_vertex(unsigned i, VertexId vid) { elements[i].set_vertex_id(vid); }
+	void set_vertex(unsigned i, vidType vid) { elements[i].set_vertex_id(vid); }
 	//std::vector<ElementTy> get_elements() const { return elements; }
 	std::vector<ElementTy> get_elements() const { return elements; }
 	void clean() { elements.clear(); }
@@ -231,11 +232,11 @@ public:
 			}
 		}
 	}
-	VertexId get_vid(unsigned level, IndexTy id) const { return vid_lists[level][id]; }
+	vidType get_vid(unsigned level, IndexTy id) const { return vid_lists[level][id]; }
 	IndexTy get_idx(unsigned level, IndexTy id) const { return idx_lists[level][id]; }
 	BYTE get_his(unsigned level, IndexTy id) const { return his_lists[level][id]; }
 	IndexTy get_pid(IndexTy id) const { return pid_list[id]; }
-	void set_vid(unsigned level, IndexTy id, VertexId vid) { vid_lists[level][id] = vid; }
+	void set_vid(unsigned level, IndexTy id, vidType vid) { vid_lists[level][id] = vid; }
 	void set_idx(unsigned level, IndexTy id, IndexTy idx) { idx_lists[level][id] = idx; }
 	void set_his(unsigned level, IndexTy id, BYTE lab) { his_lists[level][id] = lab; }
 	void set_pid(IndexTy id, IndexTy pid) { pid_list[id] = pid; }
@@ -287,7 +288,7 @@ private:
 	unsigned last_level;
 	unsigned max_level;
 	void get_embedding(unsigned level, unsigned pos, EmbeddingType &emb) {
-		VertexId vid = get_vid(level, pos);
+		vidType vid = get_vid(level, pos);
 		IndexTy idx = get_idx(level, pos);
 		BYTE his = 0;
 		#ifdef ENABLE_LABEL

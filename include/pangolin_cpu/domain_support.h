@@ -44,7 +44,7 @@ public:
 		domains_reached_support[i] = 1;
 		domain_sets[i].clear();
 	}
-	void add_vertex(int i, VertexId vid) {
+	void add_vertex(int i, vidType vid) {
 		domain_sets[i].insert(vid);
 		if (domain_sets[i].size() >= minimum_support)
 			set_domain_frequent(i);

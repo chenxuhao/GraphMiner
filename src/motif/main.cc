@@ -19,11 +19,8 @@ int main(int argc, char *argv[]) {
   if (argc > 3) n_devices = atoi(argv[3]);
   if (argc > 4) chunk_size = atoi(argv[4]);
   std::cout << k << "-motif counting (only for undirected graphs)\n";
+  g.print_meta_data();
  
-  auto m = g.size();
-  auto nnz = g.sizeEdges();
-  std::cout << "|V| " << m << " |E| " << nnz << "\n";
-  std::cout << "Maximum degree: " << g.get_max_degree() << "\n";
   int num_patterns = num_possible_patterns[k];
   std::cout << "num_patterns: " << num_patterns << "\n";
   std::vector<uint64_t> total(num_patterns, 0);

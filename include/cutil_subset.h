@@ -102,15 +102,3 @@ static size_t get_gpu_mem_size(int device = 0) {
   return prop.totalGlobalMem;
 }
 
-inline unsigned CudaTest(const char* msg) {
-  cudaError_t e;
-  // cudaThreadSynchronize();
-  cudaDeviceSynchronize();
-  if (cudaSuccess != (e = cudaGetLastError())) {
-    fprintf(stderr, "%s: %d\n", msg, e);
-    fprintf(stderr, "%s\n", cudaGetErrorString(e));
-    exit(-1);
-  }
-  return 0;
-}
-

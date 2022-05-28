@@ -52,7 +52,7 @@ void extend_motif(unsigned level, unsigned k, Graph &g, EmbList &emb_list,
                   std::vector<uint8_t> &ccodes, std::vector<uint64_t> &counter) {
   if (level == k - 2) {
     for (int pcode = 0; pcode < num_possible_patterns[level+1]; pcode++) {
-      for (VertexId emb_id = 0; emb_id < emb_list.size(level, pcode); emb_id++) {
+      for (vidType emb_id = 0; emb_id < emb_list.size(level, pcode); emb_id++) {
         auto v = emb_list.get_vertex(level, emb_id, pcode);
         emb_list.push_history(v);
         update_ccodes(level, g, v, ccodes);
@@ -80,7 +80,7 @@ void extend_motif(unsigned level, unsigned k, Graph &g, EmbList &emb_list,
     return;
   }
   for (int pcode = 0; pcode < num_possible_patterns[level+1]; pcode++) {
-    for (VertexId emb_id = 0; emb_id < emb_list.size(level, pcode); emb_id++) {
+    for (vidType emb_id = 0; emb_id < emb_list.size(level, pcode); emb_id++) {
       auto v = emb_list.get_vertex(level, emb_id, pcode);
       emb_list.push_history(v);
       update_ccodes(level, g, v, ccodes);
@@ -118,7 +118,7 @@ void kmotif(Graph &g, unsigned k, std::vector<std::vector<uint64_t>> &counters,
     auto &local_ccodes = ccodes[tid];
     auto &emb_list = emb_lists[tid];
     #pragma omp for schedule(dynamic, 1) nowait
-    for (VertexId v = 0; v < g.size(); v ++) {
+    for (vidType v = 0; v < g.size(); v ++) {
       emb_list.clear_size(1);
       auto begin = g.edge_begin(v);
       auto end = g.edge_end(v);

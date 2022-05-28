@@ -191,6 +191,7 @@ public:
       return VertexSet(ptr,idx_l,vid);
     }
   }
+  vidType *data() const { return ptr; }
   const vidType *begin() const { return ptr; }
   const vidType *end() const { return ptr+set_size; }
   void add(vidType v) { ptr[set_size++] = v; }
@@ -227,7 +228,7 @@ inline VertexSet intersection_set(const VertexSet& a, const VertexSet& b) {
   return a & b;
 }
 
-inline VertexSet intersection_set(const VertexSet& a, const VertexSet& b,vidType up) {
+inline VertexSet intersection_set(const VertexSet& a, const VertexSet& b, vidType up) {
   return a.intersect(b,up);
 }
 

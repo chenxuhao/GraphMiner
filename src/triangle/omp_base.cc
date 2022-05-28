@@ -13,7 +13,7 @@ void TCSolver(Graph &g, uint64_t &total, int, int) {
   t.Start();
   uint64_t counter = 0;
   #pragma omp parallel for reduction(+ : counter) schedule(dynamic, 1)
-  for (VertexId u = 0; u < g.V(); u ++) {
+  for (vidType u = 0; u < g.V(); u ++) {
     auto yu = g.N(u);
     for (auto v : yu) {
       counter += (uint64_t)intersection_num(yu, g.N(v));

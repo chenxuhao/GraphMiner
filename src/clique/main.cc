@@ -19,11 +19,8 @@ int main(int argc, char *argv[]) {
   int chunk_size = 1024;
   if (argc > 3) n_devices = atoi(argv[3]);
   if (argc > 4) chunk_size = atoi(argv[4]);
+  g.print_meta_data();
  
-  auto m = g.size();
-  auto nnz = g.sizeEdges();
-  std::cout << "|V| " << m << " |E| " << nnz << "\n";
-  std::cout << "Maximum degree: " << g.get_max_degree() << "\n";
   uint64_t total = 0;
   CliqueSolver(g, k, total, n_devices, chunk_size);
   std::cout << "num_" << k << "-cliques = " << total << "\n";

@@ -30,7 +30,7 @@ public:
       num_new_emb[pos] = 0;
       unsigned n = emb.size();
       for (unsigned i = 0; i < n; ++i) {
-        VertexId src = emb.get_vertex(i);
+        vidType src = emb.get_vertex(i);
         //for (auto e : graph->edges(src)) {
         IndexT row_begin = graph->edge_begin(src);
         IndexT row_end = graph->edge_end(src);
@@ -60,7 +60,7 @@ public:
       auto start = indices[pos];
       auto n = emb.size();
       for (unsigned i = 0; i < n; ++i) {
-        VertexId src = emb.get_vertex(i);
+        vidType src = emb.get_vertex(i);
         //for (auto e : graph->edges(src)) {
         IndexT row_begin = graph->edge_begin(src);
         IndexT row_end = graph->edge_end(src);
@@ -86,7 +86,7 @@ public:
     for (size_t pos = 0; pos < emb_list.size(); pos ++) {
       BaseEmbedding emb(level+1);
       get_embedding<BaseEmbedding>(level, pos, emb_list, emb);
-      VertexId vid = emb_list.get_vid(level, pos);
+      vidType vid = emb_list.get_vid(level, pos);
       num_new_emb[pos] = 0;
       for (auto dst : graph->N(vid)) {
         if (is_all_connected_dag(dst, emb, level)) {
@@ -105,7 +105,7 @@ public:
     for (size_t pos = 0; pos < emb_list.size(level); pos ++) {
       BaseEmbedding emb(level+1);
       get_embedding<BaseEmbedding>(level, pos, emb_list, emb);
-      VertexId vid = emb_list.get_vid(level, pos);
+      vidType vid = emb_list.get_vid(level, pos);
       unsigned start = indices[pos];
       for (auto dst : graph->N(vid)) {
         if (is_all_connected_dag(dst, emb, level)) {
@@ -130,7 +130,7 @@ public:
         unsigned n = emb.size();
         if (n == 3) emb.set_pid(emb_list.get_pid(pos));
         for (unsigned i = 0; i < n; ++i) {
-          VertexId src = emb.get_vertex(i);
+          vidType src = emb.get_vertex(i);
           for (auto dst : graph->N(src)) {
             if (!is_vertexInduced_automorphism(emb, i, src, dst)) {
               assert(n < 4);
@@ -154,7 +154,7 @@ public:
         get_embedding<VertexEmbedding>(level, pos, emb_list, emb);
         unsigned n = emb.size();
         for (unsigned i = 0; i < n; ++i) {
-          VertexId src = emb.get_vertex(i);
+          vidType src = emb.get_vertex(i);
           //for (auto e : graph->edges(src)) {
           IndexT row_begin = graph->edge_begin(src);
           IndexT row_end = graph->edge_end(src);
@@ -237,13 +237,13 @@ private:
 
   template <typename EmbeddingTy>
   inline void get_embedding(unsigned level, unsigned pos, const EmbeddingList& emb_list, EmbeddingTy &emb) {
-    VertexId vid = emb_list.get_vid(level, pos);
+    vidType vid = emb_list.get_vid(level, pos);
     IndexTy idx = emb_list.get_idx(level, pos);
     ElementType ele(vid);
     emb.set_element(level, ele);
     // backward constructing the embedding
     for (unsigned l = 1; l < level; l ++) {
-      VertexId u = emb_list.get_vid(level-l, idx);
+      vidType u = emb_list.get_vid(level-l, idx);
       ElementType ele(u);
       emb.set_element(level-l, ele);
       idx = emb_list.get_idx(level-l, idx);
@@ -252,7 +252,7 @@ private:
     emb.set_element(0, ele0);
   }
 
-  inline bool is_vertexInduced_automorphism(const VertexEmbedding& emb, unsigned idx, VertexId src, VertexId dst) {
+  inline bool is_vertexInduced_automorphism(const VertexEmbedding& emb, unsigned idx, vidType src, vidType dst) {
     unsigned n = emb.size();
     // the new vertex id should be larger than the first vertex id
     if (dst <= emb.get_vertex(0)) return true;
@@ -268,7 +268,7 @@ private:
     return false;
   }
 
-  inline unsigned find_motif_pattern_id(unsigned n, unsigned idx, VertexId dst, const VertexEmbedding& emb, unsigned pos = 0) {
+  inline unsigned find_motif_pattern_id(unsigned n, unsigned idx, vidType dst, const VertexEmbedding& emb, unsigned pos = 0) {
     unsigned pid = 0;
     if (n == 2) { // count 3-motifs
       pid = 1; // 3-chain

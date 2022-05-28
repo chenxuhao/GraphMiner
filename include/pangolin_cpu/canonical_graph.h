@@ -4,7 +4,7 @@
 #include "embedding.h"
 
 typedef std::priority_queue<Edge, std::vector<Edge>, EdgeComparator> EdgeHeap;
-typedef std::unordered_map<VertexId, BYTE> VertexMap;
+typedef std::unordered_map<vidType, BYTE> VertexMap;
 typedef std::vector<bliss::Graph::Vertex> BlissVertexList;
 
 template <typename EmbeddingTy, typename ElementTy> class CanonicalGraph;
@@ -67,11 +67,11 @@ private:
 	}
 	void transform_to_embedding(bliss::AbstractGraph* ag) {
 		bliss::Graph* graph = (bliss::Graph*) ag;
-		std::set<VertexId> set;
+		std::set<vidType> set;
 		VertexMap map;
 		EdgeHeap min_heap;
 		BlissVertexList vertices = graph->get_vertices_rstream();
-		VertexId first_src = init_heapAndset(vertices, min_heap, set);
+		vidType first_src = init_heapAndset(vertices, min_heap, set);
 		//assert(first_src != -1);
 		push_first_element(first_src, map, vertices);
 #ifdef USE_DOMAIN
@@ -90,7 +90,7 @@ private:
 			add_neighbours(edge, min_heap, vertices, set);
 		}
 	}
-	VertexId init_heapAndset(BlissVertexList& vertices, EdgeHeap& min_heap, std::set<VertexId>& set) {
+	vidType init_heapAndset(BlissVertexList& vertices, EdgeHeap& min_heap, std::set<vidType>& set) {
 		for(unsigned i = 0; i < vertices.size(); ++i) {
 			if(!vertices[i].edges.empty()) {
 				for(auto v: vertices[i].edges) {
@@ -106,7 +106,7 @@ private:
 		}
 		return -1;
 	}
-	void push_first_element(VertexId first, VertexMap& map, BlissVertexList& vertices){
+	void push_first_element(vidType first, VertexMap& map, BlissVertexList& vertices){
 		map[first] = 0;
 		embedding.push_back(ElementTy(first + 1, (BYTE)0, (BYTE)vertices[first].color, (BYTE)0));
 	}
@@ -136,17 +136,17 @@ private:
 			throw std::exception();
 		}
 	}
-	void add_neighbours(Edge& edge, EdgeHeap& min_heap, BlissVertexList& vertices, std::set<VertexId>& set) {
+	void add_neighbours(Edge& edge, EdgeHeap& min_heap, BlissVertexList& vertices, std::set<vidType>& set) {
 		add_neighbours(edge.src, min_heap, vertices, set);
 		add_neighbours(edge.dst, min_heap, vertices, set);
 	}
-	void add_neighbours(VertexId srcId, EdgeHeap& min_heap, BlissVertexList& vertices, std::set<VertexId>& set) {
+	void add_neighbours(vidType srcId, EdgeHeap& min_heap, BlissVertexList& vertices, std::set<vidType>& set) {
 		if(set.find(srcId) == set.end()){
 			for(auto v: vertices[srcId].edges) {
 #ifdef USE_DOMAIN
-				VertexId dst = v.first;
+				vidType dst = v.first;
 #else
-				VertexId dst = v;
+				vidType dst = v;
 #endif
 				if(set.find(dst) == set.end()) {
 #ifdef USE_DOMAIN
@@ -170,7 +170,7 @@ private:
 	bliss::AbstractGraph* turn_abstract(const QuickPattern<EmbeddingTy,ElementTy>& qp) {
 		bliss::AbstractGraph* ag = 0;
 		//get the number of vertices
-		std::unordered_map<VertexId, BYTE> vertices;
+		std::unordered_map<vidType, BYTE> vertices;
 		for(unsigned index = 0; index < qp.get_size(); ++index) {
 			auto element = qp.at(index);
 #ifdef ENABLE_LABEL
@@ -189,7 +189,7 @@ private:
 		assert(qp.get_size() > 1);
 		for(unsigned index = 1; index < qp.get_size(); ++index) {
 			auto element = qp.at(index);
-			VertexId from, to;
+			vidType from, to;
 			from = qp.at(element.get_his()).get_vid();
 			to = element.get_vid();
 			//std::cout << "Adding edge: " << from << " --> " << to << "\n";

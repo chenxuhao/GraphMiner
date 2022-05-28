@@ -2,11 +2,19 @@
 #include "common.h"
 
 template <typename T = vidType>
+__device__ T linear_search(T key, T* bin, T len) {
+  for (T i = 0; i < len; i++) {
+    if (bin[i] == key) return i;
+  }
+  return len;
+}
+
+template <typename T = vidType>
 __device__ int linear_search(T v, T* bin, T len, T idx, T stride) {
   auto i = idx;
   T step = 0;
-  while(step < len) {
-    if(bin[i] == v) return 1;
+  while (step < len) {
+    if (bin[i] == v) return 1;
     else i += stride;
     step += 1;
   }

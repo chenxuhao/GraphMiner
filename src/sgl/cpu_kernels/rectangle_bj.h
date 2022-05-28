@@ -1,4 +1,4 @@
-std::vector<std::vector<std::array<VertexId, 3>>> all_wedges(num_threads);
+std::vector<std::vector<std::array<vidType, 3>>> all_wedges(num_threads);
 
 #pragma omp parallel for schedule(dynamic,1) reduction(+:counter)
 for (vidType v0 = 0; v0 < g.V(); v0++) {
@@ -16,8 +16,8 @@ for (vidType v0 = 0; v0 < g.V(); v0++) {
   if (!wedges.empty()) {
     // group by v2; for same v2, sort v1 by descending order
     std::sort(wedges.begin(), wedges.end(),
-              [](const std::array<VertexId, 3> &a,
-                 const std::array<VertexId, 3> &b) {
+              [](const std::array<vidType, 3> &a,
+                 const std::array<vidType, 3> &b) {
                 return a[2] < b[2] || (a[2] == b[2] && a[1] > b[1]);
               });
 

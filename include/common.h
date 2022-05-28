@@ -26,24 +26,23 @@
 #include <algorithm>
 #include <unordered_map>
 
-typedef uint8_t BYTE;
-typedef uint8_t mask_t;
-typedef uint8_t label_t;
-typedef uint8_t vlabel_t;
-typedef uint8_t elabel_t;
-typedef uint8_t cmap_vt; // cmap value type
-typedef int32_t VertexId;
-typedef int32_t VertexID;
-typedef int64_t EdgeID;
+typedef float   feat_t;    // vertex feature type
+typedef uint8_t patid_t;   // pattern id type
+typedef uint8_t mask_t;    // mask type
+typedef uint8_t label_t;   // label type
+typedef uint8_t vlabel_t;  // vertex label type
+typedef uint16_t elabel_t; // edge label type
+typedef uint8_t cmap_vt;   // cmap value type
+typedef int32_t vidType;   // vertex ID type
+typedef int64_t eidType;   // edge ID type
 typedef int32_t IndexT;
-typedef int32_t WeightT;
-typedef std::vector<VertexId> VertexList;
-typedef std::vector<std::vector<VertexId>> VertexLists;
-typedef std::vector<BYTE> ByteList;
+typedef uint64_t emb_index_t; // embedding index type
 typedef unsigned long long AccType;
-typedef uint64_t emb_index_t;
-typedef int32_t vidType;
-typedef int64_t eidType;
+
+typedef std::vector<patid_t> PidList;    // pattern ID list
+typedef std::vector<vidType> VertexList; // vertex ID list
+typedef std::vector<std::vector<vidType>> VertexLists;
+typedef std::unordered_map<vlabel_t, int> nlf_map;
 
 #define ADJ_SIZE_THREASHOLD 1024
 #define FULL_MASK 0xffffffff
@@ -59,6 +58,7 @@ typedef int64_t eidType;
 #define WARPS_PER_BLOCK (BLOCK_SIZE / WARP_SIZE)
 #define MAX_BLOCKS (MAX_THREADS / BLOCK_SIZE)
 #define NUM_WARPS (BLOCK_SIZE / WARP_SIZE)
+#define BYTESTOMB(memory_cost) ((memory_cost)/(double)(1024 * 1024))
 
 enum Status {
   Idle,
@@ -71,3 +71,6 @@ enum Status {
 #define OP_INTERSECT 'i'
 #define OP_DIFFERENCE 'd'
 extern std::map<char,double> time_ops;
+
+const std::string long_separator = "--------------------------------------------------------------------\n";
+const std::string short_separator = "-----------------------\n";

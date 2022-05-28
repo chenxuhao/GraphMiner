@@ -41,11 +41,11 @@ public:
 			get_embedding(level, pos, emb_list, emb);
 			num_new_emb[pos] = 0;
 			unsigned n = emb.size();
-			std::set<VertexId> vert_set;
+			std::set<vidType> vert_set;
 			if (n > 3)
 				for (unsigned i = 0; i < n; i ++) vert_set.insert(emb.get_vertex(i));
 			for (unsigned i = 0; i < n; ++i) {
-				VertexId src = emb.get_vertex(i);
+				vidType src = emb.get_vertex(i);
 				if (emb.get_key(i) == 0) { // TODO: need to fix this
 					IndexT row_begin = graph->edge_begin(src); 
 					IndexT row_end = graph->edge_end(src); 
@@ -72,7 +72,7 @@ public:
 			get_embedding(level, pos, emb_list, emb);
 			unsigned start = indices[pos];
 			unsigned n = emb.size();
-			std::set<VertexId> vert_set;
+			std::set<vidType> vert_set;
 			if (n > 3)
 				for (unsigned i = 0; i < n; i ++) vert_set.insert(emb.get_vertex(i));
 			for (unsigned i = 0; i < n; ++i) {
@@ -262,8 +262,8 @@ public:
 		UintList is_frequent_emb(emb_list.size(), 0);
 		#pragma omp parallel for
 		for (size_t pos = 0; pos < emb_list.size(); pos ++) {
-			VertexId src = emb_list.get_idx(1, pos);
-			VertexId dst = emb_list.get_vid(1, pos);
+			vidType src = emb_list.get_idx(1, pos);
+			vidType dst = emb_list.get_vid(1, pos);
 			auto src_label = graph->getData(src);
 			auto dst_label = graph->getData(dst);
 			InitPattern key = get_init_pattern(src_label, dst_label);
@@ -276,8 +276,8 @@ public:
 		#pragma omp parallel for
 		for (size_t pos = 0; pos < emb_list.size(); pos ++) {
 			if (is_frequent_emb[pos]) {
-				VertexId src = emb_list.get_idx(1, pos);
-				VertexId dst = emb_list.get_vid(1, pos);
+				vidType src = emb_list.get_idx(1, pos);
+				vidType dst = emb_list.get_vid(1, pos);
 				unsigned eid0 = edge_map[OrderedEdge(src,dst)];
 				unsigned eid1 = edge_map[OrderedEdge(dst,src)];
 				__sync_bool_compare_and_swap(&is_frequent_edge[eid0], 0, 1);
@@ -292,8 +292,8 @@ public:
 		#pragma omp parallel for
 		for (size_t pos = 0; pos < emb_list.size(); pos ++) {
 			if (is_frequent_emb[pos]) {
-				VertexId src = vid_list0[pos];
-				VertexId dst = vid_list1[pos];
+				vidType src = vid_list0[pos];
+				vidType dst = vid_list1[pos];
 				unsigned start = indices[pos];
 				emb_list.set_vid(1, start, dst);
 				emb_list.set_idx(1, start, src);
@@ -318,7 +318,7 @@ public:
 		for (size_t pos = 0; pos < emb_list.size(); pos ++) {
 			if (is_frequent_emb[pos]) {
 				unsigned start = indices[pos];
-				VertexId vid = vid_list[pos];
+				vidType vid = vid_list[pos];
 				IndexTy idx = idx_list[pos];
 				BYTE his = his_list[pos];
 				emb_list.set_idx(level, start, idx);
@@ -379,7 +379,7 @@ private:
 	FreqMap freq_support_map;
 	DomainMap domain_support_map;
 	std::map<OrderedEdge, unsigned> edge_map;
-	std::set<std::pair<VertexId,VertexId> > freq_edge_set;
+	std::set<std::pair<vidType,vidType> > freq_edge_set;
 	std::vector<unsigned> is_frequent_edge;
 	LocalInitMap init_localmaps; // initialization map, only used for once, no need to clear
 	LocalQpMapDomain qp_localmaps; // quick pattern local map for each thread
@@ -393,7 +393,7 @@ private:
 		else return std::make_pair(dst_label, src_label);
 	}
 	inline void get_embedding(unsigned level, unsigned pos, const EmbeddingList& emb_list, EdgeEmbedding &emb) {
-		VertexId vid = emb_list.get_vid(level, pos);
+		vidType vid = emb_list.get_vid(level, pos);
 		IndexTy idx = emb_list.get_idx(level, pos);
 		BYTE his = emb_list.get_his(level, pos);
 		BYTE lab = graph->getData(vid);
@@ -411,7 +411,7 @@ private:
 		ElementType ele0(idx, 0, lab, 0);
 		emb.set_element(0, ele0);
 	}
-	bool is_quick_automorphism(unsigned size, const EdgeEmbedding& emb, BYTE history, VertexId src, VertexId dst, BYTE& existed) {
+	bool is_quick_automorphism(unsigned size, const EdgeEmbedding& emb, BYTE history, vidType src, vidType dst, BYTE& existed) {
 		if (dst <= emb.get_vertex(0)) return true;
 		if (dst == emb.get_vertex(1)) return true;
 		if (history == 0 && dst < emb.get_vertex(1)) return true;
@@ -427,7 +427,7 @@ private:
 		}
 		return false;
 	}
-	bool is_edge_automorphism(unsigned size, const EdgeEmbedding& emb, BYTE history, VertexId src, VertexId dst, BYTE& existed, const std::set<VertexId>& vertex_set) {
+	bool is_edge_automorphism(unsigned size, const EdgeEmbedding& emb, BYTE history, vidType src, vidType dst, BYTE& existed, const std::set<vidType>& vertex_set) {
 		if (size < 3) return is_quick_automorphism(size, emb, history, src, dst, existed);
 		// check with the first element
 		if (dst <= emb.get_vertex(0)) return true;
@@ -438,9 +438,9 @@ private:
 		// check to see if there already exists the vertex added; 
 		// if so, just allow to add edge which is (smaller id -> bigger id)
 		if (existed && src > dst) return true;
-		std::pair<VertexId, VertexId> added_edge(src, dst);
+		std::pair<vidType, vidType> added_edge(src, dst);
 		for (unsigned index = history + 1; index < emb.size(); ++index) {
-			std::pair<VertexId, VertexId> edge;
+			std::pair<vidType, vidType> edge;
 			edge.first = emb.get_vertex(emb.get_history(index));
 			edge.second = emb.get_vertex(index);
 			//assert(edge.first != edge.second);
@@ -449,14 +449,14 @@ private:
 		}
 		return false;
 	}
-	inline void swap(std::pair<VertexId, VertexId>& pair) {
+	inline void swap(std::pair<vidType, vidType>& pair) {
 		if (pair.first > pair.second) {
-			VertexId tmp = pair.first;
+			vidType tmp = pair.first;
 			pair.first = pair.second;
 			pair.second = tmp;
 		}
 	}
-	inline int compare(std::pair<VertexId, VertexId>& oneEdge, std::pair<VertexId, VertexId>& otherEdge) {
+	inline int compare(std::pair<vidType, vidType>& oneEdge, std::pair<vidType, vidType>& otherEdge) {
 		swap(oneEdge);
 		swap(otherEdge);
 		if(oneEdge.first == otherEdge.first) return oneEdge.second - otherEdge.second;

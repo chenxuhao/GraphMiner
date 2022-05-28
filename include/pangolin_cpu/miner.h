@@ -194,7 +194,7 @@ protected:
 			c[n-i] -= trace(n, C) / i;
 		}
 	}
-	inline void get_connectivity(unsigned n, unsigned idx, VertexId dst, const VertexEmbedding &emb, std::vector<bool> &connected) {
+	inline void get_connectivity(unsigned n, unsigned idx, vidType dst, const VertexEmbedding &emb, std::vector<bool> &connected) {
 		connected.push_back(true); // 0 and 1 are connected
 		for (unsigned i = 2; i < n; i ++)
 			for (unsigned j = 0; j < i; j++)

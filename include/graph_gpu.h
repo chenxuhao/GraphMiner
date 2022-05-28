@@ -5,26 +5,34 @@
 
 class GraphGPU {
 protected:
-  vidType num_vertices;
-  eidType num_edges;
-  int device_id, n_gpu; // no. of GPUs
-  eidType *d_rowptr; // row pointers
-  vidType *d_colidx; // column induces
+  vidType num_vertices;             // number of vertices
+  eidType num_edges;                // number of edges
+  int device_id, n_gpu;             // no. of GPUs
+  eidType *d_rowptr;                // row pointers of CSR format
+  vidType *d_colidx;                // column induces of CSR format
   vidType *d_src_list, *d_dst_list; // for COO format
-  vlabel_t *d_labels;
-  vidType *d_labels_frequency;
-  int num_vertex_classes;
+  vlabel_t *d_vlabels;              // vertex labels
+  elabel_t *d_elabels;              // edge labels
+  vidType *d_vlabels_frequency;     // vertex label frequency
+  int num_vertex_classes;           // number of unique vertex labels
+  int num_edge_classes;             // number of unique edge labels
 public:
   GraphGPU() : device_id(0), n_gpu(1) {}
   GraphGPU(Graph &g) : device_id(0), n_gpu(1) { init(g); }
   GraphGPU(Graph &g, int n, int m) : device_id(n), n_gpu(m) { init(g); }
+  inline __device__ __host__ vidType V() { return num_vertices; }
   inline __device__ __host__ vidType size() { return num_vertices; }
+  inline __device__ __host__ eidType E() { return num_edges; }
   inline __device__ __host__ eidType sizeEdges() { return num_edges; }
   inline __device__ __host__ bool valid_vertex(vidType vertex) { return (vertex < num_vertices); }
   inline __device__ __host__ bool valid_edge(eidType edge) { return (edge < num_edges); }
   inline __device__ __host__ vidType get_src(eidType eid) const { return d_src_list[eid]; }
   inline __device__ __host__ vidType get_dst(eidType eid) const { return d_dst_list[eid]; }
+  inline __device__ __host__ vidType* get_src_ptr(eidType eid) const { return d_src_list; }
+  inline __device__ __host__ vidType* get_dst_ptr(eidType eid) const { return d_dst_list; }
   inline __device__ __host__ vidType* N(vidType vid) { return d_colidx + d_rowptr[vid]; }
+  inline __device__ __host__ eidType* out_rowptr() { return d_rowptr; }
+  inline __device__ __host__ vidType* out_colidx() { return d_colidx; }
   inline __device__ __host__ eidType getOutDegree(vidType src) { return d_rowptr[src+1] - d_rowptr[src]; }
   inline __device__ __host__ vidType get_degree(vidType src) { return vidType(d_rowptr[src+1] - d_rowptr[src]); }
   inline __device__ __host__ vidType getDestination(vidType src, eidType edge) { return d_colidx[d_rowptr[src] + edge]; }
@@ -32,12 +40,17 @@ public:
   inline __device__ __host__ vidType getEdgeDst(eidType edge) { return d_colidx[edge]; }
   inline __device__ __host__ eidType edge_begin(vidType src) { return d_rowptr[src]; }
   inline __device__ __host__ eidType edge_end(vidType src) { return d_rowptr[src+1]; }
-  inline __device__ __host__ vlabel_t getData(vidType vid) { return d_labels[vid]; }
-  inline __device__ __host__ vidType getLabelsFrequency(vlabel_t label) { return d_labels_frequency[label]; }
+  inline __device__ __host__ vlabel_t getData(vidType vid) { return d_vlabels[vid]; }
+  inline __device__ __host__ vidType getLabelsFrequency(vlabel_t label) { return d_vlabels_frequency[label]; }
+  inline __device__ __host__ vlabel_t* getVlabelPtr() { return d_vlabels; }
+  inline __device__ __host__ elabel_t* getElabelPtr() { return d_elabels; }
+  inline __device__ __host__ vlabel_t* get_vlabel_ptr() { return d_vlabels; }
+  inline __device__ __host__ elabel_t* get_elabel_ptr() { return d_elabels; }
+ 
   inline __device__ __host__ bool is_freq_vertex(vidType v, int threshold) {
-    auto label = int(d_labels[v]);
+    auto label = int(d_vlabels[v]);
     assert(label <= num_vertex_classes);
-    if (d_labels_frequency[label] >= threshold) return true;
+    if (d_vlabels_frequency[label] >= threshold) return true;
     return false;
   }
   void clean() {
@@ -91,16 +104,16 @@ public:
       CUDA_SAFE_CALL(cudaMalloc((void **)&d_rowptr, (m + 1) * sizeof(eidType)));
       CUDA_SAFE_CALL(cudaMalloc((void **)&d_colidx, nnz * sizeof(vidType)));
       if (hg.has_vlabel()) {
-        CUDA_SAFE_CALL(cudaMalloc((void **)&d_labels, m * sizeof(vlabel_t)));
-        CUDA_SAFE_CALL(cudaMalloc((void **)&d_labels_frequency, (num_vertex_classes+1) * sizeof(vidType)));
+        CUDA_SAFE_CALL(cudaMalloc((void **)&d_vlabels, m * sizeof(vlabel_t)));
+        CUDA_SAFE_CALL(cudaMalloc((void **)&d_vlabels_frequency, (num_vertex_classes+1) * sizeof(vidType)));
       }
       CUDA_SAFE_CALL(cudaDeviceSynchronize());
       t.Start();
       CUDA_SAFE_CALL(cudaMemcpy(d_rowptr, h_rowptr, (m + 1) * sizeof(eidType), cudaMemcpyHostToDevice));
       CUDA_SAFE_CALL(cudaMemcpy(d_colidx, h_colidx, nnz * sizeof(vidType), cudaMemcpyHostToDevice));
       if (hg.has_vlabel()) {
-        CUDA_SAFE_CALL(cudaMemcpy(d_labels, hg.getVlabelPtr(), m * sizeof(vlabel_t), cudaMemcpyHostToDevice));
-        CUDA_SAFE_CALL(cudaMemcpy(d_labels_frequency, hg.get_label_freq_ptr(), (num_vertex_classes+1) * sizeof(vidType), cudaMemcpyHostToDevice));
+        CUDA_SAFE_CALL(cudaMemcpy(d_vlabels, hg.getVlabelPtr(), m * sizeof(vlabel_t), cudaMemcpyHostToDevice));
+        CUDA_SAFE_CALL(cudaMemcpy(d_vlabels_frequency, hg.get_label_freq_ptr(), (num_vertex_classes+1) * sizeof(vidType), cudaMemcpyHostToDevice));
       }
       CUDA_SAFE_CALL(cudaDeviceSynchronize());
       t.Stop();

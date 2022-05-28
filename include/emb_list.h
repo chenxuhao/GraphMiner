@@ -4,11 +4,11 @@
 class EmbList {
 public:
   EmbList() {}
-  EmbList(unsigned k, VertexId l, int np) {
+  EmbList(unsigned k, vidType l, int np) {
     init(k, l, np);
   }
   ~EmbList() {}
-  void init(unsigned k, VertexId l, int np=1) {
+  void init(unsigned k, vidType l, int np=1) {
     vid_lists.resize(k-2);
     num_emb.resize(k-2);
     for (unsigned i = 0; i < k-2; i++) {
@@ -36,7 +36,7 @@ public:
       }
     }
   }
-  void add_emb(unsigned level, VertexId v) {
+  void add_emb(unsigned level, vidType v) {
     assert(level >= 1);
     auto start = num_emb[level-1][0];
     if (start >= max_length) {
@@ -47,7 +47,7 @@ public:
     vid_lists[level-1][start] = v;
     num_emb[level-1][0] ++;
   }
-  void add_emb(unsigned level, VertexId v, int pid, unsigned src_idx) {
+  void add_emb(unsigned level, vidType v, int pid, unsigned src_idx) {
     assert(level >= 2);
     auto start = num_emb[level-1][pid];
     vid_lists[level-1][pid*max_length+start] = v;
@@ -58,24 +58,24 @@ public:
     return src_indices[level-2][pid*max_length+idx];
   }
   VertexList & get_history() { return history; }
-  VertexId get_history(unsigned level) const { return history[level]; }
-  const std::vector<VertexId>* get_history_ptr() const { return &history; }
-  void push_history(VertexId vid) { history.push_back(vid); }
+  vidType get_history(unsigned level) const { return history[level]; }
+  const std::vector<vidType>* get_history_ptr() const { return &history; }
+  void push_history(vidType vid) { history.push_back(vid); }
   void pop_history() { history.pop_back(); }
   void clean_history() { history.clear(); }
-  VertexId size(unsigned level) const { return num_emb[level-1][0]; }
-  VertexId size(unsigned level, int pid) const { return num_emb[level-1][pid]; }
-  void set_size(unsigned level, VertexId size) { num_emb[level-1][0] = size; }
-  void set_size(unsigned level, VertexId size, int pid) { num_emb[level-1][pid] = size; }
+  vidType size(unsigned level) const { return num_emb[level-1][0]; }
+  vidType size(unsigned level, int pid) const { return num_emb[level-1][pid]; }
+  void set_size(unsigned level, vidType size) { num_emb[level-1][0] = size; }
+  void set_size(unsigned level, vidType size, int pid) { num_emb[level-1][pid] = size; }
   void clear_size(unsigned level) {
     for (size_t i = 0; i < num_emb[level-1].size(); i++)
       num_emb[level-1][i] = 0;
   }
-  VertexId get_vertex(unsigned level, VertexId i) const {
+  vidType get_vertex(unsigned level, vidType i) const {
     assert(level >= 1);
     return vid_lists[level-1][i];
   }
-  VertexId get_vertex(unsigned level, VertexId i, int pid) const {
+  vidType get_vertex(unsigned level, vidType i, int pid) const {
     assert(level >= 1);
     return vid_lists[level-1][pid*max_length+i];
   }
@@ -91,10 +91,10 @@ public:
 
 private:
   unsigned max_level;
-  VertexId max_length;
+  vidType max_length;
   VertexList history;
-  std::vector<std::vector<VertexId>> num_emb; // number of embeddings per level per pattern
+  std::vector<std::vector<vidType>> num_emb; // number of embeddings per level per pattern
   std::vector<VertexList> vid_lists; // list of vertex IDs
-  //std::vector<ByteList> pid_lists;   // pid[i] is the pattern id of each embedding
-  std::vector<ByteList> src_indices; // list of source indices
+  //std::vector<PidList> pid_lists;   // pid[i] is the pattern id of each embedding
+  std::vector<std::vector<uint8_t>> src_indices; // list of source indices
 };

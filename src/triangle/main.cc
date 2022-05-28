@@ -17,10 +17,7 @@ int main(int argc, char *argv[]) {
   int chunk_size = 1024;
   if (argc > 2) n_devices = atoi(argv[2]);
   if (argc > 3) chunk_size = atoi(argv[3]);
-  auto m = g.size();
-  auto nnz = g.sizeEdges();
-  std::cout << "|V| " << m << " |E| " << nnz << "\n";
-  std::cout << "Maximum degree: " << g.get_max_degree() << "\n";
+  g.print_meta_data();
   uint64_t total = 0;
   TCSolver(g, total, n_devices, chunk_size);
   std::cout << "total_num_triangles = " << total << "\n";
