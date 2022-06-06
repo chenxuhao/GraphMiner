@@ -77,13 +77,23 @@ To control the number of threads, set the following environment variable:
 
 The graph loading infrastructure understands the following formats:
 
-+ `graph.meta.txt` text file specifying the number of vertices, edges and maximum degree
++ `graph.meta.txt` text file specifying the meta information of the graph, including the number of vertices and edges; number of bytes for vertex IDs, edge IDs, vertex labels, and edge labels; maximum degree; feature vector length; distinct vertex label count; distinct edge label count; start index, end index and count of train/validation/test vertices.
 
-+ `graph.vertex.bin` binary file containing the row pointers
++ `graph.vertex.bin` binary file containing the row pointers, with data type of edge IDs.
 
-+ `graph.edge.bin` binary file containing the column indices
++ `graph.edge.bin` binary file containing the column indices, with data type of vertex IDs.
 
-+ `graph.vlabel.bin` binary file containing the vertax labels (only needed for labeled graphs)
++ `graph.vlabel.bin` binary file containing the vertex labels (only needed for vertex labeled graphs)
+
++ `graph.elabel.bin` binary file containing the edge labels (only needed for edge labeled graphs)
+
++ `graph.feats.bin` binary file containing the vertex feature vectors (used for graph machine learning)
+
++ `train.masks.bin` binary file containing the masks for train vertex set 
+
++ `val.masks.bin` binary file containing the masks for validation vertex set 
+
++ `test.masks.bin` binary file containing the masks for test vertex set 
 
 An example graph is in inputs/citeseer
 
