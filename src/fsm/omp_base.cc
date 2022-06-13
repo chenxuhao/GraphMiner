@@ -1,7 +1,6 @@
 // Copyright 2020
 // Authors: Xuhao Chen <cxh@mit.edu>
-#include "fsm.h"
-#include <timer.h>
+#include "graph.h"
 #include "canonical.h"
 
 typedef std::pair<label_t, label_t> InitPattern;

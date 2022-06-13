@@ -47,6 +47,7 @@ typedef std::unordered_map<vlabel_t, int> nlf_map;
 #define ADJ_SIZE_THREASHOLD 1024
 #define FULL_MASK 0xffffffff
 #define MAX_PATTERN_SIZE 8
+#define MAX_FSM_PATTERN_SIZE 5
 #define NUM_BUCKETS 128
 #define BUCKET_SIZE 1024
 #define DIVIDE_INTO(x,y) ((x + y - 1)/y)

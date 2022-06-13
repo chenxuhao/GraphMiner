@@ -1,8 +1,7 @@
 // Copyright 2020 MIT
 // Authors: Xuhao Chen <cxh@mit.edu>
 
-#include "fsm.h"
-#include "timer.h"
+#include "graph.h"
 #include "cutil_subset.h"
 #include <cub/cub.cuh>
 #define USE_PID
@@ -23,8 +22,8 @@ __global__ void extend_alloc(eidType m, eidType start_eid, int level, GraphGPU g
                              EmbeddingList emb_list, int *num_new_emb) {
   int tid = threadIdx.x;
   int pos = blockIdx.x * blockDim.x + threadIdx.x;
-  __shared__ int vid[BLOCK_SIZE][MAX_SIZE];
-  __shared__ BYTE his[BLOCK_SIZE][MAX_SIZE];
+  __shared__ int vid[BLOCK_SIZE][MAX_FSM_PATTERN_SIZE];
+  __shared__ BYTE his[BLOCK_SIZE][MAX_FSM_PATTERN_SIZE];
   if (pos < m) {
     emb_list.get_edge_embedding(level, start_eid+pos, vid[tid], his[tid]);
     num_new_emb[pos] = 0;
@@ -45,8 +44,8 @@ __global__ void extend_insert(eidType m, eidType start_eid, int level,
                               GraphGPU graph, EmbeddingList emb_list, int *indices) {
   int tid = threadIdx.x;
   int pos = blockIdx.x * blockDim.x + threadIdx.x;
-  __shared__ int vids[BLOCK_SIZE][MAX_SIZE];
-  __shared__ BYTE his[BLOCK_SIZE][MAX_SIZE];
+  __shared__ int vids[BLOCK_SIZE][MAX_FSM_PATTERN_SIZE];
+  __shared__ BYTE his[BLOCK_SIZE][MAX_FSM_PATTERN_SIZE];
   if (pos < m) {
     emb_list.get_edge_embedding(level, start_eid+pos, vids[tid], his[tid]);
     auto start = indices[pos];
@@ -202,8 +201,8 @@ __global__ void compute_pattern_id(eidType num_emb, int level, GraphGPU graph,
                                    int *pids, int *ne) {
   int tid = threadIdx.x;
   int pos = blockIdx.x * blockDim.x + threadIdx.x;
-  __shared__ int vids[BLOCK_SIZE][MAX_SIZE];
-  __shared__ BYTE his[BLOCK_SIZE][MAX_SIZE];
+  __shared__ int vids[BLOCK_SIZE][MAX_FSM_PATTERN_SIZE];
+  __shared__ BYTE his[BLOCK_SIZE][MAX_FSM_PATTERN_SIZE];
   if (pos < num_emb) {
     emb_list.get_edge_embedding(level, pos, vids[tid], his[tid]);
     auto n = level+1;
@@ -253,8 +252,8 @@ __global__ void aggregate(int num_emb, int level, GraphGPU graph, EmbeddingList 
                           Bitsets small_sets, Bitsets middle_sets, Bitsets large_sets) {
   int tid = threadIdx.x;
   int pos = blockIdx.x * blockDim.x + threadIdx.x;
-  __shared__ int vids[BLOCK_SIZE][MAX_SIZE];
-  __shared__ BYTE his[BLOCK_SIZE][MAX_SIZE];
+  __shared__ int vids[BLOCK_SIZE][MAX_FSM_PATTERN_SIZE];
+  __shared__ BYTE his[BLOCK_SIZE][MAX_FSM_PATTERN_SIZE];
   auto nv = graph.size();
   if (pos < num_emb) {
     emb_list.get_edge_embedding(level, pos, vids[tid], his[tid]);

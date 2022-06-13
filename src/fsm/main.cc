@@ -1,6 +1,8 @@
 // Copyright 2021 MIT
 // Authors: Xuhao Chen <cxh@mit.edu>
-#include "fsm.h"
+#include "graph.h"
+
+void FsmSolver(Graph &g, int k, int minsup, int &total);
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {
