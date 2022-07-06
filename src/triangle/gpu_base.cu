@@ -53,7 +53,7 @@ void TCSolver(Graph &g, uint64_t &total, int, int) {
   Timer t;
   t.Start();
 #ifdef VERTEX_PAR
-  warp_vertex<<<nblocks, nthreads>>>(nv, gg, d_total);
+  warp_vertex<<<nblocks, nthreads>>>(0, nv, gg, d_total);
 #else
 #ifdef CTA_CENTRIC
   cta_edge<<<nblocks, nthreads>>>(ne, gg, d_total);

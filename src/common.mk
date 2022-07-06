@@ -1,4 +1,5 @@
 DEBUG ?= 0
+#CUDA_HOME=/opt/apps/cuda/11.3
 CUDA_HOME=/usr/local/cuda
 PAPI_HOME=/usr/local/papi-6.0.0
 ICC_HOME=/opt/intel/compilers_and_libraries/linux/bin/intel64
@@ -13,6 +14,7 @@ ICPC=$(ICC_HOME)/icpc
 MPICC=mpicc
 MPICXX=mpicxx
 NVCC=nvcc
+#CUDA_ARCH := -gencode arch=compute_75,code=sm_75
 CUDA_ARCH := -gencode arch=compute_70,code=sm_70
 CXXFLAGS=-Wall -fopenmp -std=c++11 -march=native
 ICPCFLAGS=-O3 -Wall -qopenmp
@@ -35,6 +37,7 @@ else
 	NVFLAGS += -O3 -w
 endif
 INCLUDES = -I../../include
+LIBS=-L$(CUDA_HOME)/lib64 -lcudart -lgomp
 
 ifeq ($(PAPI), 1)
 CXXFLAGS += -DENABLE_PAPI
@@ -44,8 +47,6 @@ endif
 
 ifeq ($(USE_TBB), 1)
 LIBS += -L/h2/xchen/work/gardenia_code/tbb2020/lib/intel64/gcc4.8/ -ltbb
-else
-LIBS += -lgomp
 endif
 
 VPATH += ../common

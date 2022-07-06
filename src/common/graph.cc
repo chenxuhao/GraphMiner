@@ -2,26 +2,35 @@
 #include "scan.h"
 
 Graph::Graph(std::string prefix, bool use_dag, bool directed, 
-             bool use_vlabel, bool use_elabel) :
-    is_directed_(directed), vlabels(NULL), elabels(NULL), nnz(0) {
+             bool use_vlabel, bool use_elabel, bool need_reverse, bool bipartite) :
+    is_directed_(directed), is_bipartite(bipartite), 
+    max_degree(0), n_vertices(0), n_edges(0), 
+    nnz(0), max_label_frequency_(0), max_label(0),
+    feat_len(0), num_vertex_classes(0), num_edge_classes(0), 
+    edges(NULL), vertices(NULL), vlabels(NULL), elabels(NULL), 
+    features(NULL), src_list(NULL), dst_list(NULL) {
   // parse file name
   size_t i = prefix.rfind('/', prefix.length());
   if (i != string::npos) inputfile_path = prefix.substr(0, i);
   i = inputfile_path.rfind('/', inputfile_path.length());
-  if (i != string::npos) name = inputfile_path.substr(i+1);
-  std::cout << "input file path: " << inputfile_path << ", graph name: " << name << "\n";
+  if (i != string::npos) name_ = inputfile_path.substr(i+1);
+  std::cout << "input file path: " << inputfile_path << ", graph name: " << name_ << "\n";
 
   // read meta information
   VertexSet::release_buffers();
   std::ifstream f_meta((prefix + ".meta.txt").c_str());
   assert(f_meta);
   int vid_size = 0, eid_size = 0, vlabel_size = 0, elabel_size = 0;
-  f_meta >> n_vertices >> n_edges >> vid_size >> eid_size >> vlabel_size >> elabel_size
+  if (bipartite) {
+    f_meta >> n_vert0 >> n_vert1;
+    n_vertices = n_vert0 + n_vert1;
+  } else f_meta >> n_vertices;
+  f_meta >> n_edges >> vid_size >> eid_size >> vlabel_size >> elabel_size
          >> max_degree >> feat_len >> num_vertex_classes >> num_edge_classes;
   assert(sizeof(vidType) == vid_size);
   assert(sizeof(eidType) == eid_size);
   assert(sizeof(vlabel_t) == vlabel_size);
-  assert(sizeof(elabel_t) == elabel_size);
+  //assert(sizeof(elabel_t) == elabel_size);
   assert(max_degree > 0 && max_degree < n_vertices);
   f_meta.close();
   // read row pointers
@@ -30,6 +39,20 @@ Graph::Graph(std::string prefix, bool use_dag, bool directed,
   // read column indices
   if (map_edges) map_file(prefix + ".edge.bin", edges, n_edges);
   else read_file(prefix + ".edge.bin", edges, n_edges);
+
+  if (is_directed_) {
+    std::cout << "This is a directed graph\n";
+    if (need_reverse) {
+      build_reverse_graph();
+      std::cout << "This graph maintains both incomming and outgoing edge-list\n";
+      has_reverse = true;
+    }
+  } else {
+    has_reverse = true;
+    reverse_vertices = vertices;
+    reverse_edges = edges;
+  }
+
   // read vertex labels
   if (use_vlabel) {
     assert (num_vertex_classes > 0);
@@ -42,6 +65,7 @@ Graph::Graph(std::string prefix, bool use_dag, bool directed,
       std::set<vlabel_t> labels;
       for (vidType v = 0; v < n_vertices; v++)
         labels.insert(vlabels[v]);
+      //for (int i = 0; i < n_vertices; i++) std::cout << unsigned(vlabels[i]) << "\n";
       std::cout << "# distinct vertex labels: " << labels.size() << "\n";
       assert(size_t(num_vertex_classes) == labels.size());
     } else {
@@ -55,23 +79,35 @@ Graph::Graph(std::string prefix, bool use_dag, bool directed,
     std::cout << "maximum vertex label: " << max_vlabel << "\n";
   }
   if (use_elabel) {
-    assert (num_edge_classes > 0);
-    assert (num_edge_classes < 65535); // we use 16-bit edge label dtype
     std::string elabel_filename = prefix + ".elabel.bin";
     ifstream f_elabel(elabel_filename.c_str());
     if (f_elabel.good()) {
+      assert (num_edge_classes > 0);
       if (map_elabels) map_file(elabel_filename, elabels, n_edges);
       else read_file(elabel_filename, elabels, n_edges);
       std::set<elabel_t> labels;
       for (eidType e = 0; e < n_edges; e++)
         labels.insert(elabels[e]);
+      //for (int i = 0; i < n_edges; i++) {
+      //  if (elabels[i] > 5 || elabels[i] < 1)
+      //    std::cout << "elabels[" << i << "]=" << elabels[i] << "\n";
+      //}
+      //for (int i = 0; i < 10; i++) std::cout << elabels[i] << "\n";
       std::cout << "# distinct edge labels: " << labels.size() << "\n";
+      //for (auto l : labels) std::cout << l << "\n";
       assert(size_t(num_edge_classes) >= labels.size());
     } else {
       std::cout << "WARNING: edge label file not exist; generating random labels\n";
       elabels = new elabel_t[n_edges];
-      for (eidType e = 0; e < n_edges; e++) {
-        elabels[e] = rand() % num_edge_classes + 1;
+      if (num_edge_classes < 1) {
+        num_edge_classes = 1;
+        for (eidType e = 0; e < n_edges; e++) {
+          elabels[e] = 1;
+        }
+      } else {
+        for (eidType e = 0; e < n_edges; e++) {
+          elabels[e] = rand() % num_edge_classes + 1;
+        }
       }
     }
     auto max_elabel = unsigned(*(std::max_element(elabels, elabels+n_edges)));
@@ -88,12 +124,49 @@ Graph::Graph(std::string prefix, bool use_dag, bool directed,
 }
 
 Graph::~Graph() {
+  if (dst_list != NULL && dst_list != edges) delete [] dst_list;
   if (map_edges) munmap(edges, n_edges*sizeof(vidType));
   else custom_free(edges, n_edges);
-  if (map_vertices) {
-    munmap(vertices, (n_vertices+1)*sizeof(eidType));
-  } else custom_free(vertices, n_vertices+1);
+  if (map_vertices) munmap(vertices, (n_vertices+1)*sizeof(eidType));
+  else custom_free(vertices, n_vertices+1);
   if (vlabels != NULL) delete [] vlabels;
+  if (elabels != NULL) delete [] elabels;
+  if (features != NULL) delete [] features;
+  if (src_list != NULL) delete [] src_list;
+}
+
+void Graph::sort_neighbors() {
+  std::cout << "Sorting the neighbor lists (used for pattern mining)\n";
+  #pragma omp parallel for
+  for (vidType v = 0; v < n_vertices; v++) {
+    auto begin = edge_begin(v);
+    auto end = edge_end(v);
+    std::sort(edges+begin, edges+end);
+  }
+}
+
+void Graph::build_reverse_graph() {
+  std::vector<VertexList> reverse_adj_lists(n_vertices);
+  for (vidType v = 0; v < n_vertices; v++) {
+    for (auto u : N(v)) {
+      reverse_adj_lists[u].push_back(v);
+    }
+  }
+  reverse_vertices = custom_alloc_global<eidType>(n_vertices+1);
+  reverse_vertices[0] = 0;
+  for (vidType i = 1; i < n_vertices+1; i++) {
+    auto degree = reverse_adj_lists[i-1].size();
+    reverse_vertices[i] = reverse_vertices[i-1] + degree;
+  }
+  reverse_edges = custom_alloc_global<vidType>(n_edges);
+  //#pragma omp parallel for
+  for (vidType i = 0; i < n_vertices; i++) {
+    auto begin = reverse_vertices[i];
+    std::copy(reverse_adj_lists[i].begin(), 
+        reverse_adj_lists[i].end(), &reverse_edges[begin]);
+  }
+  for (auto adjlist : reverse_adj_lists) adjlist.clear();
+  reverse_adj_lists.clear();
 }
 
 VertexSet Graph::N(vidType vid) const {
@@ -108,6 +181,33 @@ VertexSet Graph::N(vidType vid) const {
   return VertexSet(edges + begin, end - begin, vid);
 }
 
+VertexSet Graph::out_neigh(vidType vid, vidType offset) const {
+  assert(vid >= 0);
+  assert(vid < n_vertices);
+  auto begin = vertices[vid];
+  auto end = vertices[vid+1];
+  if (begin > end) {
+    fprintf(stderr, "vertex %u bounds error: [%lu, %lu)\n", vid, begin, end);
+    exit(1);
+  }
+  assert(end <= n_edges);
+  return VertexSet(edges + begin + offset, end - begin, vid);
+}
+
+// TODO: fix for directed graph
+VertexSet Graph::in_neigh(vidType vid) const {
+  assert(vid >= 0);
+  assert(vid < n_vertices);
+  auto begin = reverse_vertices[vid];
+  auto end = reverse_vertices[vid+1];
+  if (begin > end) {
+    fprintf(stderr, "vertex %u bounds error: [%lu, %lu)\n", vid, begin, end);
+    exit(1);
+  }
+  assert(end <= n_edges);
+  return VertexSet(reverse_edges + begin, end - begin, vid);
+}
+ 
 void Graph::allocateFrom(vidType nv, eidType ne) {
   n_vertices = nv;
   n_edges    = ne;
@@ -183,8 +283,13 @@ void Graph::print_graph() const {
   for (vidType n = 0; n < n_vertices; n++) {
     std::cout << "vertex " << n << ": degree = " 
       << get_degree(n) << " edgelist = [ ";
-    for (auto e = edge_begin(n); e != edge_end(n); e++)
+    for (auto e = edge_begin(n); e != edge_end(n); e++) {
+      if (elabels != NULL)
+        std::cout << "<";
       std::cout << getEdgeDst(e) << " ";
+      if (elabels != NULL)
+        std::cout << getEdgeData(e) << "> ";
+    }
     std::cout << "]\n";
   }
 }
@@ -262,6 +367,198 @@ vidType Graph::intersect_num(vidType v, vidType u, vlabel_t label) {
     if (a <= b) idx_l++;
     if (b <= a) idx_r++;
     if (a == b && vlabels[a] == label) num++;
+  }
+  return num;
+}
+
+vidType Graph::intersect_num(VertexSet& vs, vidType u, vlabel_t label) {
+  vidType num = 0;
+  vidType idx_l = 0, idx_r = 0;
+  vidType u_size = get_degree(u);
+  vidType* u_ptr = &edges[vertices[u]];
+  while (idx_l < vs.size() && idx_r < u_size) {
+    vidType a = vs[idx_l];
+    vidType b = u_ptr[idx_r];
+    if (a <= b) idx_l++;
+    if (b <= a) idx_r++;
+    if (a == b && vlabels[a] == label) num++;
+  }
+  return num;
+}
+
+vidType Graph::intersect_set(vidType v, vidType u, vlabel_t label, VertexSet& result) {
+  vidType num = 0;
+  vidType idx_l = 0, idx_r = 0;
+  vidType v_size = get_degree(v);
+  vidType u_size = get_degree(u);
+  vidType* v_ptr = &edges[vertices[v]];
+  vidType* u_ptr = &edges[vertices[u]];
+  while (idx_l < v_size && idx_r < u_size) {
+    vidType a = v_ptr[idx_l];
+    vidType b = u_ptr[idx_r];
+    if (a <= b) idx_l++;
+    if (b <= a) idx_r++;
+    if (a == b && vlabels[a] == label) {
+      result.add(a);
+      num++;
+    }
+  }
+  return num;
+}
+
+vidType Graph::intersect_set(VertexSet& vs, vidType u, vlabel_t label, VertexSet& result) {
+  vidType num = 0;
+  vidType idx_l = 0, idx_r = 0;
+  vidType u_size = get_degree(u);
+  vidType* u_ptr = &edges[vertices[u]];
+  while (idx_l < vs.size() && idx_r < u_size) {
+    vidType a = vs[idx_l];
+    vidType b = u_ptr[idx_r];
+    if (a <= b) idx_l++;
+    if (b <= a) idx_r++;
+    if (a == b && vlabels[a] == label) {
+      result.add(a);
+      num++;
+    }
+  }
+  return num;
+}
+
+vidType Graph::difference_num_edgeinduced(vidType v, vidType u, vlabel_t label) {
+  vidType num = 0;
+  vidType* v_ptr = &edges[vertices[v]];
+  for (vidType i = 0; i < get_degree(v); i ++) {
+    auto w = v_ptr[i];
+    if (w != u && vlabels[w] == label) num++;
+  }
+  return num;
+}
+
+vidType Graph::difference_num_edgeinduced(VertexSet& vs, vidType u, vlabel_t label) {
+  vidType num = 0;
+  for (auto w : vs)
+    if (w != u && vlabels[w] == label) num++;
+  return num;
+}
+
+vidType Graph::difference_set_edgeinduced(vidType v, vidType u, vlabel_t label, VertexSet& result) {
+  vidType num = 0;
+  vidType* v_ptr = &edges[vertices[v]];
+  for (vidType i = 0; i < get_degree(v); i ++) {
+    auto w = v_ptr[i];
+    if (w != u && vlabels[w] == label) {
+      result.add(w);
+      num++;
+    }
+  }
+  return num;
+}
+
+vidType Graph::difference_set_edgeinduced(VertexSet& vs, vidType u, vlabel_t label, VertexSet& result) {
+  vidType num = 0;
+  for (auto w : vs) {
+    if (w != u && vlabels[w] == label) {
+      result.add(w);
+      num++;
+    }
+  }
+  return num;
+}
+
+vidType Graph::difference_num(vidType v, vidType u, vlabel_t label) {
+  vidType num = 0;
+  vidType idx_l = 0, idx_r = 0;
+  vidType v_size = get_degree(v);
+  vidType u_size = get_degree(u);
+  vidType* v_ptr = &edges[vertices[v]];
+  vidType* u_ptr = &edges[vertices[u]];
+  while (idx_l < v_size && idx_r < u_size) {
+    auto a = v_ptr[idx_l];
+    auto b = u_ptr[idx_r];
+    if (a <= b) idx_l++;
+    if (b <= a) idx_r++;
+    if (a < b && a != u && vlabels[a] == label) num++;
+  }
+  while (idx_l < v_size) {
+    auto a = v_ptr[idx_l];
+    idx_l++;
+    if (a != u && vlabels[a] == label)
+      num ++;
+  }
+  return num;
+}
+
+vidType Graph::difference_num(VertexSet& vs, vidType u, vlabel_t label) {
+  vidType num = 0;
+  vidType idx_l = 0, idx_r = 0;
+  vidType u_size = get_degree(u);
+  vidType* u_ptr = &edges[vertices[u]];
+  while (idx_l < vs.size() && idx_r < u_size) {
+    auto a = vs[idx_l];
+    auto b = u_ptr[idx_r];
+    if (a <= b) idx_l++;
+    if (b <= a) idx_r++;
+    if (a < b && a != u && vlabels[a] == label) num++;
+  }
+  while (idx_l < vs.size()) {
+    auto a = vs[idx_l];
+    idx_l++;
+    if (a != u && vlabels[a] == label)
+      num ++;
+  }
+  return num;
+}
+
+vidType Graph::difference_set(vidType v, vidType u, vlabel_t label, VertexSet& result) {
+  vidType num = 0;
+  vidType idx_l = 0, idx_r = 0;
+  vidType v_size = get_degree(v);
+  vidType u_size = get_degree(u);
+  vidType* v_ptr = &edges[vertices[v]];
+  vidType* u_ptr = &edges[vertices[u]];
+  while (idx_l < v_size && idx_r < u_size) {
+    auto a = v_ptr[idx_l];
+    auto b = u_ptr[idx_r];
+    if (a <= b) idx_l++;
+    if (b <= a) idx_r++;
+    if (a < b && a != u && vlabels[a] == label) {
+      result.add(a);
+      num++;
+    }
+  }
+  while (idx_l < v_size) {
+    auto a = v_ptr[idx_l];
+    idx_l++;
+    if (a != u && vlabels[a] == label) {
+      result.add(a);
+      num ++;
+    }
+  }
+  return num;
+}
+
+vidType Graph::difference_set(VertexSet& vs, vidType u, vlabel_t label, VertexSet& result) {
+  vidType num = 0;
+  vidType idx_l = 0, idx_r = 0;
+  vidType u_size = get_degree(u);
+  vidType* u_ptr = &edges[vertices[u]];
+  while (idx_l < vs.size() && idx_r < u_size) {
+    auto a = vs[idx_l];
+    auto b = u_ptr[idx_r];
+    if (a <= b) idx_l++;
+    if (b <= a) idx_r++;
+    if (a < b && a != u && vlabels[a] == label) {
+      result.add(a);
+      num++;
+    }
+  }
+  while (idx_l < vs.size()) {
+    auto a = vs[idx_l];
+    idx_l++;
+    if (a != u && vlabels[a] == label) {
+      result.add(a);
+      num ++;
+    }
   }
   return num;
 }
@@ -364,6 +661,70 @@ void Graph::print_meta_data() const {
     std::cout << "Vertex feature vector length: " << feat_len << "\n";
   } else {
     std::cout  << "This graph has no input vertex features\n";
+  }
+}
+
+void Graph::buildCoreTable() {
+  core_table.resize(size(), 0);
+  computeKCore();
+  for (vidType i = 0; i < size(); ++i) {
+    if (core_table[i] > 1) {
+      core_length_ += 1;
+    }
+  }
+  //for (int v = 0; v < size(); v++)
+  //  std::cout << "v_" << v << " core value: " << core_table[v] << "\n";
+}
+
+void Graph::computeKCore() {
+  int nv = size();
+  int md = get_max_degree();
+  std::vector<int> vertices(nv);          // Vertices sorted by degree.
+  std::vector<int> position(nv);          // The position of vertices in vertices array.
+  std::vector<int> degree_bin(md+1, 0);   // Degree from 0 to max_degree.
+  std::vector<int> offset(md+1);          // The offset in vertices array according to degree.
+  for (int i = 0; i < nv; ++i) {
+    int degree = get_degree(i);
+    core_table[i] = degree;
+    degree_bin[degree] += 1;
+  }
+  int start = 0;
+  for (int i = 0; i < md+1; ++i) {
+    offset[i] = start;
+    start += degree_bin[i];
+  }
+  for (int i = 0; i < nv; ++i) {
+    int degree = get_degree(i);
+    position[i] = offset[degree];
+    vertices[position[i]] = i;
+    offset[degree] += 1;
+  }
+  for (int i = md; i > 0; --i) {
+    offset[i] = offset[i - 1];
+  }
+  offset[0] = 0;
+  for (int i = 0; i < nv; ++i) {
+    int v = vertices[i];
+    for(int j = 0; j < get_degree(v); ++j) {
+      int u = N(v, j);
+      if (core_table[u] > core_table[v]) {
+        // Get the position and vertex which is with the same degree
+        // and at the start position of vertices array.
+        int cur_degree_u = core_table[u];
+        int position_u = position[u];
+        int position_w = offset[cur_degree_u];
+        int w = vertices[position_w];
+        if (u != w) {
+          // Swap u and w.
+          position[u] = position_w;
+          position[w] = position_u;
+          vertices[position_u] = w;
+          vertices[position_w] = u;
+        }
+        offset[cur_degree_u] += 1;
+        core_table[u] -= 1;
+      }
+    }
   }
 }
 
