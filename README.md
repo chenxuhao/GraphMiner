@@ -97,9 +97,13 @@ The graph loading infrastructure understands the following formats:
 
 An example graph is in inputs/citeseer
 
+You can find a graph converter [here](https://github.com/chenxuhao/GraphAIBench/tree/main/src/converters) to generate the binary files from `mtx`, `lg`, `sadj` or `txt` format.
+
 Other graph input formats to be supported:
 
 * Market (.mtx), [The University of Florida Sparse Matrix Collection](http://www.cise.ufl.edu/research/sparse/matrices/)
+* SADJ (.sadj), [Arabesque](https://github.com/qcri/Arabesque) and [Fractal](https://github.com/dccspeed/fractal)
+* LG (.lg), [DistGraph](https://github.com/zakimjz/DistGraph)
 * Metis (.graph), [10th DIMACS Implementation Challenge](http://www.cc.gatech.edu/dimacs10/)
 * SNAP (.txt), [Stanford Network Analysis Project](http://snap.stanford.edu/)
 * Dimacs9th (.gr), [9th DIMACS Implementation Challenge](http://www.dis.uniroma1.it/challenge9/)
