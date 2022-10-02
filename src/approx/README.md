@@ -10,3 +10,7 @@ Massively Parallel Algorithms for Small Subgraph Counting https://arxiv.org/pdf/
 Faster Motif Counting via Succinct Color Coding and Adaptive Sampling https://dl.acm.org/doi/pdf/10.1145/3447397
 
 Triangle and Four Cycle Counting with Predictions in Graph Streams https://arxiv.org/pdf/2203.09572.pdf
+
+Parallel Five-Cycle Counting Algorithms
+
+Lightning Fast and Space Efficient k-clique Counting
