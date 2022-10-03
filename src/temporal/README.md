@@ -2,6 +2,8 @@
 
 WSDM'17-Motifs in Temporal Networks
 
+VLDB'18 - 2scent: an efficient algorithm for enumerating all simple temporal cycles
+
 WSDM'19-Sampling Methods for Counting Temporal Motifs
 
 CIKM'20-Efficient Sampling Algorithms for Approximate Temporal Motif Counting
@@ -19,3 +21,5 @@ ICDE'22-Scalable Motif Counting for Large-scale Temporal Graphs
 SIGMOD'22-Computing Complex Temporal Join Queries Efficiently
 
 TKDE'22-Space-Efficient_Subgraph_Search_Over_Streaming_Graph_With_Timing_Order_Constraint
+
+Tm-miner: Tfs-based algorithm for mining temporal motifs in large temporal network
