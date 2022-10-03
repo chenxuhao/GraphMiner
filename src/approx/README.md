@@ -14,3 +14,19 @@ Triangle and Four Cycle Counting with Predictions in Graph Streams https://arxiv
 Parallel Five-Cycle Counting Algorithms
 
 Lightning Fast and Space Efficient k-clique Counting
+
+Doulion: counting triangles in massive graphs with a coin
+
+Graph sample and hold: A framework for big-graph analytics 
+
+Revisiting wedge sampling for triangle counting
+
+Counting and sampling triangles from a graph stream
+
+How to count triangles, without seeing the whole graph
+
+Butterfly counting in bipartite networks
+
+Moss-5: A fast method of approximating counts of 5-node graphlets in large graphs
+
+A fast and provable method for estimating clique counts using tur´an’s theorem
