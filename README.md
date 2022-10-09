@@ -5,7 +5,7 @@ GraphMinerBench is a C++ implemented Benchmark Suite for Graph Pattern Mining (G
 Unlike those GPM frameworks, GraphMinerBench is inherently designed for benchmarking hardware architecture design.
 It includes various GPM workloads (e.g., TC, k-CL, SgL, k-MC, FSM) as well as representative graph datasets (Mico, Patents, Youtube, LiveJournal, Orkut, Twitter, Friendster). 
 
-Datasets are available [here](https://www.dropbox.com/sh/i1jq1uwtkcd2qo0/AADJck_u3kx7FeSR5BvdrkqYa?dl=0).
+[Datasets](https://docs.google.com/spreadsheets/d/1p84wY4Fxs8MA7_ZAQMx5QhNkeR33x3ICminWfDeD4xc/edit?usp=sharing) are available [here](https://www.dropbox.com/sh/i1jq1uwtkcd2qo0/AADJck_u3kx7FeSR5BvdrkqYa?dl=0).
 Please contact [the author](http://people.csail.mit.edu/xchen/) for more datasets.
 
 [1] Xuhao Chen, Roshan Dathathri, Gurbinder Gill, Keshav Pingali.
