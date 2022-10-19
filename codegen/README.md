@@ -8,6 +8,6 @@ Hybrid plan (database terminology): [Optimizing Subgraph Queries by Combining Bi
 
 Pattern decomposition: [DwarvesGraph: A High-Performance Graph Mining System with Pattern Decomposition](https://arxiv.org/pdf/2008.09682.pdf)
 
-Labeled patterns: [In-Memory Subgraph Matching: An In-depth Study](https://dl.acm.org/doi/pdf/10.1145/3318464.3380581) [Dryadic: Flexible and Fast Graph Pattern Matching at Scale](https://jrmcclurg.com/papers/pact_2021_paper.pdf)
+Labeled patterns: [In-Memory Subgraph Matching: An In-depth Study](https://dl.acm.org/doi/pdf/10.1145/3318464.3380581); [Dryadic: Flexible and Fast Graph Pattern Matching at Scale](https://jrmcclurg.com/papers/pact_2021_paper.pdf)
 
 Worst-case optimal join: [EmptyHeaded: A Relational Engine for Graph Processing](https://ppl.stanford.edu/papers/emptyheaded.pdf)
