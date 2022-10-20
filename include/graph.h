@@ -10,6 +10,32 @@ constexpr bool map_vlabels = false;
 constexpr bool map_elabels = false;
 constexpr bool map_features = false;
 
+typedef struct s {
+  vidType src;
+  vidType dst;
+  bool operator<(s const &obj) const {
+    return src < obj.src;
+  }
+  bool operator==(s const &obj) const {
+    return src == obj.src && dst == obj.dst;
+  }
+} s_edge;
+
+namespace std {
+template <>
+struct hash<s_edge>
+  {
+    std::size_t operator()(const s_edge& k) const
+    {
+      using std::size_t;
+      using std::hash;
+
+      return (hash<int>()(k.src)
+               ^ (hash<int>()(k.dst)));
+    }
+  };
+}
+
 class Graph {
 protected:
   std::string name_;            // name of the graph
@@ -143,6 +169,14 @@ public:
     count = reverse_index_offsets_[vl+1] - start;
     return &reverse_index_[start];
   }
+
+  void edge_sparsify(float p);
+  void color_sparsify(int c);
+
+  void init_simple_edgelist();
+  void create_edge_stream();
+  s_edge* stream;
+  s_edge stream_edge(eidType i);
 
   // edge orientation: convert the graph from undirected to directed
   void orientation();

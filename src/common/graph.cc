@@ -145,6 +145,90 @@ void Graph::sort_neighbors() {
   }
 }
 
+void Graph::create_edge_stream() {
+  Timer t;
+  t.Start();
+  if (nnz != 0) return; // already initialized
+  nnz = E();
+  stream = new s_edge[nnz];
+ 
+  size_t i = 0;
+  for (vidType v = 0; v < V(); v ++) {
+    for (auto u : N(v)) {
+      if (u == v) continue; // no selfloops
+      stream[i] = s_edge{v,u};
+      i ++;
+    }
+  }
+  assert(i == nnz);
+  t.Stop();
+  std::cout << "Time on generating the edgelist: " << t.Seconds() << " sec\n";
+  return;
+}
+
+s_edge Graph::stream_edge(eidType edgeId) {
+  return stream[edgeId];
+}
+
+void Graph::color_sparsify(int c) {
+  auto new_edges = new vidType[n_edges];
+  auto colors = new int[n_vertices];
+
+  for (vidType v = 0; v < n_vertices; v++) {
+    colors[v] = rand() % c;
+    //printf("color[%d] = %d, %d\n", v, colors[v], rand());
+  }
+
+  eidType count = 0;
+  eidType edges_removed = 0;
+  eidType last_offset = 0;
+  for (vidType v = 0; v < n_vertices; v++) {
+    auto begin = edge_begin(v); 
+    auto end = edge_end(v);
+
+    for(auto e = begin;  e < end; e++) {
+      if(colors[v] != colors[edges[e]]) { //remove edge
+        edges_removed += 1;
+      } else {
+        new_edges[count] = edges[e];
+        count += 1;
+      }
+    }
+    vertices[v] -= last_offset; // take out from end of last interval considering prev-removed edges
+    last_offset = edges_removed;   
+  }
+  vertices[n_vertices] -= edges_removed;
+  n_edges = count;
+  edges = new_edges;
+  
+}
+
+void Graph::edge_sparsify(float p) {
+  auto new_edges = new vidType[n_edges];
+  eidType count = 0;
+  eidType edges_removed = 0;
+  eidType last_offset = 0;
+  for (vidType v = 0; v < n_vertices; v++) {
+    auto begin = edge_begin(v); 
+    auto end = edge_end(v);
+
+    for(auto e = begin;  e < end; e++) {
+      if(rand() < (1-p)*RAND_MAX) { //remove edge
+        edges_removed += 1;
+      } else {
+        new_edges[count] = edges[e];
+        count += 1;
+      }
+    }
+    vertices[v] -= last_offset; // take out from end of last interval considering prev-removed edges
+    last_offset = edges_removed;   
+  }
+  vertices[n_vertices] -= edges_removed;
+  n_edges = count;
+  edges = new_edges;
+  
+}
+
 void Graph::build_reverse_graph() {
   std::vector<VertexList> reverse_adj_lists(n_vertices);
   for (vidType v = 0; v < n_vertices; v++) {
@@ -192,6 +276,29 @@ VertexSet Graph::out_neigh(vidType vid, vidType offset) const {
   }
   assert(end <= n_edges);
   return VertexSet(edges + begin + offset, end - begin, vid);
+}
+
+void Graph::init_simple_edgelist() {
+  Timer t;
+  t.Start();
+  if (nnz != 0) return; // already initialized
+  nnz = E();
+  src_list = new vidType[nnz];
+  dst_list = new vidType[nnz];
+ 
+  size_t i = 0;
+  for (vidType v = 0; v < V(); v ++) {
+    for (auto u : N(v)) {
+      if (u == v) continue; // no selfloops
+      src_list[i] = v;
+      dst_list[i] = u;
+      i ++;
+    }
+  }
+  assert(i == nnz);
+  t.Stop();
+  std::cout << "Time on generating the edgelist: " << t.Seconds() << " sec\n";
+  return;
 }
 
 // TODO: fix for directed graph
