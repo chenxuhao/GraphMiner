@@ -1,4 +1,4 @@
-Given a data graph and a (labeled) query graph (i.e., pattern), it finds all the matches of the query graph in the data graph.
+Given an arbitrary pattern and a data graph, both vertex-labeled and undirected, find all the subgraphs in the data graph that match the pattern.
 
 [In-Memory Subgraph Matching: An In-depth Study](https://dl.acm.org/doi/pdf/10.1145/3318464.3380581)
 
