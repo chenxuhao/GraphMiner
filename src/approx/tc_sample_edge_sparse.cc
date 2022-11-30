@@ -1,7 +1,7 @@
 // Copyright 2022 MIT
 // Authors: Xuhao Chen <cxh@mit.edu> and Anna Arpaci-Dusseau <annaad@mit.edu>
 #include "graph.h"
-#define P 1
+#define P 0.2
 
 void EdgeSample(Graph &g) {
   std::cout << "|e| before sampling " << g.E() << "\n";

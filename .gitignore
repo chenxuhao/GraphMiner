@@ -23,3 +23,7 @@ tools/*.txt
 */*/.gdb_history
 temp/
 **/tags
+
+inputs/livej/
+inputs/road-asia/
+inputs/ukgraph/

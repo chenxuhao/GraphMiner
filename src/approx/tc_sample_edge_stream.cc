@@ -62,10 +62,13 @@ void TCSolver(Graph &g, uint64_t &total, int, int)
       sampled_edges[e] = 0;
     }
 
-    auto adj = is_adj(sampled_edges, e); // will only be true once
+    auto adj = is_adj(sampled_edges, e); 
     if (!(adj.src == 0 && adj.dst == 0))
     {
-      awaiting_closing_edges.insert(adj);
+      if (sampled_edges[e] == 0) {
+        awaiting_closing_edges.insert(adj);
+      }
+      sampled_edges[e] += 1;
     }
   }
   printf("count: %lu\n", counter);

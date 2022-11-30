@@ -1,7 +1,7 @@
 // Copyright 2022 MIT
 // Authors: Xuhao Chen <cxh@mit.edu> and Anna Arpaci-Dusseau <annaad@mit.edu>
 #include "graph.h"
-#define C 50
+#define C 5
 #define P 1.0/C
 
 void EdgeSample(Graph &g) {

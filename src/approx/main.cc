@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Example: " << argv[0] << " /graph_inputs/mico/graph\n";
     exit(1);
   }
-  std::cout << "Triangle Counting: assuming the neighbor lists are sorted.\n";
+  std::cout << "Approximate Counting: assuming the neighbor lists are sorted.\n";
   Graph g(argv[1], USE_DAG); // use DAG
   //g.print_graph();
   int n_devices = 1;
@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
   if (!adj_sorted) g.sort_neighbors();
   uint64_t total = 0;
   TCSolver(g, total, n_devices, chunk_size);
-  std::cout << "total_num_triangles = " << total << "\n";
+  std::cout << "total_num_pattern = " << total << "\n";
   return 0;
 }
 

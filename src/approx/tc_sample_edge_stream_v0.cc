@@ -2,7 +2,7 @@
 // Authors: Xuhao Chen <cxh@mit.edu>
 #include "graph.h"
 
-#define NUM_SAMPLES 500000
+#define NUM_SAMPLES 100000
 
 bool contains(VertexSet n, vidType v) {
   for(vidType i = 0; i < n.size(); i++) {
