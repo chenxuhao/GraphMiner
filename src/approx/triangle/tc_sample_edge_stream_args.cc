@@ -2,7 +2,7 @@
 // Authors: Xuhao Chen <cxh@mit.edu>
 #include "graph.h"
 
-#define NUM_SAMPLES 500000
+#define NUM_SAMPLES 100000
 
 bool contains(VertexSet n, vidType v) {
   for(vidType i = 0; i < n.size(); i++) {
@@ -16,19 +16,19 @@ bool contains(VertexSet n, vidType v) {
   return false;
 }
 
-void TCSolver(Graph &g, uint64_t &total, int, int) {
+void TCSolver(Graph &g, uint64_t &total, int, int, vector<float> args) {
   int num_threads = 1;
   #pragma omp parallel
   {
     num_threads = omp_get_num_threads();
   }
   g.init_simple_edgelist();
-  std::cout << "OpenMP 4-Cycle Counting (" << num_threads << " threads)\n";
+  std::cout << "OpenMP Triangle Counting (" << num_threads << " threads)\n";
   Timer t;
   t.Start();
   uint64_t counter = 0;
   #pragma omp parallel for reduction(+ : counter) schedule(dynamic, 1)
-  for (int i = 0; i < NUM_SAMPLES; i++) {
+  for (int i = 0; i < int(args[0]); i++) {
     // pick one edge uniformly at random, [l0, l1]
     // 1 / m prob of choosing an edge
     eidType randE = rand() % g.E();
@@ -55,14 +55,14 @@ void TCSolver(Graph &g, uint64_t &total, int, int) {
       // shouldn't happen with DAG?
       assert(!(contains(g.N(l0), l2) && contains(g.N(l2), l0)));  
 
-      
-      counter += intersection_num(g.N(l2), g.N(l0)) * g.N(l1).size() * g.E();
+      // check if either neighbor edge completes triangle, if so incr by m*c
+      counter += (contains(g.N(l0), l2) || contains(g.N(l2), l0)) * g.N(l1).size() * g.E();
     }
 
   }
   printf("count: %lu\n", counter);
   // scale down by number of samples
-  total = counter / NUM_SAMPLES;
+  total = counter / args[0];
   t.Stop();
   std::cout << "runtime [tc_sample_edge_stream] = " << t.Seconds() << " sec\n";
   return;

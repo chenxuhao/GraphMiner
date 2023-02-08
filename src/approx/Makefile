@@ -1,6 +1,6 @@
 include ../common.mk
 #VPATH += ../partitioner
-all: tc_sample_omp_base tc_sample_edge_sparse tc_sample_color_sparse tc_sample_mask tc_sample_edge_stream tc_sample_edge_stream_v0 4cc_sample_omp_base 4cc_sample_edge_sparse 4cc_sample_color_sparse 4cc_sample_edge_stream 4cc_sample_edge_stream_v0 clique_sample_omp_base clique_sample_color_sparse clique_sample_edge_sparse tc_sample_edge_mask clique4_omp_base clique_omp_sample_perf clique4_sample_perf clique4_sample_perf_args 5cycle_sample_perf_args clique4_sample_edge_sparse tc_sample_perf_args
+all: tc_sample_omp_base tc_sample_edge_sparse tc_sample_color_sparse tc_sample_mask tc_sample_edge_stream tc_sample_edge_stream_v0 4cc_sample_omp_base 4cc_sample_edge_sparse 4cc_sample_color_sparse 4cc_sample_edge_stream 4cc_sample_edge_stream_v0 clique_sample_omp_base clique_sample_color_sparse clique_sample_edge_sparse tc_sample_edge_mask clique4_omp_base clique_omp_sample_perf clique4_sample_perf clique4_sample_perf_args 5cycle_sample_perf_args clique4_sample_edge_sparse tc_sample_perf_args tc_sample_edge_sparse_args tc_sample_edge_stream_args 4cc_sample_edge_stream_args 4cc_sample_edge_sparse_args
 
 %.o: %.cc
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $<
@@ -98,6 +98,25 @@ tc_sample_perf_args: main_sample_args.o graph.o VertexSet.o tc_sample_perf_args.
 	$(CXX) $(CXXFLAGS) $(INCLUDES) main_sample_args.o graph.o VertexSet.o tc_sample_perf_args.o -o $@ -lgomp
 	mv $@ $(BIN)
 
+tc_sample_edge_sparse_args: main_sample_args.o graph.o VertexSet.o tc_sample_edge_sparse_args.o
+	$(CXX) $(CXXFLAGS) $(INCLUDES) main_sample_args.o graph.o VertexSet.o tc_sample_edge_sparse_args.o -o $@ -lgomp
+	mv $@ $(BIN)
+
+4cc_sample_edge_sparse_args: main_sample_args.o graph.o VertexSet.o 4cc_sample_edge_sparse_args.o
+	$(CXX) $(CXXFLAGS) $(INCLUDES) main_sample_args.o graph.o VertexSet.o 4cc_sample_edge_sparse_args.o -o $@ -lgomp
+	mv $@ $(BIN)
+
+4cc_sample_edge_stream_args: main_sample_args.o graph.o VertexSet.o 4cc_sample_edge_stream_args.o
+	$(CXX) $(CXXFLAGS) $(INCLUDES) main_sample_args.o graph.o VertexSet.o 4cc_sample_edge_stream_args.o -o $@ -lgomp
+	mv $@ $(BIN)
+
+tc_sample_edge_stream_args: main_sample_args.o graph.o VertexSet.o tc_sample_edge_stream_args.o
+	$(CXX) $(CXXFLAGS) $(INCLUDES) main_sample_args.o graph.o VertexSet.o tc_sample_edge_stream_args.o -o $@ -lgomp
+	mv $@ $(BIN)
+
+tc_ASAP_args: main_sample_args.o graph.o ASAP.o VertexSet.o tc_ASAP_args.o
+	$(CXX) $(CXXFLAGS) $(INCLUDES) main_sample_args.o graph.o ASAP.o VertexSet.o tc_ASAP_args.o -o $@ -lgomp
+	mv $@ $(BIN)
 
 clean:
 	rm *.o

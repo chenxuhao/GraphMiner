@@ -15,22 +15,22 @@ void TCSolver(Graph &g, uint64_t &total, int, int, vector<float> args) {
   t.Start();
   uint64_t counter = 0;
   int numIters = g.V() * args[0];
+  int step = rand();
+  int seed = rand();
   #pragma omp parallel for schedule(dynamic, 1) reduction(+:counter)
   for (vidType v0 = 0; v0 < numIters; v0++) {
     uint64_t local_counter = 0;
     //auto tid = omp_get_thread_num();
-    auto y0 = g.N(v0);
+    auto y0 = g.N(abs((v0*step + seed) % g.V()));
     int iter = 0;
-    for (auto v1 : y0) {
+    for (int i = 0; i < y0.size()*args[1]; i++) {
+      auto v1 = y0[abs((i*step + seed) % y0.size())];
       if(iter > args[1] * y0.size()) break;
-      int j = 0;
       auto y0y1 = y0 & g.N(v1);
-      for (auto v2 : y0y1) {
-        if(j > args[2] * y0y1.size()) break;
+      for (int j = 0; j < y0y1.size()*args[2]; j++) {
+        auto v2 = y0y1[abs((j*step + seed) % y0y1.size())];
         local_counter += intersection_num(y0y1, g.N(v2));
-        j += 1;
       }
-      iter += 1;
     }
     counter += local_counter;
   }

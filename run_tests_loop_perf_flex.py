@@ -2,12 +2,12 @@ import os
 import re
 import statistics
 
-graph_name = "livej"
+graph_name = "mico"
 
-files = ["tc_sample_omp_base", "tc_sample_perf_args"]
+files = ["tc_sample_omp_base", "tc_sample_edge_sparse_args"]
 
-arg_vals = ["0.1", "0.3", "0.5", "0.9"]
-depth = 2
+arg_vals = [".1", ".3", ".5", ".9"]
+depth = 1
 
 def gen_args(depth):
     if(depth == 0):
@@ -59,10 +59,11 @@ output = []
 for k in results:
     output.append({"args": k, "error": results[k][1], "time": results[k][0]})
 
-output = sorted(output, key=lambda d: d['args']) 
+output = sorted(output, key=lambda d: float(d['args'])) 
 
 import json
 print(json.dumps(output))
+
 
 
 

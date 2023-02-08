@@ -12,17 +12,16 @@ void TCSolver(Graph &g, uint64_t &total, int, int, vector<float> args) {
   Timer t;
   t.Start();
   uint64_t counter = 0;
+  int seed = rand();
+  int step = rand();
   int numIters = g.V() * args[0];
   printf("num iters: %d\n", numIters);
-  int skips = 0;
   #pragma omp parallel for reduction(+ : counter) schedule(dynamic, 1)
   for (vidType u = 0; u < numIters; u ++) {
-    auto adj_u = g.N(u);
-    int j = 0;
-    for (auto v : adj_u) {
-      if (j > std::round(args[1] * adj_u.size())) break;
-      counter += (uint64_t)intersection_num(adj_u, g.N(v));
-      j++;
+    auto adj_u = g.N(abs((u*step + seed) % g.V()));
+    for (int v = 0; v < adj_u.size() * args[1]; v++) {
+      vidType vi = adj_u[abs((v*step + seed) % adj_u.size())];
+      counter += (uint64_t)intersection_num(adj_u, g.N(vi));
     }
   }
   float p = args[0] * args[1];
