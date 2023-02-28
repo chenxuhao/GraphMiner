@@ -6,6 +6,10 @@ ICC_HOME=/opt/intel/compilers_and_libraries/linux/bin/intel64
 MKLROOT=/opt/intel/mkl
 CUB_DIR=../../cub
 MGPU_DIR=../../moderngpu
+GCC_HOME=/usr/lib/gcc/x86_64-linux-gnu/8
+CILK_HOME=/home/cxh/OpenCilk/build
+CILK_CLANG=$(CILK_HOME)/lib/clang/14.0.6
+
 BIN=../../bin/
 CC=gcc
 CXX=g++
@@ -14,6 +18,9 @@ ICPC=$(ICC_HOME)/icpc
 MPICC=mpicc
 MPICXX=mpicxx
 NVCC=nvcc
+CLANG=$(CILK_HOME)/bin/clang
+CLANGXX=$(CILK_HOME)/bin/clang++
+
 #CUDA_ARCH := -gencode arch=compute_75,code=sm_75
 CUDA_ARCH := -gencode arch=compute_70,code=sm_70
 CXXFLAGS=-Wall -fopenmp -std=c++11 -march=native
@@ -21,6 +28,7 @@ ICPCFLAGS=-O3 -Wall -qopenmp
 NVFLAGS=$(CUDA_ARCH)
 #NVFLAGS+=-Xptxas -v
 NVFLAGS+=-DUSE_GPU
+CILKFLAGS=-O3 -fopenmp=libiomp5 -fopencilk
 
 ifeq ($(VTUNE), 1)
 	CXXFLAGS += -g
