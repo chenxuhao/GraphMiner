@@ -3,12 +3,6 @@ include ../common.mk
 INCLUDES+=-I./cpu_kernels -I./gpu_kernels
 all: clique_omp_base clique_gpu_base clique_multigpu
 
-%.o: %.cc
-	$(CXX) $(CXXFLAGS) $(INCLUDES) $(LIBS) -c $<
-
-%.o: %.cu
-	$(NVCC) $(NVFLAGS) $(INCLUDES) -c $<
-
 clique_omp_base: $(OBJS) omp_base.o
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(LIBS) omp_base.o $(OBJS) -o $@
 	mv $@ $(BIN)

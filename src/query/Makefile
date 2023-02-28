@@ -1,14 +1,7 @@
 include ../common.mk
-INCLUDES+=-I$(CUB_DIR)
 INCLUDES+=-I./cpu_kernels -I./gpu_kernels
 OBJS+=pattern.o
 all: query_omp_base query_omp_auxiliary
-
-%.o: %.cc
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $<
-
-%.o: %.cu
-	$(NVCC) $(NVFLAGS) $(INCLUDES) -c $<
 
 query_gpu_base: gpu_base.o $(OBJS)
 	$(NVCC) $(NVFLAGS) $(INCLUDES) $(OBJS) gpu_base.o -o $@ $(LIBS)

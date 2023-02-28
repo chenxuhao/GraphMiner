@@ -41,6 +41,10 @@ The document is organized as follows:
 
 ### Quick Start ###
 
+Edit `env.sh` to let the libraries pointing to the right paths in your system, and then:
+
+    $ source env.sh
+
 Just make in the root directory:
 
     $ make

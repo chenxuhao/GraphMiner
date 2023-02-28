@@ -1,16 +1,9 @@
 include ../common.mk
-#INCLUDES+=-I$(CUB_DIR)
 INCLUDES+=-I$(MGPU_DIR)
 INCLUDES+=-I./cpu_kernels -I./gpu_kernels
 OBJS+=pattern.o
 NVFLAGS+=--expt-extended-lambda
 all: sgl_omp_base sgl_gpu_base sgl_multigpu
-
-%.o: %.cc
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $<
-
-%.o: %.cu
-	$(NVCC) $(NVFLAGS) $(INCLUDES) -c $<
 
 # baseline version, add make USE_SET_OPS=1 when make
 sgl_omp_base: $(OBJS) omp_base.o

@@ -3,12 +3,6 @@ include ../common.mk
 INCLUDES+=-I./cpu_kernels -I./gpu_kernels
 all: motif_omp_base motif_omp_formula motif_gpu_base motif_gpu_formula motif_multigpu
 
-%.o: %.cc
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $<
-
-%.o: %.cu
-	$(NVCC) $(NVFLAGS) $(INCLUDES) -c $<
-
 motif_omp_base: $(OBJS) omp_base.o
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) omp_base.o -o $@ -lgomp
 	mv $@ $(BIN)

@@ -1,13 +1,6 @@
 include ../common.mk
-#INCLUDES+=-I$(CUB_DIR)
 INCLUDES+=-I./ -I./dfscode
 all: fsm_omp_base fsm_gpu_base
-
-%.o: %.cc
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $<
-
-%.o: %.cu
-	$(NVCC) $(NVFLAGS) $(INCLUDES) -c $<
 
 fsm_gpu_base: gpu_base.o $(OBJS)
 	$(NVCC) $(NVFLAGS) $(INCLUDES) $(OBJS) gpu_base.o -o $@ $(LIBS)
