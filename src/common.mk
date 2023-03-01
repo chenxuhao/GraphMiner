@@ -49,6 +49,7 @@ endif
 
 INCLUDES := -I../../include
 LIBS := $(NVLDFLAGS) -lgomp
+CILK_INC=-I$(GCC_HOME)/include -I$(CILK_CLANG)/include
 
 ifeq ($(PAPI), 1)
 CXXFLAGS += -DENABLE_PAPI

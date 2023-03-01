@@ -15,6 +15,10 @@ motif_omp_formula: $(OBJS) omp_formula.o
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) omp_formula.o -o $@ -lgomp
 	mv $@ $(BIN)
 
+motif_cilk_base: $(OBJS) cilk_base.o 
+	$(CLANGXX) $(CILKFLAGS) $(OBJS) cilk_base.o -o $@
+	mv $@ $(BIN)
+
 motif_gpu_base: $(OBJS) gpu_base.o
 	$(NVCC) $(NVFLAGS) $(INCLUDES) $(OBJS) gpu_base.o -o $@ $(LIBS)
 	mv $@ $(BIN)

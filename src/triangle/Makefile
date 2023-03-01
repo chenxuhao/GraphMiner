@@ -1,6 +1,5 @@
 include ../common.mk
 INCLUDES+=-I./gpu_kernels
-CILK_INC=-I$(GCC_HOME)/include -I$(CILK_CLANG)/include
 all: tc_omp_base tc_gpu_base tc_multigpu_base tc_multigpu
 
 tc_omp_base: $(OBJS) omp_base.o
@@ -12,7 +11,7 @@ tc_omp_simd: $(OBJS) omp_simd.o intersect.o
 	mv $@ $(BIN)
 
 tc_cilk_base: $(OBJS) cilk_base.o 
-	$(CLANGXX) $(CILKFLAGS) $(INCLUDES) $(CILK_INC) $(OBJS) cilk_base.o -o $@
+	$(CLANGXX) $(CILKFLAGS) $(OBJS) cilk_base.o -o $@
 	mv $@ $(BIN)
 
 tc_gpu_base: $(OBJS) gpu_base.o

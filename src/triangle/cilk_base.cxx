@@ -1,4 +1,4 @@
-// Copyright 2020 MIT
+// Copyright 2023 MIT
 // Authors: Xuhao Chen <cxh@mit.edu>
 #include "graph.h"
 #include <cilk/cilk.h>
@@ -13,14 +13,16 @@ void TCSolver(Graph &g, uint64_t &total, int, int) {
   cilk::opadd_reducer<uint64_t> counter = 0;
   #pragma grainsize = 1
   cilk_for (vidType u = 0; u < g.V(); u ++) {
-    auto yu = g.N(u);
-    for (auto v : yu) {
-      counter += (uint64_t)intersection_num(yu, g.N(v));
+    auto adj_u = g.N(u);
+    for (auto v : adj_u) {
+    //clik_for (auto i = adj_u.begin(); i != adj_u.end(); i = i+1) {
+      //auto v = *i;
+      counter += (uint64_t)intersection_num(adj_u, g.N(v));
     }
   }
   total = counter;
   t.Stop();
-  std::cout << "runtime [omp_base] = " << t.Seconds() << " sec\n";
+  std::cout << "runtime [cilk_base] = " << t.Seconds() << " sec\n";
   return;
 }
 

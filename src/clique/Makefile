@@ -15,6 +15,10 @@ clique_omp_iterative: $(OBJS) omp_iterative.o
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(LIBS) omp_iterative.o $(OBJS) -o $@
 	mv $@ $(BIN)
 
+clique_cilk_base: $(OBJS) cilk_base.o 
+	$(CLANGXX) $(CILKFLAGS) $(OBJS) cilk_base.o -o $@
+	mv $@ $(BIN)
+
 clique_gpu_vp: $(OBJS) gpu_vp.o
 	$(NVCC) $(NVFLAGS) $(INCLUDES) $(OBJS) gpu_vp.o -o $@ $(LIBS)
 	mv $@ $(BIN)
