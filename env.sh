@@ -24,6 +24,7 @@ export MKL_DIR=/opt/apps/sysnet/intel/20.0/mkl
 #export MKLROOT=/opt/intel/mkl
 
 export GCC_HOME=/usr/lib/gcc/x86_64-linux-gnu/8
+export TBB_HOME=/opt/intel/oneapi/tbb/latest
 export CILK_HOME=/home/cxh/OpenCilk/build
 export CILK_CLANG=/home/cxh/OpenCilk/build/lib/clang/14.0.6
 export PAPI_HOME=/usr/local/papi-6.0.0

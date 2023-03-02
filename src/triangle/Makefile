@@ -1,5 +1,5 @@
 include ../common.mk
-INCLUDES+=-I./gpu_kernels
+INCLUDES+=-I./gpu_kernels -I$(TBB_HOME)/include
 all: tc_omp_base tc_gpu_base tc_multigpu_base tc_multigpu
 
 tc_omp_base: $(OBJS) omp_base.o
@@ -12,6 +12,10 @@ tc_omp_simd: $(OBJS) omp_simd.o intersect.o
 
 tc_cilk_base: $(OBJS) cilk_base.o 
 	$(CLANGXX) $(CILKFLAGS) $(OBJS) cilk_base.o -o $@
+	mv $@ $(BIN)
+
+tc_tbb_base: $(OBJS) tbb_base.o
+	$(CXX) $(CXXFLAGS) -L$(TBB_HOME)/lib/intel64/gcc4.8 $(OBJS) tbb_base.o -o $@ -lgomp -ltbb
 	mv $@ $(BIN)
 
 tc_gpu_base: $(OBJS) gpu_base.o
