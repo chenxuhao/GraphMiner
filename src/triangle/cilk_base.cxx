@@ -11,12 +11,11 @@ void TCSolver(Graph &g, uint64_t &total, int, int) {
   Timer t;
   t.Start();
   cilk::opadd_reducer<uint64_t> counter = 0;
-  #pragma grainsize = 1
+  //#pragma grainsize = 1
   cilk_for (vidType u = 0; u < g.V(); u ++) {
     auto adj_u = g.N(u);
-    for (auto v : adj_u) {
-    //clik_for (auto i = adj_u.begin(); i != adj_u.end(); i = i+1) {
-      //auto v = *i;
+    for (auto i = 0; i < adj_u.size(); i ++) {
+      auto v = adj_u[i];
       counter += (uint64_t)intersection_num(adj_u, g.N(v));
     }
   }
