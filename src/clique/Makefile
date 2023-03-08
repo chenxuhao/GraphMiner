@@ -4,15 +4,15 @@ INCLUDES+=-I./cpu_kernels -I./gpu_kernels
 all: clique_omp_base clique_gpu_base clique_multigpu
 
 clique_omp_base: $(OBJS) omp_base.o
-	$(CXX) $(CXXFLAGS) $(INCLUDES) $(LIBS) omp_base.o $(OBJS) -o $@
+	$(CXX) $(CXXFLAGS) $(INCLUDES) omp_base.o $(OBJS) -o $@ -lgomp
 	mv $@ $(BIN)
 
 clique_omp_recursive: $(OBJS) omp_recursive.o
-	$(CXX) $(CXXFLAGS) $(INCLUDES) $(LIBS) omp_recursive.o $(OBJS) -o $@
+	$(CXX) $(CXXFLAGS) $(INCLUDES) omp_recursive.o $(OBJS) -o $@ -lgomp
 	mv $@ $(BIN)
 
 clique_omp_iterative: $(OBJS) omp_iterative.o
-	$(CXX) $(CXXFLAGS) $(INCLUDES) $(LIBS) omp_iterative.o $(OBJS) -o $@
+	$(CXX) $(CXXFLAGS) $(INCLUDES) omp_iterative.o $(OBJS) -o $@ -lgomp
 	mv $@ $(BIN)
 
 clique_cilk_base: $(OBJS) cilk_base.o 
