@@ -11,8 +11,9 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
   std::cout << "Triangle Counting: we assume the neighbor lists are sorted.\n";
-  Graph g(argv[1], USE_DAG); // use DAG
-  int n_devices = 1;
+  // Graph g(argv[1], USE_DAG); // use DAG
+  Graph g(argv[1]);
+	int n_devices = 1;
   int chunk_size = 1024;
   int adj_sorted = 1;
   if (argc > 2) n_devices = atoi(argv[2]);
