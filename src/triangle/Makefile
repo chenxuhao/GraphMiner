@@ -1,5 +1,5 @@
 include ../common.mk
-INCLUDES+=-I./gpu_kernels -I$(TBB_HOME)/include
+INCLUDES+=-I./gpu_kernels -I$(TBB_HOME)/include -I$(OPENBLAS_DIR)/include
 CLANGXX=/home/azliu/build/bin/clang++
 # all: tc_omp_base tc_gpu_base tc_multigpu_base tc_multigpu
 # all: tc_omp_base tc_cilk_base tc_cilk_custom

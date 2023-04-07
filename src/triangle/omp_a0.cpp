@@ -1,6 +1,7 @@
 //#pragma GCC optimize("O3,unroll-loops")
 //#pragma GCC target("avx2,bmi,bmi2,lzcnt,popcnt")
 #include "graph.h"
+#include "cblas.h"
 #define ll uint64_t 
 
 void MM(vector<vector<vidType>> &A, vector<vector<vidType>> &B){
