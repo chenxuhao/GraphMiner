@@ -19,66 +19,87 @@ void MM(vector<vector<vidType>> &A, vector<vector<vidType>> &B){
   A=C;
 }
 
-void cnt_1(Graph &g, vector<vector<vidType>> &adj, vector<vidType> &type, vidType &n, uint64_t &t1){
-  // counts all HHHH 
+void cnt_1(Graph &g, vector<vector<vidType>> &adj, vector<vector<vidType>> &adj_arr, vector<vidType> &type, vidType &n, uint64_t &t1){
+  // t1 = 4*HHHH
+	// runtime: iterates through all high vertices. sum d_H^alpha = e * (e/D)^(alpha-1)
 	vector<vidType> h;
   vector<vidType> label_to_h(n);
+	vector<vidType> h_to_label(n);
   for (vidType i = 0; i < n; i++){
     if (type[i]==1){
       h.push_back(i);
       label_to_h[i] = h.size()-1;
+			h_to_label[h.size()-1] = i;
     }
   }
   vidType m = h.size();
-
+	
 	vector<vector<vidType>> adj_h(m);
 	for (vidType i = 0; i < m; i++){
 		for (vidType j : adj[h[i]]){
 			if (type[j]==1){
 				adj_h[i].push_back(label_to_h[j]);
-				adj_h[label_to_h[j]].push_back(i);
 			}
 		}
 	}
 
   vector<vector<vidType>> adj_arr_h(m, vector<vidType>(m));
   vector<vector<vidType>> adj_arr_h_2=adj_arr_h;
-	
-	for (vidType i = 0; i < m; i++){
-		cout << i << endl;
 
+	for (vidType i = 0; i < m; i++){
+	
 		vidType mh = adj_h[i].size();
 		vector<vector<vidType>> adj_arr_h_i(mh, vector<vidType>(mh));
-		vector<vector<vidType>> adj_arr_h_i_2 = adj_arr_h_i;
-		// fill with N(i)
-		for (vidType j : adj_h[i]){
-			for (vidType k : adj_h[i]){
-				if (j==k) continue;
-				adj_arr_h_i[j][k]=1;
+		
+		//if (mh > 3){
+		//	cout << "i: " << i << endl;
+		//	for (vidType j = 0; j < mh; j++){
+		//		cout << adj_h[i][j] << " ";
+		//	}
+		//	cout << endl;
+		//}
+		// fill adjacency array with edges between neighbors N(i)
+		for (vidType j = 0; j < mh; j++){
+			for (vidType k = 0; k < mh; k++){
+				if (adj_arr[h_to_label[adj_h[i][j]]][h_to_label[adj_h[i][k]]]){
+					adj_arr_h_i[j][k]=1;
+				}
 			}
 		}
+		vector<vector<vidType>> adj_arr_h_i_2 = adj_arr_h_i;
 		MM(adj_arr_h_i_2, adj_arr_h_i);
 		
 		// each triangle is triple counted
+		int cnt = 0;
 		for (vidType j = 0; j < mh; j++){
 			for (vidType k = j+1; k < mh; k++){
+				cnt += adj_arr_h_i[j][k]*adj_arr_h_i_2[j][k];
 				t1 += adj_arr_h_i[j][k]*adj_arr_h_i_2[j][k];
 			}
 		}
 	}
-	cout << t1 << endl;
-	// 4 triangles / k4, 3 cnts / triangle
-	t1 /= 12;
+	cout << "t1 (pre division): " << t1 << endl;
+	// 3 cnts / triangle
+	// t1 is HHHH * 4
+	t1 /= 3;
+}
+
+void cnt_2(Graph &g, vector<vector<vidType>> &adj, vector<vector<vidType>> &adj_arr, vector<vidType> &type, vidType &n, uint64_t &t2){
+	// t2 is 4*LLLL + 3*LLLH + 2*LLHH + 1*LHHH
+	cout << "inside of count 2" << endl;
 }
 
 void cliqueSolver(Graph &g, int k, uint64_t &total){
 	assert(k==4);
+	
 	vidType n = g.V();
 	vector<vector<vidType>> adj(n);
-  for (vidType i = 0; i < n; i++){
+  vector<vector<vidType>> adj_arr(n, vector<vidType>(n));
+	for (vidType i = 0; i < n; i++){
     auto ni = g.N(i);
     for (auto u : ni){
       adj[i].push_back(u);
+			adj_arr[i][u] = 1;
     }
   }
 
@@ -94,7 +115,7 @@ void cliqueSolver(Graph &g, int k, uint64_t &total){
 	cout << "number of high degree vertices: " << num_high_deg << '\n';
 	// totals
 	uint64_t t1=0, t2=0, t3=0, t4=0, t5=0;
-	cnt_1(g, adj, type, n, t1);
+	cnt_1(g, adj, adj_arr, type, n, t1);
 	total = t1+t2+t3+t4+t5; 
 }
 

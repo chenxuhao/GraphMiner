@@ -14,11 +14,11 @@ void SglSolver(Graph &g, Pattern &p, uint64_t &total, int, int) {
   t.Start();
   std::cout << "Running the baseline implementation\n";
   if (p.is_house()) {
-    #include "house.h"
+   // #include "house.h"
   } else if (p.is_pentagon()) {
-    #include "pentagon.h"
+   // #include "pentagon.h"
   } else if (p.is_rectangle()) {
-    #include "rectangle.h"
+   // #include "rectangle.h"
   } else {
     #include "diamond.h"
   }
