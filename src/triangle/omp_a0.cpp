@@ -1,15 +1,9 @@
 //#pragma GCC optimize("O3,unroll-loops")
 //#pragma GCC target("avx2,bmi,bmi2,lzcnt,popcnt")
 #include "graph.h"
+#include "cblas.h"
 #define ll uint64_t 
-#include <cblas.h>
 
-// adjacency arrays high vertices
-const ll mx_sz = 10000;
-float adj_arr_h[mx_sz*mx_sz];
-float adj_arr_h_2[mx_sz*mx_sz];
-
-// naive matmul
 void MM(vector<vector<vidType>> &A, vector<vector<vidType>> &B){
 	vidType n = A.size();
 	assert(n == (vidType)B.size());
@@ -29,28 +23,7 @@ void MM(vector<vector<vidType>> &A, vector<vector<vidType>> &B){
 	A=C;
 }
 
-// count intersections when adjacency graph is sorted by degree
 ll intersect(vidType &x, vidType &y, vector<vidType> &A, vector<vidType> &B, vector<vidType> &type){
-    ll cnt = 0;
-    vidType Asz = (vidType)A.size();
-    vidType Bsz = (vidType)B.size();
-    vidType idx1 = 0;
-    vidType idx2 = 0;
-    while(idx1 < Asz && idx2 < Bsz){
-      if (A[idx1] > B[idx2]) idx2++;
-      else if (A[idx1] < B[idx2]) idx1++;
-      else cnt++;
-    }
-    return cnt;
-}
-
-
-// count intersections when adjacency graph is not sorted by degree 
-// HHL are counted 2x
-// HLL are counted 4x
-// LLL are counted 6x
-// so we weight the counter differently according to the type
-ll intersect_unsorted(vidType &x, vidType &y, vector<vidType> &A, vector<vidType> &B, vector<vidType> &type){
 	// size of A < size of B
 	ll cnt=0;
 	vidType Asz = (vidType)A.size();
@@ -71,7 +44,7 @@ ll intersect_unsorted(vidType &x, vidType &y, vector<vidType> &A, vector<vidType
 	//		}
 	//	}
 	//}
-	while(idx1 < Asz && idx2 < Bsz){
+	while(idx1 != Asz && idx2 != Bsz){
 		if (A[idx1] > B[idx2]) idx2++;
 		else if (A[idx1] < B[idx2]) idx1++;
 		else {
@@ -86,89 +59,55 @@ ll intersect_unsorted(vidType &x, vidType &y, vector<vidType> &A, vector<vidType
 	return cnt;
 }
 
-
-// MM HELPER FUNCTIONS ------------
-//! wrapper function to call cblas_sgemm
-void sgemm_cpu(const CBLAS_TRANSPOSE TransA, const CBLAS_TRANSPOSE TransB,
-               const int M, const int N, const int K, const float alpha,
-               const float* A, const float* B, const float beta, float* C) {
-  int lda = (TransA == CblasNoTrans) ? K : M;
-  int ldb = (TransB == CblasNoTrans) ? N : K;
-	cblas_sgemm(CblasRowMajor, TransA, TransB, M, N, K, alpha, A, lda, B, ldb, beta, C, N);
-}
-
-// A: x*z; B: z*y; C: x*y
-// C = A*B: 
-// matmul(n, n, n, A, B, C, 0, 0, 0);
-// ROWMAJOR: A[0]=A[0][0], A[1] = A[0][1], A[2] = A[1][0], A[3] = A[1][1]
-// input matrices are flattened
-void matmul(const size_t dim_x, const size_t dim_y, const size_t dim_z,
-            const float* A, const float* B, float* C, bool transA, bool transB, bool accum) {
-  const CBLAS_TRANSPOSE TransA = transA ? CblasTrans : CblasNoTrans;
-  const CBLAS_TRANSPOSE TransB = transB ? CblasTrans : CblasNoTrans;
-  sgemm_cpu(TransA, TransB, dim_x, dim_y, dim_z, 1.0, A, B, accum?1.0:0.0, C);
-}
-// --------------------------------
-// --------------------------------
-
 void TCSolver(Graph &g, uint64_t &total, int, int) {
-	int num_threads = 1;
+  int num_threads = 1;
   #pragma omp parallel
   {
     num_threads = omp_get_num_threads();
   }
   std::cout << "OpenMP TC (" << num_threads << " threads)\n";
-	
 	Timer t;
 	t.Start();
+	ll counter = 0;
 	vidType n = g.V();
 	
 	Timer p;
 	p.Start();
 	// convert to undirected
 	//vector<vector<vidType>> adj_arr(n, vector<vidType>(n)); 
-  //for (vidType i = 0; i < n; i++){
-	//	cout << i << endl;
-   // auto ni = g.N(i);
+	//for (vidType i = 0; i < n; i++){
+	//	auto ni = g.N(i);
 	//	for (auto u : ni){
 	//		adj_arr[i][u]=1;
 	//		adj_arr[u][i]=1;
 	//	}
 	//}
+
 	// build adjacency lists
 	vector<vector<vidType>> adj(n);
 	for (vidType i = 0; i < n; i++){
 		auto ni = g.N(i);
 		for (auto u : ni){
 			adj[i].push_back(u);
-      adj[u].push_back(i);
 		}
 	}
-
-  // sort vertices by degree
-  //sort(adj.begin(), adj.end(), [](const vector<vidType> &i, const vector<vidType> &j){
-   // return i.size() < j.size();
-  //});
-  
 	//for (vidType i = 0; i < n; i++){
-		// cout << i << endl;
-    //for (vidType j = i+1; j < n; j++){
-			// cout << i << " " << j << endl;
-      //if (adj_arr[i][j]==1){
-			//	adj[i].push_back(j);
-			//	adj[j].push_back(i);
-			//}
+	//	for (vidType j = i+1; j < n; j++){
+	//		if (adj_arr[i][j]==1){
+	//			adj[i].push_back(j);
+	//			adj[j].push_back(i);
+	//		}
 			//for (auto u : g.N(i)){
-			//	  adj[i].push_back(u);
+			//	adj[i].push_back(u);
 			//}
-		//}
+	//	}
 	//}
 	
 
 	// sort adjacency lists
 	vidType max_undirected_degree = 0;
 	for (vidType i = 0; i < n; i++){
-		sort(adj[i].begin(), adj[i].end());
+	//	sort(adj[i].begin(), adj[i].end());
 		max_undirected_degree = max(max_undirected_degree, (vidType)adj[i].size());
 	}
 	cout << "max undirected degree: " << max_undirected_degree << endl;
@@ -184,7 +123,7 @@ void TCSolver(Graph &g, uint64_t &total, int, int) {
 	// collect vertices of high degree
 	double alpha = 2.81; // coefficient of matrix multiplication
 	vidType D = pow(g.E(),(alpha-1.0)/(alpha+1.0)); // threshold	
-	D = 500;
+	// D = 700;
 	cout << "threshold degree: " << D << endl;
 	vector<vidType> h;
 	vector<vidType> label_to_h(n);
@@ -196,78 +135,47 @@ void TCSolver(Graph &g, uint64_t &total, int, int) {
 			type[i]=1;
 		}
 	}
-  
-  Timer low_counter_timer;
-  low_counter_timer.Start();
+
 	// triangles with at least one low degree
 	ll lowcounter = 0;
-	// OLD WAY of counting intersections when lists were unsorted
-  //#pragma omp parallel for reduction(+ : lowcounter) schedule(dynamic, 1)
-	//for (vidType i = 0; i < n; i++){
-	//	if (type[i]!=1){
-	//		for (vidType j : adj[i]){
-	//			lowcounter += intersect_unsorted(i,j,adj[i], adj[j], type);
-	//		}
-	//	}
-	//}
-  #pragma omp parallel for reduction(+ : lowcounter) schedule(dynamic, 1)
-  for (vidType i = 0; i < n; i++) {
-    if (!type[i]){
-      auto ni = g.N(i); 
-      for (auto v : ni) {
-        lowcounter += (uint64_t)intersection_num(ni, g.N(v));
-      }    
-    }
-  }
-  low_counter_timer.Stop();
-  Timer high_counter_timer;
-  high_counter_timer.Start();
+	#pragma omp parallel for reduction(+ : lowcounter) schedule(dynamic, 1)
+	for (vidType i = 0; i < n; i++){
+		if (type[i]!=1){
+			for (vidType j : adj[i]){
+				lowcounter += intersect(i,j,adj[i], adj[j], type);
+			}
+		}
+	}
 
 	// triangles with all high degrees
 	ll highcounter = 0;
 	vidType m = h.size();
-	cout << "number of vertices with high degree: " << m << endl;
-	
-  for (vidType i = 0; i < m; i++){
-    for (vidType j : adj[h[i]]){
-      if (type[j]==1){
-        adj_arr_h[m*i+label_to_h[j]]=1;
-        adj_arr_h[m*label_to_h[j]+i]=1;
-      }
-    }
-  }
-
-  matmul(m, m, m, adj_arr_h, adj_arr_h, adj_arr_h_2, 0, 0, 0);
-  
-  // old code: filling up 2d adjacency array
-  //vector<vector<vidType>> adj_arr_h(m, vector<vidType>(m));
-	//for (vidType i = 0; i < m; i++){
-	//	for (vidType j : adj[h[i]]){
-	//		if (type[j]==1){
-	//			adj_arr_h[i][label_to_h[j]]=1;
-	//			adj_arr_h[label_to_h[j]][i]=1;
-	//		}
-	//	}
-	//}
-
-	// vector<vector<vidType>> adj_arr_h_2=adj_arr_h;
-	// MM(adj_arr_h_2, adj_arr_h);
-
+	cout << "m: " << m << endl;
+	vector<vector<vidType>> adj_arr_h(m, vector<vidType>(m));
 	for (vidType i = 0; i < m; i++){
-		for (vidType j = i+1; j < m; j++){
-			highcounter += adj_arr_h_2[i*m+j] * adj_arr_h[i*m+j];
+		for (vidType j : adj[h[i]]){
+			if (type[j]==1){
+				adj_arr_h[i][label_to_h[j]]=1;
+				adj_arr_h[label_to_h[j]][i]=1;
+			}
 		}
 	}
-  
-  high_counter_timer.Stop();
+
+	vector<vector<vidType>> adj_arr_h_2=adj_arr_h;
+	MM(adj_arr_h_2, adj_arr_h);
+
+	for (vidType i = 0; i < m; i++){
+		for (vidType j = 0; j < m; j++){
+			highcounter += adj_arr_h_2[i][j] * adj_arr_h[i][j];
+		}
+	}
+
 	// compute final answer
 	cout << "lowcnt: " << lowcounter << endl;
 	cout << "highcnt: " << highcounter << endl;
-	total = lowcounter + highcounter/3;
+	total = lowcounter/12 + highcounter/6;
 	s.Stop();
 	t.Stop();
-  cout << "time to compute low triangles = " << low_counter_timer.Seconds() << " sec\n";
-  cout << "time to compute high triangles = " << high_counter_timer.Seconds() << " sec\n";
 	cout << "computing runtime = " << s.Seconds() << " sec\n";
 	std::cout << "total runtime [omp_a0] = " << t.Seconds() << " sec\n";
 	return;

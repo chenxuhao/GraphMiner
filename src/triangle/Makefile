@@ -1,18 +1,16 @@
 include ../common.mk
 INCLUDES+=-I./gpu_kernels -I$(TBB_HOME)/include -I$(OPENBLAS_DIR)/include
-# INCLUDES+= -I./gpu_kernels -I$(TBB_HOME)/include
 CLANGXX=/home/azliu/build/bin/clang++
 # all: tc_omp_base tc_gpu_base tc_multigpu_base tc_multigpu
 # all: tc_omp_base tc_cilk_base tc_cilk_custom
-# all: tc_omp_base tc_omp_a0 tc_cilk_base 
-all: tc_omp_base tc_omp_a0
+all: tc_omp_base tc_omp_a0 tc_cilk_base 
 
 tc_omp_base: $(OBJS) omp_base.o
-	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) omp_base.o -o $@ -lgomp -L$(OPENBLAS_DIR)/lib -lopenblas
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) omp_base.o -o $@ -lgomp
 	mv $@ $(BIN)
 
 tc_omp_a0: $(OBJS) omp_a0.o
-	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) omp_a0.o -o $@ -lgomp -L$(OPENBLAS_DIR)/lib -lopenblas 
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) omp_a0.o -o $@ -lgomp
 	mv $@ $(BIN)
 
 tc_omp_simd: $(OBJS) omp_simd.o intersect.o

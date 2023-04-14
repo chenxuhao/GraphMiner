@@ -1,4 +1,4 @@
-export LD_LIBRARY_PATH=/usr/local/openblas/lib:$LD_LIBRARY_PATH
+#export LD_LIBRARY_PATH=/usr/local/OpenBLAS/build/lib:$LD_LIBRARY_PATH
 #export KMP_AFFINITY=scatter
 export KMP_AFFINITY=disabled
 export KMP_LIBRARY=turnaround
