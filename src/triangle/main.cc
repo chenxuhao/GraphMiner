@@ -5,14 +5,15 @@
 void TCSolver(Graph &g, uint64_t &total, int n_gpu, int chunk_size);
 
 int main(int argc, char *argv[]) {
-  if (argc < 2) {
+  if (argc < 3) {
+		cout << "don't forget to add whether or not you want to use a dag (1) or not (0) at the end as arg3" << endl;
     std::cout << "Usage: " << argv[0] << " <graph> [num_gpu(1)] [chunk_size(1024)] [adj_sorted(1)]\n";
     std::cout << "Example: " << argv[0] << " /graph_inputs/mico/graph\n";
     exit(1);
   }
   std::cout << "Triangle Counting: we assume the neighbor lists are sorted.\n";
   // Graph g(argv[1], USE_DAG); // use DAG
-  Graph g(argv[1]);
+	Graph g(argv[1], atoi(argv[2]));
 	int n_devices = 1;
   int chunk_size = 1024;
   int adj_sorted = 1;
@@ -24,6 +25,6 @@ int main(int argc, char *argv[]) {
   uint64_t total = 0;
   TCSolver(g, total, n_devices, chunk_size);
   std::cout << "total_num_triangles = " << total << "\n";
-  return 0;
+	return 0;
 }
 
