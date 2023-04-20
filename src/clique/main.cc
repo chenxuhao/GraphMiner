@@ -4,14 +4,14 @@
 #include "graph.h"
 #include "string.h"
 
-void DiamondSolver(Graph &g, int k, uint64_t &total, int, int);
+void DiamondSolver(Graph &g, int k, uint64_t &total, int, int, int);
 void CliqueSolver(Graph &g, int k, uint64_t &total, int, int);
 
 int main(int argc, char *argv[]) {
-	if (argc < 4) {
-		cout << "number of args: " << argc << ", expected 4\n";
-		cout << "don't forget fourth argument, diamond or clique\n"; 
-		std::cout << "Usage: " << argv[0] << "<graph> <k> [ngpu(0)] [chunk_size(1024)]\n";
+	if (argc < 5) {
+    cout << "third arg is size of clique (ignored for diamonds), fourth arg is diamond/clique, last arg is threshold for high degree vertices" << '\n';
+	  cout << "exmple: ../../bin/diamond_omp_a0 ../../inputs/citeseer/graph 4 diamond 30" << '\n';	
+    std::cout << "Usage: " << argv[0] << "<graph> <k> [ngpu(0)] [chunk_size(1024)]\n";
     std::cout << "Example: " << argv[0] << " /graph_inputs/mico/graph 4\n";
  	  exit(1);
   }
@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
 	
 	if (strcmp(argv[3],"diamond")==0){
   	uint64_t total_diamonds = 0;
-  	DiamondSolver(g, k, total_diamonds, n_devices, chunk_size);
+  	DiamondSolver(g, k, total_diamonds, n_devices, chunk_size, atoi(argv[4]));
 		std::cout << "num_diamonds = " << total_diamonds << "\n";		
 	} else {
 		uint64_t total_kcliques = 0;

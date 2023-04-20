@@ -9,6 +9,11 @@ const ll mx_sz = 10000;
 float adj_arr_h[mx_sz*mx_sz];
 float adj_arr_h_2[mx_sz*mx_sz];
 
+const ll mx_label_sz = 10000000; // max label size
+vidType h[mx_label_sz];
+vidType label_to_h[mx_label_sz];
+vidType type[mx_label_sz];
+
 // naive matmul
 void MM(vector<vector<vidType>> &A, vector<vector<vidType>> &B){
 	vidType n = A.size();
@@ -111,7 +116,7 @@ void matmul(const size_t dim_x, const size_t dim_y, const size_t dim_z,
 // --------------------------------
 // --------------------------------
 
-void TCSolver(Graph &g, uint64_t &total, int, int) {
+void TCSolver(Graph &g, uint64_t &total, int, int, int threshold) {
 	int num_threads = 1;
   #pragma omp parallel
   {
@@ -137,13 +142,23 @@ void TCSolver(Graph &g, uint64_t &total, int, int) {
 	//}
 	// build adjacency lists
 	vector<vector<vidType>> adj(n);
-	for (vidType i = 0; i < n; i++){
+	
+  // need to sort adjacency lists by size. otherwise, triangles of the form 
+  // H --> L--> L (H --------> L on the bottom) 
+  // are not counted correctly (they should not exist)
+  // assuming that g.N(i) was created such that lower vertices (in the non-DAG form) always point towards higher vertices, 
+  // we need to determine H and L vertices based on their degrees in the non-DAG form
+  // so, we cannot avoid this pre-processing unless we pass in degree information from the non-DAG form (which should be possible)
+  for (vidType i = 0; i < n; i++){
 		auto ni = g.N(i);
-		for (auto u : ni){
+	  for (auto u : ni){
 			adj[i].push_back(u);
       adj[u].push_back(i);
-		}
+	  }
 	}
+  //sort(adj.begin(), adj.end(), [](const vector<vidType> &a, const vector<vidType> &b){
+  //  return (vidType)a.size() < (vidType)b.size();  
+  //});
 
   // sort vertices by degree
   //sort(adj.begin(), adj.end(), [](const vector<vidType> &i, const vector<vidType> &j){
@@ -166,37 +181,46 @@ void TCSolver(Graph &g, uint64_t &total, int, int) {
 	
 
 	// sort adjacency lists
-	vidType max_undirected_degree = 0;
-	for (vidType i = 0; i < n; i++){
-		sort(adj[i].begin(), adj[i].end());
-		max_undirected_degree = max(max_undirected_degree, (vidType)adj[i].size());
-	}
-	cout << "max undirected degree: " << max_undirected_degree << endl;
+//	vidType max_undirected_degree = 0;
+//	for (vidType i = 0; i < n; i++){
+//		sort(adj[i].begin(), adj[i].end());
+//		max_undirected_degree = max(max_undirected_degree, (vidType)adj[i].size());
+//	}
+//	cout << "max undirected degree: " << max_undirected_degree << endl;
 	
-	p.Stop();
-	cout << "preprocessing runtime = " << p.Seconds() << " sec\n";
-	Timer s;
-	s.Start();
 	// adjacency squared
 	// vector<vector<vidType>> adj_arr_2=adj_arr;
 	// MM(adj_arr_2, adj_arr);
 
 	// collect vertices of high degree
-	double alpha = 2.81; // coefficient of matrix multiplication
-	vidType D = pow(g.E(),(alpha-1.0)/(alpha+1.0)); // threshold	
-	D = 500;
+  // these degrees are all with respect to the non-DAG version of the graph
+	// double alpha = 2.81; // coefficient of matrix multiplication
+	// vidType D = pow(g.E(),(alpha-1.0)/(alpha+1.0)); // theoretically optimal threshold, usually not practically applicable
+	vidType D = threshold;
 	cout << "threshold degree: " << D << endl;
-	vector<vidType> h;
-	vector<vidType> label_to_h(n);
-	vector<vidType> type(n);
+	//vector<vidType> h;
+	//vector<vidType> label_to_h(n);
+  vidType cur = 0;
+	// vector<vidType> type(n);
 	for (vidType i = 0; i < n; i++){
 		if ((vidType)adj[i].size() >= D){
-			h.push_back(i);
-			label_to_h[i] = h.size()-1;
-			type[i]=1;
+			//h.push_back(i);
+			//label_to_h[i] = h.size()-1;
+		// if ((vidType)g.N(i).size() >= D){	
+      h[cur]=i;
+      label_to_h[i]=cur;
+      type[i]=1;
+      cur++;
 		}
 	}
-  
+	vidType m = cur;
+	cout << "number of vertices with high degree: " << m << endl;
+
+	p.Stop();
+	cout << "preprocessing runtime = " << p.Seconds() << " sec\n";
+	Timer s;
+	s.Start();
+   
   Timer low_counter_timer;
   low_counter_timer.Start();
 	// triangles with at least one low degree
@@ -212,12 +236,12 @@ void TCSolver(Graph &g, uint64_t &total, int, int) {
 	//}
   #pragma omp parallel for reduction(+ : lowcounter) schedule(dynamic, 1)
   for (vidType i = 0; i < n; i++) {
-    if (!type[i]){
+  //  if (!type[i]){
       auto ni = g.N(i); 
       for (auto v : ni) {
-        lowcounter += (uint64_t)intersection_num(ni, g.N(v));
+        lowcounter += (!type[i])*(uint64_t)intersection_num(ni, g.N(v));
       }    
-    }
+   // }
   }
   low_counter_timer.Stop();
   Timer high_counter_timer;
@@ -225,14 +249,11 @@ void TCSolver(Graph &g, uint64_t &total, int, int) {
 
 	// triangles with all high degrees
 	ll highcounter = 0;
-	vidType m = h.size();
-	cout << "number of vertices with high degree: " << m << endl;
 	
   for (vidType i = 0; i < m; i++){
-    for (vidType j : adj[h[i]]){
+    for (vidType j : g.N(h[i])){
       if (type[j]==1){
         adj_arr_h[m*i+label_to_h[j]]=1;
-        adj_arr_h[m*label_to_h[j]+i]=1;
       }
     }
   }
@@ -252,9 +273,10 @@ void TCSolver(Graph &g, uint64_t &total, int, int) {
 
 	// vector<vector<vidType>> adj_arr_h_2=adj_arr_h;
 	// MM(adj_arr_h_2, adj_arr_h);
-
+  
+  #pragma omp parallel for reduction(+ : highcounter) schedule(dynamic, 1)
 	for (vidType i = 0; i < m; i++){
-		for (vidType j = i+1; j < m; j++){
+		for (vidType j = 0; j < m; j++){
 			highcounter += adj_arr_h_2[i*m+j] * adj_arr_h[i*m+j];
 		}
 	}
@@ -263,14 +285,18 @@ void TCSolver(Graph &g, uint64_t &total, int, int) {
 	// compute final answer
 	cout << "lowcnt: " << lowcounter << endl;
 	cout << "highcnt: " << highcounter << endl;
-	total = lowcounter + highcounter/3;
+	total = lowcounter + highcounter;
 	s.Stop();
 	t.Stop();
   cout << "time to compute low triangles = " << low_counter_timer.Seconds() << " sec\n";
   cout << "time to compute high triangles = " << high_counter_timer.Seconds() << " sec\n";
 	cout << "computing runtime = " << s.Seconds() << " sec\n";
 	std::cout << "total runtime [omp_a0] = " << t.Seconds() << " sec\n";
-	return;
+	
+  // the "computing runtime" assumes the following quantities are already given: 
+  // -compressed list of high degree nodes, where high degree nodes are determined by their degree in the non-DAG version of the graph
+  // adjacency arrays in DAG version of the graph
+  return;
 }
 
 

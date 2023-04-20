@@ -137,6 +137,6 @@ void CliqueSolver(Graph &g, int k, uint64_t &total, int, int){
   return;	
 }
 
-void DiamondSolver(Graph &g, int k, uint64_t &total, int, int){
+void DiamondSolver(Graph &g, int k, uint64_t &total, int, int, int){
 	return;
 }

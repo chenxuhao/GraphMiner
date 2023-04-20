@@ -105,11 +105,9 @@ void cnt_2(Graph &g, vector<vector<vidType>> &adj, vector<vidType> &type, vidTyp
 	// O(sum deg_L^alpha)\in D^(alpha-1)*e, summing over adjacency graphs of all low degree vertices
 	cout << "running count 2..." << endl;
   
-  vidType neighbor_index = 100;
   // #pragma omp parallel for reduction(+ : total_2) schedule(dynamic, 100)
 	for (vidType i = 0; i < n; i++){
 		// cout << i << endl;
-    neighbor_index++;
     if (type[i]==0){
 			// cout << "found a low degree vertex, with degree: " << (vidType)adj[i].size() << '\n';
 			// vector<vidType> nx;
@@ -122,7 +120,7 @@ void cnt_2(Graph &g, vector<vector<vidType>> &adj, vector<vidType> &type, vidTyp
 			//  is_neighbor[u]=i;
       //}
       
-      is_neighbor[i]=neighbor_index;
+      is_neighbor[i]=i;
       nx[0]=i;
       label_to_nx[i]=0;
       //cout << "this is another flag" << endl;
@@ -130,7 +128,7 @@ void cnt_2(Graph &g, vector<vector<vidType>> &adj, vector<vidType> &type, vidTyp
       for (auto u : adj[i]){
         nx[cur] = u;
         label_to_nx[u] = cur;
-        is_neighbor[u]=neighbor_index;
+        is_neighbor[u] = i;
         cur++;
      }
 
@@ -150,7 +148,7 @@ void cnt_2(Graph &g, vector<vector<vidType>> &adj, vector<vidType> &type, vidTyp
    //   }
       for (vidType k = 0; k < m; k++){
 		  	for (vidType j : adj[nx[k]]){
-          if (is_neighbor[j] != neighbor_index) continue;
+          if (is_neighbor[j] != i) continue;
 					adj_x[k*m+label_to_nx[j]] = 1;
           adj_x[k+label_to_nx[j]*m] = 1;
 				}
@@ -161,9 +159,9 @@ void cnt_2(Graph &g, vector<vector<vidType>> &adj, vector<vidType> &type, vidTyp
       matmul(m, m, m, adj_x, adj_x, adj_x_2, 0,0,0);
       for (auto u : adj[i]){
 				if (type[u] == 1){ // HL
-					total_2 += adj_x_2[label_to_nx[i]+label_to_nx[u]*m]*(adj_x_2[label_to_nx[i]+label_to_nx[u]*m]-1);
+					total_2 += adj_x_2[label_to_nx[i]*m+label_to_nx[u]]*(adj_x_2[label_to_nx[i]*m+label_to_nx[u]]-1);
 				} else { // LL
-					total_2 += (adj_x_2[label_to_nx[i]+label_to_nx[u]*m]*(adj_x_2[label_to_nx[i]+label_to_nx[u]*m]-1))/2;
+					total_2 += adj_x_2[label_to_nx[i]*m+label_to_nx[u]]*(adj_x_2[label_to_nx[i]*m+label_to_nx[u]]-1)/2;
 				}
 			}
       //for (auto u : adj[i]){
@@ -176,7 +174,8 @@ void cnt_2(Graph &g, vector<vector<vidType>> &adj, vector<vidType> &type, vidTyp
 			// cout << "new total 2 value: " << total_2 << '\n';
 		}
 	}
-	total_2/=2;	
+	total_2/=2;
+  // each 
 }
 
 void cnt_1(Graph &g, vector<vector<vidType>> &adj, vector<vidType> &type, vidType &n, vidType &m, uint64_t &total_1){
@@ -208,10 +207,10 @@ void cnt_1(Graph &g, vector<vector<vidType>> &adj, vector<vidType> &type, vidTyp
 			}	
 		}
 	}
-	// total_1/=2;
+	total_1/=2;
 }
 
-void diamondSolver(Graph &g, int k, uint64_t &total){
+void diamondSolver(Graph &g, int k, uint64_t &total, int threshold){
 	// assert(k==4);
 	Timer construction;
   construction.Start();
@@ -221,22 +220,35 @@ void diamondSolver(Graph &g, int k, uint64_t &total){
     auto ni = g.N(i);
     for (auto u : ni){
       adj[i].push_back(u);
+      adj[u].push_back(i);
     }
   }
   construction.Stop();
   cout << "construction time: " << construction.Seconds() << '\n';
 
-	vidType D = pow(g.E(), 0.5); // TODO: what is the best possible threshold? 
-	//D=150; // for testing
+	// vidType D = pow(g.E(), 0.5); // theoretically optimal threshold 
+  vidType D = threshold;	
 	cout << "number of edges: " << g.E() << '\n';
 	cout << "threshold for high degree vertices: " << D << '\n';
 	vidType num_high_deg = 0;
 	vector<vidType> type(n);
 	for (vidType i = 0; i < n; i++){
-		if ((vidType)adj[i].size() >= D) {type[i] = 1; num_high_deg++;}
+		if ((vidType)adj[i].size() >= D) {
+      type[i] = 1; 
+      num_high_deg++;
+    }
 	}
 	cout << "number of high degree vertices: " << num_high_deg << '\n';
-
+  
+  // adjacency matrix directed
+  adj.clear();
+  adj.resize(n);
+  for (vidType i = 0; i < n; i++){
+    auto ni = g.N(i);
+    for (auto u : ni){
+      adj[i].push_back(u);  
+    }
+  }
   // compute graphs for high vertices
   vidType cur = 0;
   for (vidType i = 0; i < n; i++){
@@ -247,24 +259,23 @@ void diamondSolver(Graph &g, int k, uint64_t &total){
     }
   }
   vidType m = cur;
-  ll non_zero = 0;
+  // ll non_zero = 0;
   for (vidType i = 0; i < m; i++){
     for (vidType j : adj[h[i]]){
       if (type[j]==1){
-        non_zero++;
+        // non_zero++;
         adj_arr_h[i*m+label_to_h[j]] = 1;
-        adj_arr_h[label_to_h[j]*m+i] = 1;
+        adj_arr_h[i+label_to_h[j]*m] = 1;
       }
     }
   }
-  cout << "NON ZERO: " << non_zero << " TOTAL SIZE: " << m*m << '\n';
+  // cout << "NON ZERO: " << non_zero << " TOTAL SIZE: " << m*m << '\n';
 	// totals
 	uint64_t total_1 = 0, total_2 = 0, total_3 = 0;
 	Timer time_cnt_1;
   time_cnt_1.Start();
   cnt_1(g, adj, type, n, m, total_1);
   time_cnt_1.Stop();
-  total_1 /= 2;
   Timer time_cnt_2;
   time_cnt_2.Start();
 	cnt_2(g, adj, type, n, m, total_2);
@@ -282,7 +293,7 @@ void diamondSolver(Graph &g, int k, uint64_t &total){
   cout << "time to compute HH diameters with >= L: " << time_cnt_3.Seconds() << '\n';
 }
 
-void DiamondSolver(Graph &g, int k, uint64_t &total, int, int){
+void DiamondSolver(Graph &g, int k, uint64_t &total, int, int, int threshold){
 	int num_threads = 1;
 	#pragma omp parallel
 	{
@@ -293,7 +304,7 @@ void DiamondSolver(Graph &g, int k, uint64_t &total, int, int){
   t.Start();
   double start_time = omp_get_wtime();
 	cout << "compute the number of diamonds" << '\n';
-  diamondSolver(g, k, total);
+  diamondSolver(g, k, total, threshold);
 	double run_time = omp_get_wtime() - start_time;
 	t.Stop();
   std::cout << "runtime [omp_base] = " << run_time << " sec\n";
