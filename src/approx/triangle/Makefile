@@ -1,6 +1,6 @@
 include ../../common.mk
 VPATH += ../../common
-all: tc_sample_omp_base tc_sample_edge_sparse tc_sample_color_sparse tc_sample_mask tc_sample_edge_stream tc_sample_edge_stream_v0 tc_sample_edge_mask tc_sample_perf_args tc_sample_edge_sparse_args tc_sample_edge_stream_args
+all: tc_sample_omp_base tc_sample_edge_sparse tc_sample_color_sparse tc_sample_mask tc_sample_edge_stream tc_sample_edge_stream_v0 tc_sample_edge_mask tc_sample_perf_args tc_sample_edge_sparse_args tc_sample_edge_stream_args tc_sample_color_sparse_args
 
 BIN=../../../bin
 INCLUDES = -I../../../include
@@ -50,6 +50,10 @@ tc_sample_edge_sparse_args: main_sample_args.o graph.o VertexSet.o tc_sample_edg
 
 tc_sample_edge_stream_args: main_sample_args.o graph.o VertexSet.o tc_sample_edge_stream_args.o
 	$(CXX) $(CXXFLAGS) $(INCLUDES) main_sample_args.o graph.o VertexSet.o tc_sample_edge_stream_args.o -o $@ -lgomp
+	mv $@ $(BIN)
+
+tc_sample_color_sparse_args: main_sample_args.o graph.o VertexSet.o tc_sample_color_sparse_args.o
+	$(CXX) $(CXXFLAGS) $(INCLUDES) main_sample_args.o graph.o VertexSet.o tc_sample_color_sparse_args.o -o $@ -lgomp
 	mv $@ $(BIN)
 
 tc_ASAP_args: main_sample_args.o graph.o ASAP.o VertexSet.o tc_ASAP_args.o

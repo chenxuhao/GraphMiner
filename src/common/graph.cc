@@ -1,5 +1,7 @@
 #include "graph.h"
 #include "scan.h"
+#include <random>
+
 
 Graph::Graph(std::string prefix, bool use_dag, bool directed, 
              bool use_vlabel, bool use_elabel, bool need_reverse, bool bipartite) :
@@ -174,8 +176,14 @@ void Graph::color_sparsify(int c) {
   auto new_edges = new vidType[n_edges];
   auto colors = new int[n_vertices];
 
+  
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  std::uniform_int_distribution<int> dist(0, c-1);
+
+
   for (vidType v = 0; v < n_vertices; v++) {
-    colors[v] = rand() % c;
+    colors[v] = dist(mt);
     //printf("color[%d] = %d, %d\n", v, colors[v], rand());
   }
 

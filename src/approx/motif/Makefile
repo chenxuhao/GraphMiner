@@ -1,6 +1,6 @@
 include ../../common.mk
 VPATH += ../../common
-all: motif_omp_base motif_edge_sparse_args
+all: motif_omp_base motif_edge_sparse_args motif_color_sparse_args
 
 BIN=../../../bin
 INCLUDES = -I../../../include
@@ -19,5 +19,9 @@ motif_omp_base: $(OBJS) omp_base.o
 
 motif_edge_sparse_args: $(OBJS_ARGS) motif_edge_sparse_args.o
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS_ARGS) motif_edge_sparse_args.o -o $@ -lgomp
+	mv $@ $(BIN)
+
+motif_color_sparse_args: $(OBJS_ARGS) motif_color_sparse_args.o
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS_ARGS) motif_color_sparse_args.o -o $@ -lgomp
 	mv $@ $(BIN)
 

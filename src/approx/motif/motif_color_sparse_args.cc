@@ -3,7 +3,7 @@
 
 void EdgeSample(Graph &g, float p) {
   std::cout << "|e| before sampling " << g.E() << "\n";
-  g.edge_sparsify(p);
+  g.color_sparsify(p);
   std::cout <<  "|e| after sampling " << g.E() << "\n";
 }
 
@@ -85,16 +85,8 @@ void MotifSolver(Graph &g, int k, std::vector<uint64_t> &total, int, int, vector
 
   //star (3), chain(3), 3-loop-out(4), box(4), semi-clique(5), clique(6) 
   printf("p: %f\n", args[0]);
-  for(int pid = 0; pid < num_patterns; pid++) {
-      if(pid == 0 || pid == 1) { // 3 edges
-        total[pid] = total[pid]*(1/(args[0]*args[0]*args[0]));
-      } else if (pid == 2 || pid == 3){ // 4 edges
-        total[pid] = total[pid]*(1/(args[0]*args[0]*args[0]*args[0]));
-      } else if (pid == 4) { // 5 edges
-        total[pid] = total[pid]*(1/(args[0]*args[0]*args[0]*args[0]*args[0]));
-      } else if (pid == 5){ // 6 edges
-        total[pid] = total[pid]*(1/(args[0]*args[0]*args[0]*args[0]*args[0]*args[0]));
-      }
+  for(int pid = 0; pid < num_patterns; pid++) { 
+    total[pid] = total[pid]*(args[0]*args[0]*args[0]); //all nodes have same color
   }
   
   t.Stop();
