@@ -2,6 +2,7 @@ include ../common.mk
 #INCLUDES+=-I$(CUB_DIR)
 INCLUDES+=-I./cpu_kernels -I./gpu_kernels -I$(OPENBLAS_DIR)/include
 # all: clique_omp_base clique_gpu_base clique_multigpu
+CXXFLAGS+=-pie
 all: diamond_omp_a0 clique_omp_a0
 
 # clique_omp_base: $(OBJS) omp_base.o

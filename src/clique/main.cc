@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
 	} else {
 		cout << "k-clique listing with undirected graphs\n";
 	}
-	if (USE_DAG) std::cout << "Using DAG (static orientation)\n";
+	// if (USE_DAG) std::cout << "Using DAG (static orientation)\n";
   // Graph g(argv[1], USE_DAG); // use DAG
 	Graph g(argv[1], false);
 	
