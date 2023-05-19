@@ -118,11 +118,13 @@ void matmul(const size_t dim_x, const size_t dim_y, const size_t dim_z,
 
 void TCSolver(Graph &g, uint64_t &total, int, int, int threshold) {
 	int num_threads = 1;
-  #pragma omp parallel
+	int openblas_num_threads = openblas_get_num_threads();  
+	#pragma omp parallel
   {
     num_threads = omp_get_num_threads();
   }
   std::cout << "OpenMP TC (" << num_threads << " threads)\n";
+  cout << "with Openblas (" << openblas_num_threads << " threads)\n";
 	
 	Timer t;
 	t.Start();
