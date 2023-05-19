@@ -4,6 +4,7 @@ export KMP_AFFINITY=disabled
 export KMP_LIBRARY=turnaround
 export KMP_BLOCKTIME=0
 export OMP_NUM_THREADS=20
+export OPENBLAS_NUM_THREADS=4
 
 export CUDA_HOME=/usr/local/cuda
 #CUDA_HOME=/org/centers/cdgc/cuda/cuda-10.2

@@ -1,3 +1,4 @@
+// #pragma GCC optimize("O3,unroll-loops")
 #include "graph.h"
 #define ll uint64_t
 #include <cblas.h>
@@ -77,10 +78,8 @@ void cnt_3(Graph &g, vector<vector<vidType>> &adj, vector<vidType> &type, vidTyp
   // ll test = 0;
 
   uint64_t other = 0;
-  uint64_t temp = 0;
-  uint64_t temp2 = 0;
 
-// #pragma omp parallel for reduction(+ : temp2) schedule(dynamic, 1)
+  #pragma omp parallel for reduction(+ : total_3) firstprivate(other) schedule(dynamic, 1)
   for (vidType i = 0; i < m; i++){
     for (vidType j = i+1; j < m; j++){
       if (adj_arr_h[i*m+j]==1){
@@ -98,14 +97,9 @@ void cnt_3(Graph &g, vector<vector<vidType>> &adj, vector<vidType> &type, vidTyp
           } else if (adj[h[i]][idx_1] < adj[h[j]][idx_2]) idx_1++;
           else idx_2++;
         }
-        if (cnt){
-          other += cnt*(cnt-1)/2;
-          //            if (h_cnt) other -= h_cnt*(h_cnt-1)/2;
-        }
-        if (h_cnt){
-          temp += h_cnt*(h_cnt-1)/2;
-        }
-        temp2 += h_cnt*l_cnt + (l_cnt)*(l_cnt-1)/2;
+        other += h_cnt*l_cnt + (l_cnt)*(l_cnt-1)/2;
+        total_3 += other;
+        other=0;
         //if (h_cnt && l_cnt){
         //  total_3 += h_cnt * l_cnt;  
         //}
@@ -124,10 +118,10 @@ void cnt_3(Graph &g, vector<vector<vidType>> &adj, vector<vidType> &type, vidTyp
         //other=0;
       }
     }
-    //total_3 += other;
+    //temp2 += other;
     //other=0;
   }
-  total_3 = temp2;
+  //total_3 = temp2;
   // total_3 /= 2;
   // cout << test << '\n';
 }
@@ -153,7 +147,24 @@ void cnt_2(Graph &g, vector<vector<vidType>> &adj, vector<vidType> &type, vidTyp
 //    vidType label_to_nx[mx_label_sz]; // original labels to index in neighbors array
 //    vidType is_neighbor[mx_label_sz];
     
-//    #pragma omp parallel for reduction(+ : other) schedule(dynamic, 1)
+    //int a[10]={0};
+    //vidType is_neighbor[100]={};
+    //uint64_t total=0;
+    //#pragma omp parallel for reduction(+ : total) firstprivate(is_neighbor, a) schedule(dynamic, 1)
+    //for (int i = 0; i < 10; i++){
+    //  cout << i << " " << is_neighbor[i] << "\n";  
+    //  total += is_neighbor[i];
+    //}  
+    //cout << "final total: " << total << endl;
+    
+    
+    //vidType is_neighbor[200000]={};
+    //float adj_x[100000]={}; // adjacency array for neighbors of node x
+    //float adj_x_2[100000]={}; // squared adjacency array for neighbors of node x   
+    //vidType nx[200000]={}; // neighbors of each x
+    //vidType label_to_nx[200000]={}; // original labels to index in neighbors array
+
+    // #pragma omp parallel for reduction(+ : total_2) firstprivate(is_neighbor) schedule(dynamic, 1)
     for (vidType i = 0; i < n; i++){
       if (type[i]==0){
         // cout << "found a low degree vertex, with degree: " << (vidType)adj[i].size() << '\n';
@@ -236,14 +247,14 @@ void cnt_2(Graph &g, vector<vector<vidType>> &adj, vector<vidType> &type, vidTyp
 
         for (auto u : adj[i]){
           if (type[u] == 1){ // HL
-            total_2 += adj_x_2[label_to_nx[u]]*(adj_x_2[label_to_nx[u]]-1);
+            other += adj_x_2[label_to_nx[u]]*(adj_x_2[label_to_nx[u]]-1);
           } else { // LL
-            total_2 += adj_x_2[label_to_nx[u]]*(adj_x_2[label_to_nx[u]]-1)/2;
+            other += adj_x_2[label_to_nx[u]]*(adj_x_2[label_to_nx[u]]-1)/2;
           }
         }
 
-        //total_2 += other;
-        //other = 0;
+        total_2 += other;
+        other = 0;
 
         //if (0==1){
         //if (adj_x_2[i*mm+j] != aa2[i][j]){
@@ -291,9 +302,8 @@ void cnt_2(Graph &g, vector<vector<vidType>> &adj, vector<vidType> &type, vidTyp
 //  }
   // total_2=other;
 
-  cout << total_2 << " before division" << endl;
   total_2/=2;
-  cout << "OTHER: " << other << endl;
+  // cout << "OTHER: " << other << endl;
   // each 
 }
 
@@ -318,7 +328,8 @@ void cnt_1(Graph &g, vector<vector<vidType>> &adj, vector<vidType> &type, vidTyp
   matmul(m, m, m, adj_arr_h, adj_arr_h, adj_arr_h_2, 0, 0, 0);
 
   uint64_t other = 0;
-  // #pragma omp parallel for reduction(+ : other) schedule(dynamic, 1)
+  // this pragma makes the runtown slower?
+  // #pragma omp parallel for reduction(+ : total_1) firstprivate(other) schedule(dynamic, 1)
   for (vidType i = 0; i < m; i++){
     for (vidType j = i+1; j < m; j++){
       other += adj_arr_h[i*m+j]*adj_arr_h_2[i*m+j]*(adj_arr_h_2[i*m+j]-1)/2;
@@ -423,7 +434,7 @@ void diamondSolver(Graph &g, int k, uint64_t &total, int threshold){
   total = total_1 + total_2 + total_3; 
 
   total_time.Stop();
-  cout << "OTHER ANSWER: " << total_2 + total_3 << '\n';
+  // cout << "OTHER ANSWER: " << total_2 + total_3 << '\n';
   cout << "HHHH total: " << total_1 << '\n';
   cout << "HL/LL diameter total: " << total_2 << '\n';
   cout << "HH diamater with>=1 L total: " << total_3 << '\n';
@@ -435,11 +446,13 @@ void diamondSolver(Graph &g, int k, uint64_t &total, int threshold){
 
 void DiamondSolver(Graph &g, int k, uint64_t &total, int, int, int threshold){
   int num_threads = 1;
+  int openblas_num_threads = openblas_get_num_threads();
 #pragma omp parallel
   {
     num_threads = omp_get_num_threads();
   }
   std::cout << "OpenMP diamond listing (" << num_threads << " threads)\n";
+  cout << "with Openblas (" << openblas_num_threads << " threads)'\n";
   Timer t;
   t.Start();
   double start_time = omp_get_wtime();
