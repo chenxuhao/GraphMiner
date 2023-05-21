@@ -10,7 +10,7 @@ void CliqueSolver(Graph &g, int k, uint64_t &total, int, int);
 int main(int argc, char *argv[]) {
 	if (argc < 5) {
     cout << "third arg is size of clique (ignored for diamonds), fourth arg is diamond/clique, last arg is threshold for high degree vertices" << '\n';
-	  cout << "exmple: ../../bin/diamond_omp_a0 ../../inputs/citeseer/graph 4 diamond 30" << '\n';	
+	  cout << "exmple: ../../bin/diamond_omp_a0 ../../inputs/mico/graph 4 diamond 400" << '\n';	
     std::cout << "Usage: " << argv[0] << "<graph> <k> [ngpu(0)] [chunk_size(1024)]\n";
     std::cout << "Example: " << argv[0] << " /graph_inputs/mico/graph 4\n";
  	  exit(1);

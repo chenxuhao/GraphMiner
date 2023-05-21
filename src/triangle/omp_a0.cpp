@@ -1,4 +1,4 @@
-//#pragma GCC optimize("O3,unroll-loops")
+#pragma GCC optimize("O3,unroll-loops")
 //#pragma GCC target("avx2,bmi,bmi2,lzcnt,popcnt")
 #include "graph.h"
 #define ll uint64_t 
@@ -63,19 +63,6 @@ ll intersect_unsorted(vidType &x, vidType &y, vector<vidType> &A, vector<vidType
 	vidType idx1 = 0;
 	vidType idx2 = 0;
 	vidType h_cnt = type[x]+type[y];
-	//for (vidType i = 0; i < Asz; i++){
-	//	if (idx2 == Bsz) break;
-	//	if (A[i] > B[idx2]){
-	//		idx2 = lower_bound(B.begin()+idx2+1, B.end(), A[i])-B.begin();
-	//		if (idx2 != Bsz && B[idx2]==A[i]){
-	//			vidType h_tot = h_cnt+type[A[i]];
-	//			if (h_tot == 0) cnt+=2;
-	//			else if (h_tot == 1) cnt+=3;
-	//			else cnt+=6;
-	//			idx2++;
-	//		}
-	//	}
-	//}
 	while(idx1 < Asz && idx2 < Bsz){
 		if (A[idx1] > B[idx2]) idx2++;
 		else if (A[idx1] < B[idx2]) idx1++;
@@ -132,16 +119,6 @@ void TCSolver(Graph &g, uint64_t &total, int, int, int threshold) {
 	
 	Timer p;
 	p.Start();
-	// convert to undirected
-	//vector<vector<vidType>> adj_arr(n, vector<vidType>(n)); 
-  //for (vidType i = 0; i < n; i++){
-	//	cout << i << endl;
-   // auto ni = g.N(i);
-	//	for (auto u : ni){
-	//		adj_arr[i][u]=1;
-	//		adj_arr[u][i]=1;
-	//	}
-	//}
 	// build adjacency lists
 	vector<vector<vidType>> adj(n);
 	
@@ -158,57 +135,15 @@ void TCSolver(Graph &g, uint64_t &total, int, int, int threshold) {
       adj[u].push_back(i);
 	  }
 	}
-  //sort(adj.begin(), adj.end(), [](const vector<vidType> &a, const vector<vidType> &b){
-  //  return (vidType)a.size() < (vidType)b.size();  
-  //});
-
-  // sort vertices by degree
-  //sort(adj.begin(), adj.end(), [](const vector<vidType> &i, const vector<vidType> &j){
-   // return i.size() < j.size();
-  //});
-  
-	//for (vidType i = 0; i < n; i++){
-		// cout << i << endl;
-    //for (vidType j = i+1; j < n; j++){
-			// cout << i << " " << j << endl;
-      //if (adj_arr[i][j]==1){
-			//	adj[i].push_back(j);
-			//	adj[j].push_back(i);
-			//}
-			//for (auto u : g.N(i)){
-			//	  adj[i].push_back(u);
-			//}
-		//}
-	//}
-	
-
-	// sort adjacency lists
-//	vidType max_undirected_degree = 0;
-//	for (vidType i = 0; i < n; i++){
-//		sort(adj[i].begin(), adj[i].end());
-//		max_undirected_degree = max(max_undirected_degree, (vidType)adj[i].size());
-//	}
-//	cout << "max undirected degree: " << max_undirected_degree << endl;
-	
-	// adjacency squared
-	// vector<vector<vidType>> adj_arr_2=adj_arr;
-	// MM(adj_arr_2, adj_arr);
-
 	// collect vertices of high degree
   // these degrees are all with respect to the non-DAG version of the graph
 	// double alpha = 2.81; // coefficient of matrix multiplication
 	// vidType D = pow(g.E(),(alpha-1.0)/(alpha+1.0)); // theoretically optimal threshold, usually not practically applicable
 	vidType D = threshold;
 	cout << "threshold degree: " << D << endl;
-	//vector<vidType> h;
-	//vector<vidType> label_to_h(n);
   vidType cur = 0;
-	// vector<vidType> type(n);
 	for (vidType i = 0; i < n; i++){
 		if ((vidType)adj[i].size() >= D){
-			//h.push_back(i);
-			//label_to_h[i] = h.size()-1;
-		// if ((vidType)g.N(i).size() >= D){	
       h[cur]=i;
       label_to_h[i]=cur;
       type[i]=1;
@@ -227,15 +162,6 @@ void TCSolver(Graph &g, uint64_t &total, int, int, int threshold) {
   low_counter_timer.Start();
 	// triangles with at least one low degree
 	ll lowcounter = 0;
-	// OLD WAY of counting intersections when lists were unsorted
-  //#pragma omp parallel for reduction(+ : lowcounter) schedule(dynamic, 1)
-	//for (vidType i = 0; i < n; i++){
-	//	if (type[i]!=1){
-	//		for (vidType j : adj[i]){
-	//			lowcounter += intersect_unsorted(i,j,adj[i], adj[j], type);
-	//		}
-	//	}
-	//}
   #pragma omp parallel for reduction(+ : lowcounter) schedule(dynamic, 1)
   for (vidType i = 0; i < n; i++) {
   //  if (!type[i]){
@@ -261,20 +187,6 @@ void TCSolver(Graph &g, uint64_t &total, int, int, int threshold) {
   }
 
   matmul(m, m, m, adj_arr_h, adj_arr_h, adj_arr_h_2, 0, 0, 0);
-  
-  // old code: filling up 2d adjacency array
-  //vector<vector<vidType>> adj_arr_h(m, vector<vidType>(m));
-	//for (vidType i = 0; i < m; i++){
-	//	for (vidType j : adj[h[i]]){
-	//		if (type[j]==1){
-	//			adj_arr_h[i][label_to_h[j]]=1;
-	//			adj_arr_h[label_to_h[j]][i]=1;
-	//		}
-	//	}
-	//}
-
-	// vector<vector<vidType>> adj_arr_h_2=adj_arr_h;
-	// MM(adj_arr_h_2, adj_arr_h);
   
   #pragma omp parallel for reduction(+ : highcounter) schedule(dynamic, 1)
 	for (vidType i = 0; i < m; i++){

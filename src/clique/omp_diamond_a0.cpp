@@ -1,21 +1,28 @@
-// #pragma GCC optimize("O3,unroll-loops")
+#pragma GCC optimize("O3,unroll-loops")
 #include "graph.h"
 #define ll uint64_t
 #include <cblas.h>
 
 // adjacency arrays
-const ll mx_sz = 10000; // change to fit graph
+const ll mx_sz = 10000; // number of high degree vertices 
 float adj_arr_h[mx_sz*mx_sz]; // adjacency array for high vertices
 float adj_arr_h_2[mx_sz*mx_sz]; // squared adjacency array for high vertices
-float adj_x[mx_sz*mx_sz]; // adjacency array for neighbors of node x
-float adj_x_2[mx_sz*mx_sz]; // squared adjacency array for neighbors of node x
+const ll mx_low_sz = 450; // degree threshold
+float adj_x[mx_low_sz*mx_low_sz]; // adjacency array for neighbors of node x
+float adj_x_2[mx_low_sz*mx_low_sz]; // squared adjacency array for neighbors of node x
 
-const ll mx_label_sz = 10000000; // max label size
-vidType nx[mx_label_sz]; // neighbors of each x
-vidType label_to_nx[mx_label_sz]; // original labels to index in neighbors array
+const ll mx_label_sz = 200000; // total number of vertices
 vidType h[mx_label_sz]; // high vertices
 vidType label_to_h[mx_label_sz]; // original labels to index in high vertices array
+
+vidType nx[mx_low_sz]; // neighbors of each x
+vidType label_to_nx[mx_label_sz]; // original labels to index in neighbors array
 vidType is_neighbor[mx_label_sz];
+// map<vidType, vidType> label_to_nx;
+
+void FLAG(int i){
+  cout << "flag: " << i << '\n';  
+}
 
 // naive matrix multiplication
 void MM(vector<vector<vidType>> &A, vector<vector<vidType>> &B){
@@ -66,17 +73,6 @@ void cnt_3(Graph &g, vector<vector<vidType>> &adj, vector<vidType> &type, vidTyp
   // counts all HH diameters with at least one L other
   // O((e/D)^2*e)?
   cout << "running count 3..." << endl;
-  //vector<vector<vidType>> adj_arr_h(m, vector<vidType>(m));
-  //for (vidType i = 0; i < m; i++){
-  // for (vidType j : adj[h[i]]){
-  //   if (type[j]==1){
-  //     adj_arr_h[i][label_to_h[j]] = 1;
-  //     adj_arr_h[label_to_h[j]][i] = 1;
-  //    }
-  //  }
-  //}
-  // ll test = 0;
-
   uint64_t other = 0;
 
   #pragma omp parallel for reduction(+ : total_3) firstprivate(other) schedule(dynamic, 1)
@@ -100,30 +96,9 @@ void cnt_3(Graph &g, vector<vector<vidType>> &adj, vector<vidType> &type, vidTyp
         other += h_cnt*l_cnt + (l_cnt)*(l_cnt-1)/2;
         total_3 += other;
         other=0;
-        //if (h_cnt && l_cnt){
-        //  total_3 += h_cnt * l_cnt;  
-        //}
-        //total_3 += h_cnt * l_cnt;
-        //if (l_cnt > 1) {
-        //  total_3 += l_cnt*(l_cnt-1)/2;
-        //}
-        // total_3 += (h_cnt+l_cnt) * (h_cnt+l_cnt-1) / 2;
-        // cout << "CNT: " << l_cnt << " " << h_cnt << '\n';
-        // total_3 += h_cnt*(h_cnt-1)/2;
-        // test += l_cnt*(l_cnt-1)/2;
-        // test += h_cnt*l_cnt;
-        //total_3 += h_cnt * l_cnt;
-        //if (l_cnt) total_3 += l_cnt*(l_cnt-1)/2;
-        //total_3 += other;
-        //other=0;
       }
     }
-    //temp2 += other;
-    //other=0;
   }
-  //total_3 = temp2;
-  // total_3 /= 2;
-  // cout << test << '\n';
 }
 
 void cnt_2(Graph &g, vector<vector<vidType>> &adj, vector<vidType> &type, vidType &n, vidType &useless, uint64_t &total_2){
@@ -131,85 +106,17 @@ void cnt_2(Graph &g, vector<vector<vidType>> &adj, vector<vidType> &type, vidTyp
   // O(sum deg_L^alpha)\in D^(alpha-1)*e, summing over adjacency graphs of all low degree vertices
   cout << "running count 2..." << endl;
 
-  uint64_t other = 0;
-  // #pragma omp parallel for reduction(+ : total_2) schedule(dynamic, 100)
-
-
-//#pragma omp parallel  
-//  {
-//    cout << "inside of the pragma" << endl;
-//    cout << mx_sz << endl;
-//    cout << mx_sz*mx_sz << endl;
-//    float adj_x[mx_sz*mx_sz]; // adjacency array for neighbors of node x
-//    float adj_x_2[mx_sz*mx_sz]; // squared adjacency array for neighbors of node x
-
-//    vidType nx[mx_label_sz]; // neighbors of each x
-//    vidType label_to_nx[mx_label_sz]; // original labels to index in neighbors array
-//    vidType is_neighbor[mx_label_sz];
+     uint64_t other = 0;
     
-    //int a[10]={0};
-    //vidType is_neighbor[100]={};
-    //uint64_t total=0;
-    //#pragma omp parallel for reduction(+ : total) firstprivate(is_neighbor, a) schedule(dynamic, 1)
-    //for (int i = 0; i < 10; i++){
-    //  cout << i << " " << is_neighbor[i] << "\n";  
-    //  total += is_neighbor[i];
-    //}  
-    //cout << "final total: " << total << endl;
-    
-    
-    //vidType is_neighbor[200000]={};
-    //float adj_x[100000]={}; // adjacency array for neighbors of node x
-    //float adj_x_2[100000]={}; // squared adjacency array for neighbors of node x   
-    //vidType nx[200000]={}; // neighbors of each x
-    //vidType label_to_nx[200000]={}; // original labels to index in neighbors array
-
-    // #pragma omp parallel for reduction(+ : total_2) firstprivate(is_neighbor) schedule(dynamic, 1)
+    // note about this pragma: it may lead to segfaults if the memory is too large, since it needs to make a private copy of each adjacency array
+    #pragma omp parallel for reduction(+ : total_2) firstprivate(other, adj_x, adj_x_2, nx, is_neighbor, label_to_nx) schedule(dynamic, 1)
     for (vidType i = 0; i < n; i++){
       if (type[i]==0){
-        // cout << "found a low degree vertex, with degree: " << (vidType)adj[i].size() << '\n';
-        //vector<vidType> nnx;
-        //vector<vidType> label_to_nnx(n);
-        //nnx.push_back(i);
-        //label_to_nnx[i] = 0;
-        //for (auto u : adj[i]){
-        //	nnx.push_back(u);
-        //	label_to_nnx[u] = nnx.size()-1;
-        //  is_neighbor[u]=i;
-        //}
-
-        //vidType mm = nnx.size();
-        //vector<vector<vidType>> aa1(mm, vector<vidType>(mm));
-        //float a1[mm*mm] {0};
-        //for (vidType k = 0; k < mm; k++){  
-        //  for (vidType j : adj[nnx[k]]){
-        //    if (is_neighbor[j]==i){
-        //a1[k*mm+label_to_nnx[j]]=1;
-        // a1[label_to_nnx[j]*mm+k]=1;
-        //      aa1[k][label_to_nnx[j]]=1;
-        //      aa1[label_to_nnx[j]][k]=1;
-        //    }  
-        //  }
-        //}
-        //vector<vector<vidType>> aa2=aa1;
-        //float a2[mm*mm] {0};
-        //MM(aa2, aa2);
-        //matmul(mm, mm, mm, a1, a1, a2, 0,0,0);
-
-        //for (auto u : adj[i]){
-        //   if (type[u] == 1){ // HL
-        //total_2 += adj_x_2[label_to_nx[i]*m+label_to_nx[u]]*(adj_x_2[label_to_nx[i]*m+label_to_nx[u]]-1);
-        //  } else { // LL
-        // other += a2[0*mm+label_to_nnx[u]] * (a2[0*mm+label_to_nnx[u]]-1) / 2;
-        //     dother += aa2[0][label_to_nnx[u]]*(aa2[0][label_to_nnx[u]] - 1)/2;
-        //   }
-        // }
-        // other += dother;
-
+        
+        // generate neighbor graph
         is_neighbor[i]=i;
         nx[0]=i;
         label_to_nx[i]=0;
-        //cout << "this is another flag" << endl;
         vidType cur = 1;
         for (auto u : adj[i]){
           nx[cur] = u;
@@ -218,33 +125,24 @@ void cnt_2(Graph &g, vector<vector<vidType>> &adj, vector<vidType> &type, vidTyp
           cur++;
         }
 
-        // vidType m = nx.size();
         vidType m = cur;
         for (vidType j = 0; j <= m*m; j++){
           adj_x[j]=0;
           adj_x_2[j]=0;
         }
-        //      vector<vector<vidType>> adj_x(m, vector<vidType>(m));
-        //      for (vidType k = 0; k < m; k++){
-        //        for (vidType j : adj[nx[k]]){
-        //          if (is_neighbor[j] != i) continue;
-        //         adj_x[k][label_to_nx[j]]=1;
-        //       adj_x[label_to_nx[j]][k]=1;
-        //       }  
-        //   }
+        
         for (vidType k = 0; k < m; k++){
           for (vidType j : adj[nx[k]]){
-            if (is_neighbor[j] == i){
+            if (is_neighbor[j] == i) {
+            //if (label_to_nx.count(j)){
               adj_x[k*m+label_to_nx[j]] = 1;
-              adj_x[k+label_to_nx[j]*m] = 1;      
             }
           }
         }
-        //vector<vector<vidType>> adj_x_2=adj_x;
-        //MM(adj_x_2, adj_x);
-
+        
+        // multiply adjacency matrix
         matmul(m, m, m, adj_x, adj_x, adj_x_2, 0,0,0); 
-
+    
         for (auto u : adj[i]){
           if (type[u] == 1){ // HL
             other += adj_x_2[label_to_nx[u]]*(adj_x_2[label_to_nx[u]]-1);
@@ -255,75 +153,16 @@ void cnt_2(Graph &g, vector<vector<vidType>> &adj, vector<vidType> &type, vidTyp
 
         total_2 += other;
         other = 0;
-
-        //if (0==1){
-        //if (adj_x_2[i*mm+j] != aa2[i][j]){
-        //      cout << "before regular: " << endl;
-        //      for (vidType ii = 0; ii < mm; ii++){
-        //      for (vidType jj = 0 ; jj < mm; jj++){
-        //        cout << aa1[ii][jj] << " ";
-        //      }
-        //     cout << endl;
-        //    }
-        //    cout << "before array: " << endl;
-        //    for (vidType ii = 0; ii < mm; ii++){
-        //      for (vidType jj = 0 ; jj < mm; jj++){
-        //        cout << adj_x[ii*mm + jj] << " ";
-        //      }
-        //      cout << endl;
-        //    }
-        //    cout << "after regular: " << endl;
-        //    for (vidType ii = 0; ii < mm; ii++){
-        //      for (vidType jj = 0 ; jj < mm; jj++){
-        //        cout << aa2[ii][jj] << " ";
-        //      }
-        //      cout << endl;
-        //    }
-        //    cout << "after array: " << endl;
-        //    for (vidType ii = 0; ii < mm; ii++){
-        //      for (vidType jj = 0 ; jj < mm; jj++){
-        //        cout << adj_x_2[ii*mm + jj] << " ";
-        //      }
-        //      cout << endl;
-        //    }
-        //    return;
-        //}  
-        //}
-        //for (auto u : adj[i]){
-        // if (type[u] == 1){ // HL
-        //    total_2 += adj_x_2[label_to_nx[i]][label_to_nx[u]]*(adj_x_2[label_to_nx[i]][label_to_nx[u]]-1);
-        //  } else { // LL
-        //    total_2 += adj_x_2[label_to_nx[i]][label_to_nx[u]]*(adj_x_2[label_to_nx[i]][label_to_nx[u]]-1)/2;
-        //  }
-        // }
-        // cout << "new total 2 value: " << total_2 << '\n';
       }
     }
-//  }
-  // total_2=other;
 
   total_2/=2;
-  // cout << "OTHER: " << other << endl;
-  // each 
 }
 
 void cnt_1(Graph &g, vector<vector<vidType>> &adj, vector<vidType> &type, vidType &n, vidType &m, uint64_t &total_1){
   // counts all HH diameters with HH others
   // O(sum deg_H^alpha)\in O(deg_H*sum deg_H^(alpha-1))\in O(e^alpha/D^(alpha-1))	
   cout << "running count 1..." << endl;
-
-  // vector<vector<vidType>> adj_arr_h(m, vector<vidType>(m));
-  //for (vidType i = 0; i < m; i++){
-  //	for (vidType j : adj[h[i]]){
-  //		if (type[j]==1){
-  //			adj_arr_h[i*m+label_to_h[j]] = 1;
-  //			adj_arr_h[label_to_h[j]*m+i] = 1;
-  //		}
-  //	}
-  //}
-
-  // vector<vector<vidType>> adj_arr_h_2=adj_arr_h;
-  // MM(adj_arr_h_2, adj_arr_h);
 
   matmul(m, m, m, adj_arr_h, adj_arr_h, adj_arr_h_2, 0, 0, 0);
 
@@ -343,29 +182,19 @@ void cnt_1(Graph &g, vector<vector<vidType>> &adj, vector<vidType> &type, vidTyp
 
 void diamondSolver(Graph &g, int k, uint64_t &total, int threshold){
   // assert(k==4);
+  cout << "preprocessing..." << endl;
   Timer construction;
   construction.Start();
   vidType n = g.V();
   vector<vector<vidType>> adj(n);
-  map<pair<int, int>, int> adj_arr;
   for (vidType i = 0; i < n; i++){
     auto ni = g.N(i);
     for (auto u : ni){
-      adj_arr[{u,i}]=1;
-      adj_arr[{i,u}]=1;
-    }
+      adj[i].push_back(u);
+      //adj[u].push_back(i);
+    }  
   }
-
-  for (auto [i,j] : adj_arr){
-    adj[i.first].push_back(i.second);  
-  }
-  //for (vidType i = 0; i < n; i++){
-  //  auto ni = g.N(i);
-  //  for (auto u : ni){
-  //    adj[i].push_back(u);
-  //    adj[u].push_back(i);
-  //  }
-  //}
+  
   construction.Stop();
   cout << "construction time: " << construction.Seconds() << '\n';
 
@@ -383,15 +212,6 @@ void diamondSolver(Graph &g, int k, uint64_t &total, int threshold){
   }
   cout << "number of high degree vertices: " << num_high_deg << '\n';
 
-  //adjacency matrix directed
-  //adj.clear();
-  //adj.resize(n);
-  //for (vidType i = 0; i < n; i++){
-  //  auto ni = g.N(i);
-  //  for (auto u : ni){
-  //    adj[i].push_back(u);
-  //  }
-  //}
   // compute graphs for high vertices
   vidType cur = 0;
   for (vidType i = 0; i < n; i++){
@@ -402,19 +222,17 @@ void diamondSolver(Graph &g, int k, uint64_t &total, int threshold){
     }
   }
   vidType m = cur;
-  // ll non_zero = 0;
   cout << "m: " << m << '\n';
   for (vidType i = 0; i < m; i++){
     for (vidType j : adj[h[i]]){
       if (type[j]==1){
-        // non_zero++;
         adj_arr_h[i*m+label_to_h[j]] = 1;
         adj_arr_h[label_to_h[j]*m+i] = 1;
       }
     }
   }
-  // cout << "NON ZERO: " << non_zero << " TOTAL SIZE: " << m*m << '\n';
-  // totals
+  
+  // total counts for each type
   uint64_t total_1 = 0, total_2 = 0, total_3 = 0;
   Timer total_time;
   total_time.Start();
@@ -434,7 +252,6 @@ void diamondSolver(Graph &g, int k, uint64_t &total, int threshold){
   total = total_1 + total_2 + total_3; 
 
   total_time.Stop();
-  // cout << "OTHER ANSWER: " << total_2 + total_3 << '\n';
   cout << "HHHH total: " << total_1 << '\n';
   cout << "HL/LL diameter total: " << total_2 << '\n';
   cout << "HH diamater with>=1 L total: " << total_3 << '\n';
