@@ -1,23 +1,23 @@
-#pragma GCC optimize("O3,unroll-loops")
+#pragma GCC optimize("Ofast")
 #include "graph.h"
 #define ll uint64_t
 #include <cblas.h>
 
 // adjacency arrays
-const ll mx_sz = 10000; // number of high degree vertices 
+const ll mx_sz = 2000; // number of high degree vertices 
 float adj_arr_h[mx_sz*mx_sz]; // adjacency array for high vertices
 float adj_arr_h_2[mx_sz*mx_sz]; // squared adjacency array for high vertices
-const ll mx_low_sz = 450; // degree threshold
-float adj_x[mx_low_sz*mx_low_sz]; // adjacency array for neighbors of node x
-float adj_x_2[mx_low_sz*mx_low_sz]; // squared adjacency array for neighbors of node x
+const ll mx_low_sz = 600; // degree threshold
+//float adj_x[mx_low_sz*mx_low_sz]; // adjacency array for neighbors of node x
+//float adj_x_2[mx_low_sz*mx_low_sz]; // squared adjacency array for neighbors of node x
 
-const ll mx_label_sz = 200000; // total number of vertices
+const ll mx_label_sz = 7100000; // total number of vertices
 vidType h[mx_label_sz]; // high vertices
 vidType label_to_h[mx_label_sz]; // original labels to index in high vertices array
 
-vidType nx[mx_low_sz]; // neighbors of each x
-vidType label_to_nx[mx_label_sz]; // original labels to index in neighbors array
-vidType is_neighbor[mx_label_sz];
+//vidType nx[mx_low_sz]; // neighbors of each x
+//vidType label_to_nx[mx_label_sz]; // original labels to index in neighbors array
+//vidType is_neighbor[mx_label_sz];
 // map<vidType, vidType> label_to_nx;
 
 void FLAG(int i){
@@ -106,53 +106,64 @@ void cnt_2(Graph &g, vector<vector<vidType>> &adj, vector<vidType> &type, vidTyp
   // O(sum deg_L^alpha)\in D^(alpha-1)*e, summing over adjacency graphs of all low degree vertices
   cout << "running count 2..." << endl;
 
-     uint64_t other = 0;
-    
     // note about this pragma: it may lead to segfaults if the memory is too large, since it needs to make a private copy of each adjacency array
-    #pragma omp parallel for reduction(+ : total_2) firstprivate(other, adj_x, adj_x_2, nx, is_neighbor, label_to_nx) schedule(dynamic, 1)
-    for (vidType i = 0; i < n; i++){
-      if (type[i]==0){
-        
-        // generate neighbor graph
-        is_neighbor[i]=i;
-        nx[0]=i;
-        label_to_nx[i]=0;
-        vidType cur = 1;
-        for (auto u : adj[i]){
-          nx[cur] = u;
-          label_to_nx[u] = cur;
-          is_neighbor[u] = i;
-          cur++;
-        }
+    // #pragma omp parallel for reduction(+ : total_2) firstprivate(adj_x, adj_x_2, nx, is_neighbor, label_to_nx) schedule(dynamic, 1)
+    
+    #pragma omp parallel
+    {
+      float* adj_x = new float[mx_low_sz*mx_low_sz]; // adjacency array for neighbors of node x
+      float* adj_x_2 = new float[mx_low_sz*mx_low_sz]; // squared adjacency array for neighbors of node x
 
-        vidType m = cur;
-        for (vidType j = 0; j <= m*m; j++){
-          adj_x[j]=0;
-          adj_x_2[j]=0;
-        }
-        
-        for (vidType k = 0; k < m; k++){
-          for (vidType j : adj[nx[k]]){
-            if (is_neighbor[j] == i) {
-            //if (label_to_nx.count(j)){
-              adj_x[k*m+label_to_nx[j]] = 1;
+      vidType* nx = new vidType[mx_low_sz]; // neighbors of each x
+      vidType* label_to_nx = new vidType[mx_label_sz]; // original labels to index in neighbors array
+      vidType* is_neighbor = new vidType[mx_label_sz];
+   
+      #pragma omp for reduction(+: total_2) schedule(dynamic, 1)
+      for (vidType i = 0; i < n; i++){
+        if (type[i]==0){
+          uint64_t other=0;
+
+          // generate neighbor graph
+          is_neighbor[i]=i;
+          nx[0]=i;
+          label_to_nx[i]=0;
+          vidType cur = 1;
+          for (auto u : adj[i]){
+            nx[cur] = u;
+            label_to_nx[u] = cur;
+            is_neighbor[u] = i;
+            cur++;
+          }
+
+          vidType m = cur;
+          for (vidType j = 0; j <= m*m; j++){
+            adj_x[j]=0;
+            adj_x_2[j]=0;
+          }
+          
+          for (vidType k = 0; k < m; k++){
+            for (vidType j : adj[nx[k]]){
+              if (is_neighbor[j] == i) {
+              //if (label_to_nx.count(j)){
+                adj_x[k*m+label_to_nx[j]] = 1;
+              }
             }
           }
-        }
-        
-        // multiply adjacency matrix
-        matmul(m, m, m, adj_x, adj_x, adj_x_2, 0,0,0); 
-    
-        for (auto u : adj[i]){
-          if (type[u] == 1){ // HL
-            other += adj_x_2[label_to_nx[u]]*(adj_x_2[label_to_nx[u]]-1);
-          } else { // LL
-            other += adj_x_2[label_to_nx[u]]*(adj_x_2[label_to_nx[u]]-1)/2;
+          
+          // multiply adjacency matrix
+          matmul(m, m, m, adj_x, adj_x, adj_x_2, 0,0,0); 
+      
+          for (auto u : adj[i]){
+            if (type[u] == 1){ // HL
+              other += adj_x_2[label_to_nx[u]]*(adj_x_2[label_to_nx[u]]-1);
+            } else { // LL
+              other += adj_x_2[label_to_nx[u]]*(adj_x_2[label_to_nx[u]]-1)/2;
+            }
           }
-        }
 
-        total_2 += other;
-        other = 0;
+          total_2 += other;
+          other = 0;
+        }
       }
     }
 
