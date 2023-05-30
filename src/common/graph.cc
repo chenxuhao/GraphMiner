@@ -172,7 +172,125 @@ s_edge Graph::stream_edge(eidType edgeId) {
   return stream[edgeId];
 }
 
+void Graph::sample_tree_subgraph(int threshold) {
+  Timer t;
+  t.Start();
+
+  int sparse_count = 0;
+  int dense_count = 0;
+  #pragma omp parallel for default(shared) reduction(+ : sparse_count, dense_count)
+  for (vidType v = 0; v < n_vertices; v++) {
+
+    float degree = 0;
+    #pragma omp parallel for reduction(+ : degree)
+    for (vidType i = 0; i < N(v).size(); i++) {
+      auto u = N(v)[i];
+      degree += intersection_num(N(u), N(v));
+    }
+
+    degree /= N(v).size();
+
+    if(degree < threshold) {
+      sparse_count += 1;
+    } else {
+      dense_count += 1;
+    }
+  }
+
+  t.Stop();
+  std::cout << "Threshold: " << threshold << " Sparse |V|: " << sparse_count << " Dense |V|: " << dense_count << "\n";
+  std::cout << "Time on subgraph degree profiling: " << t.Seconds() << " sec\n";
+}
+
+void Graph::sample_tree(int threshold) {
+  Timer t;
+  t.Start();
+
+  int sparse_count = 0;
+  int dense_count = 0;
+  
+  #pragma omp parallel for shared(vertices) reduction(+ : sparse_count, dense_count)
+  for (vidType v = 0; v < n_vertices; v++) {
+    float degree = vertices[v+1] - vertices[v];
+
+    for (auto u : N(v)) {
+      degree += vertices[u+1] - vertices[u];
+    }
+    degree /= N(v).size();
+
+    if(degree < threshold) {
+      sparse_count += 1;
+    } else {
+      dense_count += 1;
+    }
+  }
+
+  t.Stop();
+  std::cout << "Threshold: " << threshold << " Sparse |V|: " << sparse_count << " Dense |V|: " << dense_count << "\n";
+  std::cout << "Time on simple degree profiling: " << t.Seconds() << " sec\n";
+}
+
+void Graph::color_sparsify_fast(int c) {
+  Timer t;
+  t.Start();
+  auto new_edges = new vidType[n_edges];
+  auto colors = new int[n_vertices];
+  auto new_vertices = new eidType[n_vertices];
+
+  
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  std::uniform_int_distribution<int> dist(0, c-1);
+
+  #pragma omp parallel for schedule(dynamic, 1) shared(colors)
+  for (vidType v = 0; v < n_vertices; v++) {
+    colors[v] = dist(mt);
+    //printf("color[%d] = %d, %d\n", v, colors[v], rand());
+  }
+
+  eidType count = 0;
+  #pragma omp parallel for schedule(dynamic, 1) shared(vertices) reduction(+ : count)
+  for (vidType v = 0; v < n_vertices; v++) {
+    auto begin = edge_begin(v); 
+    auto end = edge_end(v);
+    auto edges_kept = 0;
+
+    #pragma omp parallel for schedule(dynamic, 1) shared(vertices) reduction(+ : edges_kept)
+    for(auto e = begin;  e < end; e++) {
+      if(colors[v] == colors[edges[e]]) { //keep edge
+        edges_kept += 1;
+      }
+    }
+   new_vertices[v] = edges_kept; // take out from end of last interval considering prev-removed edges
+   count += edges_kept;
+  }
+
+  #pragma omp parallel for schedule(dynamic, 1) shared(vertices, new_vertices,colors)
+  for (vidType v = 0; v < n_vertices; v++) {
+    auto begin = edge_begin(v); 
+    auto end = edge_end(v);
+    auto edges_kept = new_vertices[v];
+    eidType vcount = 0;
+
+    for(auto e = begin;  e < end; e++) {
+      if(colors[v] == colors[edges[e]]) { //keep edge
+        new_edges[edges_kept+vcount] = edges[e];
+        vcount += 1;
+      }
+    }
+  }
+  n_edges = count;
+  edges = new_edges;
+  vertices = new_vertices;
+  
+  t.Stop();
+  std::cout << "color induced sparsification fast = " << t.Seconds() << " sec\n";
+  
+}
+
 void Graph::color_sparsify(int c) {
+  Timer t;
+  t.Start();
   auto new_edges = new vidType[n_edges];
   auto colors = new int[n_vertices];
 
@@ -181,7 +299,7 @@ void Graph::color_sparsify(int c) {
   std::mt19937 mt(rd());
   std::uniform_int_distribution<int> dist(0, c-1);
 
-
+  #pragma omp parallel for schedule(dynamic, 1) shared(colors)
   for (vidType v = 0; v < n_vertices; v++) {
     colors[v] = dist(mt);
     //printf("color[%d] = %d, %d\n", v, colors[v], rand());
@@ -208,6 +326,9 @@ void Graph::color_sparsify(int c) {
   vertices[n_vertices] -= edges_removed;
   n_edges = count;
   edges = new_edges;
+  
+  t.Stop();
+  std::cout << "color induced sparsification = " << t.Seconds() << " sec\n";
   
 }
 

@@ -23,6 +23,8 @@ int main(int argc, char *argv[]) {
   if (argc > 4) adj_sorted = atoi(argv[4]);
   if (!adj_sorted) g.sort_neighbors();
   uint64_t total = 0;
+
+  g.sample_tree(3);
   TCSolver(g, total, n_devices, chunk_size);
   std::cout << "total_num_pattern = " << total << "\n";
   return 0;

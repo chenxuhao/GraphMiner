@@ -2,12 +2,11 @@
 // Authors: Xuhao Chen <cxh@mit.edu>
 #include "graph.h"
 
-void TCSolver(Graph &g, uint64_t &total, int n_gpu, int chunk_size, vector<float> sample_factors);
 
 int main(int argc, char *argv[]) {
   srand ( time(NULL) );
   if (argc < 2) {
-    std::cout << "Usage: " << argv[0] << " <graph> [num_gpu(1)] [chunk_size(1024)] [adj_sorted(1)]\n";
+    std::cout << "Usage: " << argv[0] << " <graph> [num_gpu(1)] [chunk_size(1024)] [adj_sorted(1)] [subgraph_profile(0)] [avg_degree_threshold(0)]\n";
     std::cout << "Example: " << argv[0] << " /graph_inputs/mico/graph\n";
     exit(1);
   }
@@ -17,6 +16,9 @@ int main(int argc, char *argv[]) {
   int n_devices = 1;
   int chunk_size = 1024;
   int adj_sorted = 1;
+  int subgraph_profile = 0;
+    int threshold = 0;
+
 
 
   if (argc > 2) n_devices = atoi(argv[2]);
@@ -24,19 +26,18 @@ int main(int argc, char *argv[]) {
   g.print_meta_data();
   if (argc > 4) adj_sorted = atoi(argv[4]);
   if (!adj_sorted) g.sort_neighbors();
-  std::vector<std::string> sample_factors(argv + 5, argv + argc);
-  vector<float> factors;
-  printf("args [ ");
-  for (string i: sample_factors) {
-    std::cout << i << ' ';
-    factors.push_back(std::stof(i));
-  }
-  printf("]\n");
+  if (argc > 5) subgraph_profile = atoi(argv[5]);
+  if (argc > 6) threshold = atoi(argv[6]);
 
-  g.sample_tree(3);
-  uint64_t total = 0;
-  TCSolver(g, total, n_devices, chunk_size, factors);
-  std::cout << "total_num_pattern = " << total << "\n";
+
+  if(subgraph_profile) {
+      g.color_sparsify_fast(threshold);
+      g.sample_tree_subgraph(threshold);
+  } else {
+      g.color_sparsify(threshold);
+      g.sample_tree(threshold);
+  }
+
   return 0;
 }
 

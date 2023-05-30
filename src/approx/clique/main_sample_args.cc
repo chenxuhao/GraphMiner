@@ -32,6 +32,7 @@ int main(int argc, char *argv[]) {
     factors.push_back(std::stof(i));
   }
   printf("]\n");
+  g.sample_tree(9);
   uint64_t total = 0;
   TCSolver(g, total, n_devices, chunk_size, factors);
   std::cout << "total_num_pattern = " << total << "\n";

@@ -172,6 +172,10 @@ public:
 
   void edge_sparsify(float p);
   void color_sparsify(int c);
+  void color_sparsify_fast(int c);
+  void sample_tree(int threshold);
+  void sample_tree_subgraph(int threshold);
+
 
   void init_simple_edgelist();
   void create_edge_stream();
