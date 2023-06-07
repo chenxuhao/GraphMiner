@@ -71,6 +71,9 @@ protected:
   std::vector<nlf_map> nlf_;    // neighborhood label frequency
   std::vector<eidType> reverse_index_offsets_; // pointers to each vertex group
 
+  int *thresholds;
+  int *thresholds_s;
+
 public:
   Graph(std::string prefix, bool use_dag = false, bool directed = false,
         bool use_vlabel = false, bool use_elabel = false, 
@@ -173,8 +176,13 @@ public:
   void edge_sparsify(float p);
   void color_sparsify(int c);
   void color_sparsify_fast(int c);
+  void color_sparsify_old(int c);
   void sample_tree(int threshold);
   void sample_tree_subgraph(int threshold);
+  int get_threshold(vidType v);
+  int get_threshold_s(vidType v);
+
+  int get_intersect_threshold(int t, int ts);
 
 
   void init_simple_edgelist();
