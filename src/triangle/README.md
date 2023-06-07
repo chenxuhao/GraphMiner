@@ -48,7 +48,7 @@ The following are example command lines:
 OUTPUT
 --------------------------------------------------------------------------------
 
-|                  |    # nodes  |#edges(directed)| #edges(directed)  |   # triangles   |
+|                  |    # nodes  |#edges(directed)| #edges(undirected)|   # triangles   |
 |------------------|------------:|---------------:|------------------:|----------------:|
 | mico             |     100,000 |      1,080,156 |         2,160,312 |      12,534,960 |
 | patent_citations |   2,745,761 |     13,965,409 |        27,930,818 |       6,913,764 |
