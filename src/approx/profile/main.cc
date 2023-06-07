@@ -3,8 +3,9 @@
 #include "graph.h"
 
 #define THRESHOLD 3
-void TCSolver(Graph &g, uint64_t &total, int k, int c);
-void TCSolver_thresh(Graph &g, uint64_t &total, int k);
+void TCSolver(Graph &g, uint64_t &total, int c);
+void TCSolver_dense(Graph &g, uint64_t &total, int k, int c);
+void TCSolver_sparse(Graph &g, uint64_t &total, int k);
 
 int main(int argc, char *argv[]) {
   srand ( time(NULL) );
@@ -34,9 +35,14 @@ int main(int argc, char *argv[]) {
 
   if(mode == std::string("color")) {
       std::cout << "|e| before sampling " << g.E() << "\n";
-      std::cout <<  "coloring graph with fast mode and c =" << argList[0] << "\n";
-      g.color_sparsify_fast(std::stoi(argList[0]));
+      int c = std::stoi(argList[0]);
+      std::cout <<  "coloring graph with fast mode and c =" << c << "\n";
+      g.color_sparsify_fast(c);
       std::cout <<  "|e| after sampling " << g.E() << "\n";
+
+      uint64_t total;
+      TCSolver(g, total, c);
+      std::cout << "TC count = " << total << "\n";
   }
   
   
@@ -64,7 +70,30 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-void TCSolver(Graph &g, uint64_t &total, int k, int c) {
+void TCSolver(Graph &g, uint64_t &total, int c) {
+  int num_threads = 1;
+  #pragma omp parallel
+  {
+    num_threads = omp_get_num_threads();
+  }
+  std::cout << "OpenMP Triangle Counting (" << num_threads << " threads)\n";
+  Timer t;
+  t.Start();
+  uint64_t counter = 0;
+  #pragma omp parallel for reduction(+ : counter)
+  for (vidType u = 0; u < g.V(); u ++) {
+    auto adj_u = g.N(u);
+    for (auto v : adj_u) {
+      counter += (uint64_t)intersection_num(adj_u, g.N(v));
+    }
+  }
+  total = counter * (c * c); // assumes that p(the other two edges exist) = (1/c*1/c)
+  t.Stop();
+  std::cout << "runtime [omp_base] = " << t.Seconds() << " sec\n";
+  return;
+}
+
+void TCSolver_dense(Graph &g, uint64_t &total, int k, int c) {
   int num_threads = 1;
   #pragma omp parallel
   {
@@ -89,7 +118,7 @@ void TCSolver(Graph &g, uint64_t &total, int k, int c) {
 }
 
 
-void TCSolver_thresh(Graph &g, uint64_t &total, int k) {
+void TCSolver_sparse(Graph &g, uint64_t &total, int k) {
   int num_threads = 1;
   #pragma omp parallel
   {

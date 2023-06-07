@@ -279,6 +279,11 @@ void Graph::color_sparsify_fast(int c) {
     colors[v] = dist(mt);
   }
 
+  t.Stop();
+  std::cout << "coloring = " << t.Seconds() << " sec\n";
+
+  t.Start();
+
   #pragma omp parallel for shared(colors, new_degrees)
   for (vidType src = 0; src < n_vertices; src ++) {  
     for(auto dst : N(src)) {
@@ -334,6 +339,12 @@ void Graph::color_sparsify(int c) {
     //printf("color[%d] = %d, %d\n", v, colors[v], rand());
   }
 
+
+  t.Stop();
+  std::cout << "coloring = " << t.Seconds() << " sec\n";
+
+
+  t.Start();
   eidType count = 0;
   eidType edges_removed = 0;
   eidType last_offset = 0;
