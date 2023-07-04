@@ -1,5 +1,4 @@
 include ../common.mk
-INCLUDES+=-I$(MGPU_DIR)
 INCLUDES+=-I./cpu_kernels -I./gpu_kernels
 OBJS+=pattern.o
 NVFLAGS+=--expt-extended-lambda
@@ -23,6 +22,10 @@ sgl_omp_cmap: $(OBJS) omp_cmap.o
 # GraphZero version, add make USE_ZERO=1 when make
 sgl_omp_zero: $(OBJS) omp_zero.o
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) omp_zero.o -o $@ -lgomp
+	mv $@ $(BIN)
+
+sgl_omp_bj: $(OBJS) omp_bj.o
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) omp_bj.o -o $@ -lgomp
 	mv $@ $(BIN)
 
 sgl_omp_lb: $(OBJS) omp_lb.o
