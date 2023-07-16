@@ -1,6 +1,6 @@
 ### Approximate Graph Pattern Mining at Scale
 
-* [Sampling from Large Graphs](https://cs.stanford.edu/~jure/pubs/sampling-kdd06.pdf) [GitHub](https://github.com/Ashish7129/Graph_Sampling)
+* [Sampling from Large Graphs](https://cs.stanford.edu/~jure/pubs/sampling-kdd06.pdf) KDD 2006 [GitHub](https://github.com/Ashish7129/Graph_Sampling)
 
 * [SampleMine: A Framework for Applying Random Sampling to Subgraph Pattern Mining through Loop Perforation](https://dl.acm.org/doi/abs/10.1145/3559009.3569658) PACT 2022 [GitHub](https://github.com/HPC-Research-Lab/SampleMine/tree/main)
   
