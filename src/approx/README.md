@@ -1,8 +1,10 @@
 ### Approximate Graph Pattern Mining at Scale
 
-* [Sampling from Large Graphs](https://cs.stanford.edu/~jure/pubs/sampling-kdd06.pdf)
+* [Sampling from Large Graphs](https://cs.stanford.edu/~jure/pubs/sampling-kdd06.pdf) [GitHub](https://github.com/Ashish7129/Graph_Sampling)
 
-* [ASAP-Fast, Approximate Graph Pattern Mining at Scale](https://www.usenix.org/conference/osdi18/presentation/iyer) OSDI'18 
+* [SampleMine: A Framework for Applying Random Sampling to Subgraph Pattern Mining through Loop Perforation](https://dl.acm.org/doi/abs/10.1145/3559009.3569658) PACT 2022 [GitHub](https://github.com/HPC-Research-Lab/SampleMine/tree/main)
+  
+* [ASAP-Fast, Approximate Graph Pattern Mining at Scale](https://www.usenix.org/conference/osdi18/presentation/iyer) OSDI 2018 
 
 * [Motif Counting Beyond Five Nodes](https://dl.acm.org/doi/pdf/10.1145/3186586)
 
