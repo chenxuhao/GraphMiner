@@ -29,8 +29,7 @@ The input graph is preprocessed internally to meet these requirements:
 
   - count_omp_base : one thread per vertex using OpenMP
 
-RUN
---------------------------------------------------------------------------------
+### RUN
 
 The following is an example command line:
 
