@@ -58,6 +58,8 @@ public:
   bool is_rectangle() const { return name_ == "rectangle"; }
   bool is_pentagon() const { return name_ == "pentagon"; }
   bool is_house() const { return name_ == "house"; }
+  bool is_hourglass() const { return name_ == "hourglass"; }
+  bool is_dumbbell() const { return name_ == "dummbell"; }
   bool is_4color_square() const { return name_ == "4color-square"; }
   bool is_connected(vidType u, vidType v) const;
   void read_adj_file(std::string inputfile);
