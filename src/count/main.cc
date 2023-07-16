@@ -4,7 +4,7 @@
 #include "pattern.hh"
 
 std::map<char,double> time_ops;
-void SglSolver(Graph &g, Pattern &p, uint64_t &total, int n_devices, int chunk_size);
+void ScSolver(Graph &g, Pattern &p, uint64_t &total, int n_devices, int chunk_size);
 
 int main(int argc, char **argv) {
   if(argc < 3) {
@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
   time_ops[OP_INTERSECT] = 0;
   time_ops[OP_DIFFERENCE] = 0;
   uint64_t h_total = 0;
-  SglSolver(g, patt, h_total, n_devices, chunk_size);
+  ScSolver(g, patt, h_total, n_devices, chunk_size);
   std::cout << "total_num = " << h_total << "\n";
   std::cout << "--------------------\n";
   std::cout << "set intersection time: " << time_ops[OP_INTERSECT] << "\n";

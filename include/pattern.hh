@@ -52,10 +52,14 @@ public:
     set_name();
   }
   ~Pattern() {}
+  bool is_clique() const { return num_edges == (num_vertices-1)*num_vertices/2; }
   bool is_wedge() const { return name_ == "wedge"; }
   bool is_triangle() const { return name_ == "triangle"; }
   bool is_diamond() const { return name_ == "diamond"; }
   bool is_rectangle() const { return name_ == "rectangle"; }
+  bool is_tailedtriangle() const { return name_ == "tailedtriangle"; }
+  bool is_4path() const { return name_ == "4path"; }
+  bool is_3star() const { return name_ == "3star"; }
   bool is_pentagon() const { return name_ == "pentagon"; }
   bool is_house() const { return name_ == "house"; }
   bool is_hourglass() const { return name_ == "hourglass"; }

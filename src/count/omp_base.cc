@@ -2,27 +2,37 @@
 #include "pattern.hh"
 #include "intersect.h"
 
-void SglSolver(Graph &g, Pattern &p, uint64_t &total, int, int) {
+void ScSolver(Graph &g, Pattern &p, uint64_t &total, int, int) {
   int num_threads = 1;
   #pragma omp parallel
   {
     num_threads = omp_get_num_threads();
   }
-  printf("OpenMP edge-induced subgraph listing (%d threads) ...\n", num_threads);
+  printf("OpenMP edge-induced subgraph counting (%d threads) ...\n", num_threads);
   uint64_t counter = 0;
   Timer t;
   t.Start();
-  std::cout << "Running the baseline implementation\n";
-  if (p.is_house()) {
-    #include "house.h"
-  } else if (p.is_pentagon()) {
-    #include "pentagon.h"
+  if (p.is_clique()) {
+    //#include "clique.h"
+    std::cout << "Please go to clique counting\n";
+  // 4-motifs
   } else if (p.is_rectangle()) {
     #include "rectangle.h"
-  } else if (p.is_hourglass()) {
-    #include "hourglass.h"
+  } else if (p.is_tailedtriangle()) {
+    #include "tailedtriangle.h"
   } else if (p.is_diamond()) {
     #include "diamond.h"
+  } else if (p.is_4path()) { // a.k.a, 4-chain
+    #include "4path.h"
+  } else if (p.is_3star()) {
+    #include "3star.h"
+  // 5-motifs
+  } else if (p.is_pentagon()) { // a.k.a, 5-cycle
+    #include "pentagon.h"
+  } else if (p.is_house()) {
+    #include "house.h"
+  } else if (p.is_hourglass()) {
+    #include "hourglass.h"
   } else {
     std::cout << "Not implemented\n";
   }
