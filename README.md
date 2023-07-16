@@ -176,6 +176,21 @@ GraphPi: high performance graph pattern matching through effective redundancy el
 Please cite the following paper if you use this code:
 
 ```
+@inproceedings {G2Miner,
+author = {Xuhao Chen and Arvind},
+title = {Efficient and Scalable Graph Pattern Mining on {GPUs}},
+booktitle = {16th USENIX Symposium on Operating Systems Design and Implementation (OSDI 22)},
+year = {2022},
+isbn = {978-1-939133-28-1},
+address = {Carlsbad, CA},
+pages = {857--877},
+url = {https://www.usenix.org/conference/osdi22/presentation/chen},
+publisher = {USENIX Association},
+month = jul,
+}
+```
+
+```
 @article{Pangolin,
 	title={Pangolin: An Efficient and Flexible Graph Mining System on CPU and GPU},
 	author={Xuhao Chen and Roshan Dathathri and Gurbinder Gill and Keshav Pingali},
