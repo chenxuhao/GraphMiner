@@ -1,5 +1,6 @@
 ### Approximate Graph Pattern Mining at Scale
 
+* [Sampling from Large Graphs](https://cs.stanford.edu/~jure/pubs/sampling-kdd06.pdf)
 
 * [ASAP-Fast, Approximate Graph Pattern Mining at Scale](https://www.usenix.org/conference/osdi18/presentation/iyer) OSDI'18 
 
