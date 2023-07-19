@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
     printf("Example: %s /graph_inputs/mico/graph rectangle\n", argv[0]);
     exit(1);
   }
-  std::cout << "Subgraph Listing/Counting (undirected graph only)\n";
+  std::cout << "Subgraph Counting (undirected graph only)\n";
   Graph g(argv[1]);
   Pattern patt(argv[2]);
   std::cout << "Pattern: " << patt.get_name() << "\n";
@@ -27,9 +27,9 @@ int main(int argc, char **argv) {
   uint64_t h_total = 0;
   ScSolver(g, patt, h_total, n_devices, chunk_size);
   std::cout << "total_num = " << h_total << "\n";
-  std::cout << "--------------------\n";
-  std::cout << "set intersection time: " << time_ops[OP_INTERSECT] << "\n";
-  std::cout << "set difference time: " << time_ops[OP_DIFFERENCE] << "\n";
+  //std::cout << "--------------------\n";
+  //std::cout << "set intersection time: " << time_ops[OP_INTERSECT] << "\n";
+  //std::cout << "set difference time: " << time_ops[OP_DIFFERENCE] << "\n";
   return 0;
 }
 

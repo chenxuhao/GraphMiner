@@ -53,6 +53,8 @@ public:
   }
   ~Pattern() {}
   bool is_clique() const { return num_edges == (num_vertices-1)*num_vertices/2; }
+  bool is_path() const { return num_edges == num_vertices-1; }
+  bool is_chain() const { return num_edges == num_vertices-1; }
   bool is_wedge() const { return name_ == "wedge"; }
   bool is_triangle() const { return name_ == "triangle"; }
   bool is_diamond() const { return name_ == "diamond"; }
@@ -60,9 +62,12 @@ public:
   bool is_tailedtriangle() const { return name_ == "tailedtriangle"; }
   bool is_4path() const { return name_ == "4path"; }
   bool is_3star() const { return name_ == "3star"; }
+  bool is_5path() const { return name_ == "5path"; }
   bool is_pentagon() const { return name_ == "pentagon"; }
   bool is_house() const { return name_ == "house"; }
   bool is_hourglass() const { return name_ == "hourglass"; }
+  bool is_taileddiamond() const { return name_ == "taileddiamond"; }
+  bool is_taileddiamond2() const { return name_ == "taileddiamond2"; }
   bool is_dumbbell() const { return name_ == "dummbell"; }
   bool is_4color_square() const { return name_ == "4color-square"; }
   bool is_connected(vidType u, vidType v) const;
