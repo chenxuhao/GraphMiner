@@ -57,17 +57,22 @@ public:
   bool is_chain() const { return num_edges == num_vertices-1; }
   bool is_wedge() const { return name_ == "wedge"; }
   bool is_triangle() const { return name_ == "triangle"; }
+  // 4-motif
   bool is_diamond() const { return name_ == "diamond"; }
   bool is_rectangle() const { return name_ == "rectangle"; }
   bool is_tailedtriangle() const { return name_ == "tailedtriangle"; }
   bool is_4path() const { return name_ == "4path"; }
   bool is_3star() const { return name_ == "3star"; }
+  // 5-motif
   bool is_5path() const { return name_ == "5path"; }
   bool is_pentagon() const { return name_ == "pentagon"; }
   bool is_house() const { return name_ == "house"; }
+  bool is_semihouse() const { return name_ == "semihouse"; }
+  bool is_closedhouse() const { return name_ == "closedhouse"; }
   bool is_hourglass() const { return name_ == "hourglass"; }
   bool is_taileddiamond() const { return name_ == "taileddiamond"; }
   bool is_taileddiamond2() const { return name_ == "taileddiamond2"; }
+  // 6-motif
   bool is_dumbbell() const { return name_ == "dummbell"; }
   bool is_4color_square() const { return name_ == "4color-square"; }
   bool is_connected(vidType u, vidType v) const;

@@ -33,6 +33,10 @@ void SglSolver(Graph &g, Pattern &p, uint64_t &total, int, int) {
     #include "pentagon.h"
   } else if (p.is_house()) {
     #include "house.h"
+  } else if (p.is_semihouse()) {
+    #include "semihouse.h"
+  } else if (p.is_closedhouse()) {
+    #include "closedhouse.h"
   } else if (p.is_hourglass()) {
     #include "hourglass.h"
   } else if (p.is_taileddiamond()) {
