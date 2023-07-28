@@ -23,3 +23,9 @@ tools/*.txt
 */*/.gdb_history
 temp/
 **/tags
+
+inputs/livej/
+inputs/road-asia/
+inputs/ukgraph/
+inputs/friendster
+inputs/friendster.zip

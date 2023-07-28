@@ -1,5 +1,7 @@
 #include "graph.h"
 #include "scan.h"
+#include <random>
+
 
 Graph::Graph(std::string prefix, bool use_dag, bool directed, 
              bool use_vlabel, bool use_elabel, bool need_reverse, bool bipartite) :
@@ -145,6 +147,290 @@ void Graph::sort_neighbors() {
   }
 }
 
+void Graph::create_edge_stream() {
+  Timer t;
+  t.Start();
+  if (nnz != 0) return; // already initialized
+  nnz = E();
+  stream = new s_edge[nnz];
+ 
+  size_t i = 0;
+  for (vidType v = 0; v < V(); v ++) {
+    for (auto u : N(v)) {
+      if (u == v) continue; // no selfloops
+      stream[i] = s_edge{v,u};
+      i ++;
+    }
+  }
+  assert(i == nnz);
+  t.Stop();
+  std::cout << "Time on generating the edgelist: " << t.Seconds() << " sec\n";
+  return;
+}
+
+s_edge Graph::stream_edge(eidType edgeId) {
+  return stream[edgeId];
+}
+
+void Graph::sample_tree_subgraph(int threshold) {
+  Timer t;
+  t.Start();
+
+  int sparse_count = 0;
+  int dense_count = 0;
+  thresholds_s = new int[n_vertices];
+
+
+  #pragma omp parallel for default(shared) reduction(+ : sparse_count, dense_count)
+  for (vidType v = 0; v < n_vertices; v++) {
+
+    float degree = 0;
+    #pragma omp parallel for reduction(+ : degree)
+    for (vidType i = 0; i < N(v).size(); i++) {
+      auto u = N(v)[i];
+      degree += intersection_num(N(u), N(v));
+    }
+
+    degree /= N(v).size();
+    thresholds_s[v] = degree;
+
+    if(degree < threshold) {
+      sparse_count += 1;
+    } else {
+      dense_count += 1;
+    }
+  }
+
+  t.Stop();
+  std::cout << "Threshold: " << threshold << " Sparse |V|: " << sparse_count << " Dense |V|: " << dense_count << "\n";
+  std::cout << "Time on subgraph degree profiling: " << t.Seconds() << " sec\n";
+}
+
+void Graph::sample_tree(int threshold) {
+  Timer t;
+  t.Start();
+
+  int sparse_count = 0;
+  int dense_count = 0;
+  thresholds = new int[n_vertices];
+  
+  #pragma omp parallel for shared(vertices) reduction(+ : sparse_count, dense_count)
+  for (vidType v = 0; v < n_vertices; v++) {
+    float degree = 0;
+
+    for (auto u : N(v)) {
+      degree += vertices[u+1] - vertices[u];
+    }
+    degree /= N(v).size();
+
+    thresholds[v] = degree;
+
+
+    if(degree < threshold) {
+      sparse_count += 1;
+    } else {
+      dense_count += 1;
+    }
+  }
+
+  t.Stop();
+  std::cout << "Threshold: " << threshold << " Sparse |V|: " << sparse_count << " Dense |V|: " << dense_count << "\n";
+  std::cout << "Time on simple degree profiling: " << t.Seconds() << " sec\n";
+}
+
+int Graph::get_threshold(vidType v) {
+  return thresholds[v];
+}
+
+int Graph::get_threshold_s(vidType v) {
+  return thresholds_s[v];
+}
+
+int Graph::get_intersect_threshold(int t, int ts) {
+  int s_count = 0;
+  int d_count = 0;
+  int mismatch = 0;
+  for(vidType v = 0; v < n_vertices; v++) {
+    if((thresholds[v] < t && thresholds_s[v] < ts)) {
+      s_count += 1;
+    } else if (thresholds[v] >= t && thresholds_s[v] >= ts) {
+      d_count += 1;
+    } else {
+      mismatch += 1;
+    }
+  }
+  printf("sparse match: %d, dense match: %d, mismatch: %d\n", s_count,d_count,mismatch);
+  return d_count + s_count;
+}
+
+void Graph::color_sparsify_fast(int c) {
+  Timer t;
+  t.Start();
+  auto colors = new int[n_vertices];
+
+  std::vector<vidType> new_degrees(n_vertices, 0);
+
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  std::uniform_int_distribution<int> dist(0, c-1);
+
+  //#pragma omp parallel for schedule(dynamic, 1) shared(colors)
+  for (vidType v = 0; v < n_vertices; v++) {
+    colors[v] = dist(mt);
+  }
+
+  t.Stop();
+  std::cout << "coloring = " << t.Seconds() << " sec\n";
+
+  t.Start();
+
+  #pragma omp parallel for shared(colors, new_degrees)
+  for (vidType src = 0; src < n_vertices; src ++) {  
+    for(auto dst : N(src)) {
+      if(colors[src] == colors[dst]) { //keep edge
+        new_degrees[src] += 1;
+      }
+    }
+  }
+
+  eidType *new_vertices = custom_alloc_global<eidType>(n_vertices+1);
+  parallel_prefix_sum<vidType,eidType>(new_degrees, new_vertices);
+  auto num_edges = new_vertices[n_vertices];
+
+  auto new_edges = new vidType[num_edges];
+
+
+  #pragma omp parallel for
+  for (vidType src = 0; src < n_vertices; src ++) {
+    auto begin = new_vertices[src];
+    eidType offset = 0;
+    for (auto dst : N(src)) {
+      if (colors[src] == colors[dst]) { // keep edge
+        new_edges[begin+offset] = dst;
+        offset ++;
+      }
+    }
+  }
+  std::cout << "deleting old graph\n";
+
+  n_edges = num_edges;
+  vertices = new_vertices;
+  edges = new_edges;
+  
+  t.Stop();
+  std::cout << "color induced sparsification fast = " << t.Seconds() << " sec\n";
+  
+}
+
+void Graph::color_sparsify(int c) {
+  Timer t;
+  t.Start();
+  auto new_edges = new vidType[n_edges];
+  auto colors = new int[n_vertices];
+
+
+  std::random_device rd;  // a seed source for the random number engine
+  std::mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
+  std::uniform_int_distribution<> distrib(0, c-1);
+
+  //#pragma omp parallel for schedule(dynamic, 1) shared(colors)
+  for (vidType v = 0; v < n_vertices; v++) {
+    colors[v] = distrib(gen);
+    //printf("color[%d] = %d, %d\n", v, colors[v], rand());
+  }
+
+
+  t.Stop();
+  std::cout << "coloring = " << t.Seconds() << " sec\n";
+
+
+  t.Start();
+  eidType count = 0;
+  eidType edges_removed = 0;
+  eidType last_offset = 0;
+  for (vidType v = 0; v < n_vertices; v++) {
+    auto begin = edge_begin(v); 
+    auto end = edge_end(v);
+
+    for(auto e = begin;  e < end; e++) {
+      if(colors[v] != colors[edges[e]]) { //remove edge
+        edges_removed += 1;
+      } else {
+        new_edges[count] = edges[e];
+        count += 1;
+      }
+    }
+    vertices[v] -= last_offset; // take out from end of last interval considering prev-removed edges
+    last_offset = edges_removed;   
+  }
+  vertices[n_vertices] -= edges_removed;
+  n_edges = count;
+  edges = new_edges;
+  
+  t.Stop();
+  std::cout << "color induced sparsification = " << t.Seconds() << " sec\n";
+  
+}
+
+
+void Graph::color_sparsify_old(int c) {
+  auto new_edges = new vidType[n_edges];
+  auto colors = new int[n_vertices];
+
+  for (vidType v = 0; v < n_vertices; v++) {
+    colors[v] = rand() % c;
+    //printf("color[%d] = %d, %d\n", v, colors[v], rand());
+  }
+
+  eidType count = 0;
+  eidType edges_removed = 0;
+  eidType last_offset = 0;
+  for (vidType v = 0; v < n_vertices; v++) {
+    auto begin = edge_begin(v); 
+    auto end = edge_end(v);
+
+    for(auto e = begin;  e < end; e++) {
+      if(colors[v] != colors[edges[e]]) { //remove edge
+        edges_removed += 1;
+      } else {
+        new_edges[count] = edges[e];
+        count += 1;
+      }
+    }
+    vertices[v] -= last_offset; // take out from end of last interval considering prev-removed edges
+    last_offset = edges_removed;   
+  }
+  vertices[n_vertices] -= edges_removed;
+  n_edges = count;
+  edges = new_edges;
+  
+}
+void Graph::edge_sparsify(float p) {
+  auto new_edges = new vidType[n_edges];
+  eidType count = 0;
+  eidType edges_removed = 0;
+  eidType last_offset = 0;
+  for (vidType v = 0; v < n_vertices; v++) {
+    auto begin = edge_begin(v); 
+    auto end = edge_end(v);
+
+    for(auto e = begin;  e < end; e++) {
+      if(rand() < (1-p)*RAND_MAX) { //remove edge
+        edges_removed += 1;
+      } else {
+        new_edges[count] = edges[e];
+        count += 1;
+      }
+    }
+    vertices[v] -= last_offset; // take out from end of last interval considering prev-removed edges
+    last_offset = edges_removed;   
+  }
+  vertices[n_vertices] -= edges_removed;
+  n_edges = count;
+  edges = new_edges;
+  
+}
+
 void Graph::build_reverse_graph() {
   std::vector<VertexList> reverse_adj_lists(n_vertices);
   for (vidType v = 0; v < n_vertices; v++) {
@@ -192,6 +478,29 @@ VertexSet Graph::out_neigh(vidType vid, vidType offset) const {
   }
   assert(end <= n_edges);
   return VertexSet(edges + begin + offset, end - begin, vid);
+}
+
+void Graph::init_simple_edgelist() {
+  Timer t;
+  t.Start();
+  if (nnz != 0) return; // already initialized
+  nnz = E();
+  src_list = new vidType[nnz];
+  dst_list = new vidType[nnz];
+ 
+  size_t i = 0;
+  for (vidType v = 0; v < V(); v ++) {
+    for (auto u : N(v)) {
+      if (u == v) continue; // no selfloops
+      src_list[i] = v;
+      dst_list[i] = u;
+      i ++;
+    }
+  }
+  assert(i == nnz);
+  t.Stop();
+  std::cout << "Time on generating the edgelist: " << t.Seconds() << " sec\n";
+  return;
 }
 
 // TODO: fix for directed graph
