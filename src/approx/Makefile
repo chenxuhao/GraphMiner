@@ -8,6 +8,10 @@ all: tc_sample_omp_base tc_sample_edge_sparse tc_sample_color_sparse tc_sample_c
 %.o: %.cu
 	$(NVCC) $(NVFLAGS) $(INCLUDES) -c $<
 
+ns_path: VertexSet.o graph.o ns_path.o
+	$(CXX) $(CXXFLAGS) $(INCLUDES) VertexSet.o graph.o ns_path.o -o $@ -lgomp
+	mv $@ $(BIN)
+
 tc_sample_omp_base: $(OBJS) tc_omp_base.o
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) tc_omp_base.o -o $@ -lgomp
 	mv $@ $(BIN)
