@@ -43,6 +43,9 @@ void SglSolver(Graph &g, Pattern &p, uint64_t &total, int, int) {
     #include "taileddiamond.h"
   } else if (p.is_taileddiamond2()) {
     #include "taileddiamond2.h"
+  // 6-motifs
+  } else if (p.is_6path()) { // a.k.a, 6-chain
+    #include "6path.h"
   } else {
     std::cout << "Not implemented\n";
   }

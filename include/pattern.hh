@@ -73,11 +73,14 @@ public:
   bool is_taileddiamond() const { return name_ == "taileddiamond"; }
   bool is_taileddiamond2() const { return name_ == "taileddiamond2"; }
   // 6-motif
+  bool is_6path() const { return name_ == "6path"; }
   bool is_dumbbell() const { return name_ == "dummbell"; }
+
+  // colorful patterns
   bool is_4color_square() const { return name_ == "4color-square"; }
+
   bool is_connected(vidType u, vidType v) const;
   void read_adj_file(std::string inputfile);
-
   std::string get_name() const { return name_; }
   int size() const { return num_vertices; }
   int sizeEdges() const { return num_edges; }
