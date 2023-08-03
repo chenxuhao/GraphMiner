@@ -1,16 +1,6 @@
 #include <iostream>
-#include <random>
 #include "graph.h"
-#include <iomanip>
-#include <locale>
-
-template<class T>
-std::string FormatWithCommas(T value) {
-  std::stringstream ss;
-  ss.imbue(std::locale(""));
-  ss << std::fixed << value;
-  return ss.str();
-}
+#include "sample.hh"
 
 vidType sample_neighbor(Graph &g, vidType v, VertexSet &vs, vidType &num, vidType upper_bound = INT_MAX) {
   VertexSet candidate_set;
@@ -19,10 +9,7 @@ vidType sample_neighbor(Graph &g, vidType v, VertexSet &vs, vidType &num, vidTyp
   else
     difference_set(candidate_set, g.N(v), vs);
   num = candidate_set.size();
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_int_distribution<vidType> dist(0, num);
-  auto id = dist(gen);
+  auto id = random_select_single(0, num);
   return candidate_set[id];
 }
 
@@ -34,21 +21,15 @@ int main(int argc, char* argv[]) {
   }
   Graph g(argv[1]);
   g.print_meta_data();
-  g.init_simple_edgelist();
+
   int path_length = atoi(argv[2]);
   assert(path_length > 1);
   eidType num_samples = atoi(argv[3]);
   std::cout << "num_samples: " << num_samples << "\n";
+
+  g.init_simple_edgelist();
   auto m = g.E();
-  Timer t;
-  t.Start();
   __int128_t counter = 0;
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_int_distribution<eidType> dist(0, m);
-  std::vector<eidType> edges(num_samples);
-  for (eidType i = 0; i < num_samples; i++)
-    edges[i] = dist(gen);
 
   int num_threads = 1;
   #pragma omp parallel
@@ -57,6 +38,10 @@ int main(int argc, char* argv[]) {
   }
   std::cout << "OpenMP (" << num_threads << " threads)\n";
  
+  Timer t;
+  t.Start();
+  std::vector<eidType> edges(num_samples);
+  random_select_batch<eidType>(0, m, num_samples, edges);
   #pragma omp parallel for reduction(+ : counter) //schedule(dynamic, 1)
   for (eidType i = 0; i < num_samples; i++) {
     uint64_t scale = m;
