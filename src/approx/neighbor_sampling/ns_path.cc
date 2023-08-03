@@ -2,17 +2,6 @@
 #include "graph.h"
 #include "sample.hh"
 
-vidType sample_neighbor(Graph &g, vidType v, VertexSet &vs, vidType &num, vidType upper_bound = INT_MAX) {
-  VertexSet candidate_set;
-  if (upper_bound < INT_MAX) 
-    difference_set(candidate_set, g.N(v), vs, upper_bound);
-  else
-    difference_set(candidate_set, g.N(v), vs);
-  num = candidate_set.size();
-  auto id = random_select_single(0, num);
-  return candidate_set[id];
-}
-
 int main(int argc, char* argv[]) {
   if (argc < 4) {
     std::cout << "Usage: " << argv[0] << " <graph> <path_length> <num_samples>\n";
@@ -51,19 +40,24 @@ int main(int argc, char* argv[]) {
     VertexSet vs;
     vs.add(v0);
     vs.add(v1);
-    vidType v;
-    std::vector<vidType> c(path_length-1);
+    vidType v = 0;
+    vidType c = 0;
     for (int j = 1; j < path_length; j++) {
-      if (j == path_length-1)
-        v = sample_neighbor(g, vs[j], vs, c[j-1], v0);
-      else
-        v = sample_neighbor(g, vs[j], vs, c[j-1]);
-      if (c[j-1] == 0) {
+      if (j == path_length-1) {
+        c = difference_num(g.N(vs[j]), vs, v0);
+      } else {
+        VertexSet candidate_set;
+        difference_set(candidate_set, g.N(vs[j]), vs);
+        c = candidate_set.size();
+        auto id = random_select_single(0, c);
+        v = candidate_set[id];
+        vs.add(v);
+      }
+      if (c == 0) {
         scale = 0;
         break;
       }
-      vs.add(v);
-      scale *= c[j-1];
+      scale *= c;
     }
     counter += scale;
   }
