@@ -46,3 +46,9 @@ void random_select_batch(T begin, T end, int64_t n, std::vector<T> &samples) {
     samples[i] = dist(gen);
 }
 
+#include "VertexSet.h"
+inline void sort_vertexset(VertexSet &vs) {
+  auto ptr = vs.data();
+  auto set_size = vs.size();
+  std::sort(ptr, ptr+set_size);
+}

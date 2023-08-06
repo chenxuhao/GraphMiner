@@ -30,32 +30,28 @@ int main(int argc, char* argv[]) {
 
 void sample_clique(Graph &g, int k, eidType num_samples, uint64_t &total) {
   auto m = g.E();
-  std::cout << "num_samples: " << num_samples << "\n";
-
+  double counter = 0;
   int num_threads = 1;
   #pragma omp parallel
   {
     num_threads = omp_get_num_threads();
   }
   std::cout << "OpenMP (" << num_threads << " threads)\n";
+  std::uniform_int_distribution<eidType> edge_dist(0, m-1);
+  auto num_samples_per_thread = num_samples / num_threads; 
 
   Timer t;
   t.Start();
-  __int128_t counter = 0;
-  std::vector<eidType> edges(num_samples);
-  random_select_batch<eidType>(0, m-1, num_samples, edges);
-  #pragma omp parallel for reduction(+ : counter) //schedule(dynamic, 1)
-  for (int64_t i = 0; i < num_samples; i++) {
-    uint64_t scale = m;
-    auto eid = edges[i];
+  #pragma omp parallel reduction(+ : counter)
+  {
+  std::random_device rd;
+  rd_engine gen(rd());
+  for (int64_t i = 0; i < num_samples_per_thread; i++) {
+    auto eid = edge_dist(gen);
+    double scale = m;
     auto v0 = g.get_src(eid);
     auto v1 = g.get_dst(eid);
-    VertexSet vs;
     VertexSet temp[2];
-    vs.add(v0);
-    vs.add(v1);
-    vidType v;
-
     intersection(g.N(v0), g.N(v1), temp[0]);
     vidType c = temp[0].size();
     if (c == 0) continue;
@@ -63,26 +59,25 @@ void sample_clique(Graph &g, int k, eidType num_samples, uint64_t &total) {
       counter += scale * c;
       continue;
     }
-    auto idx0 = random_select_single<vidType>(0, c-1);
-    v = temp[0][idx0];
-    vs.add(v);
+    auto idx0 = random_select_single<vidType>(0, c-1, gen);
+    vidType v = temp[0][idx0];
     scale *= c;
     for (int j = 2; j < k-1; j++) {
       temp[(j+1)%2].clear();
-      if (j == k - 2)
-        c = intersection_num(g.N(vs[j]), temp[j%2]);
-      else {
-        intersection(g.N(vs[j]), temp[j%2], temp[(j+1)%2]);
+      if (j == k - 2) {
+        c = intersection_num(g.N(v), temp[j%2]);
+      } else {
+        intersection(g.N(v), temp[j%2], temp[(j+1)%2]);
         c = temp[(j+1)%2].size();
         if (c == 0) { scale = 0; break; }
-        auto id = random_select_single<vidType>(0, c-1);
+        auto id = random_select_single<vidType>(0, c-1, gen);
         v = temp[(j+1)%2][id];
-        vs.add(v);
       }
       if (c == 0) { scale = 0; break; }
       scale *= c;
     }
     counter += scale;
+  }
   }
   // scale down by number of samples
   total = counter / num_samples;
@@ -90,20 +85,32 @@ void sample_clique(Graph &g, int k, eidType num_samples, uint64_t &total) {
 
 void sample_4clique(Graph &g, eidType num_samples, uint64_t &total) {
   auto m = g.E();
-  std::vector<eidType> edges(num_samples);
-  random_select_batch<eidType>(0, m-1, num_samples, edges);
-  __int128_t counter = 0;
-  #pragma omp parallel for reduction(+ : counter) //schedule(dynamic, 1)
-  for (eidType i = 0; i < num_samples; i++) {
-    auto eid = edges[i];
+  double counter = 0;
+  int num_threads = 1;
+  #pragma omp parallel
+  {
+    num_threads = omp_get_num_threads();
+  }
+  std::cout << "OpenMP (" << num_threads << " threads)\n";
+ 
+  std::uniform_int_distribution<eidType> edge_dist(0, m-1);
+  auto num_samples_per_thread = num_samples / num_threads; 
+
+  #pragma omp parallel reduction(+ : counter)
+  {
+  std::random_device rd;
+  rd_engine gen(rd());
+  for (int64_t i = 0; i < num_samples_per_thread; i++) {
+    auto eid = edge_dist(gen);
     auto v0 = g.get_src(eid);
     auto v1 = g.get_dst(eid);
     auto y0y1 = g.N(v0) & g.N(v1);
     auto d1 = y0y1.size();
-    if (d1 == 0) continue;
-    auto idx1 = random_select_single<vidType>(0, d1-1);
+    if (d1 < 1) continue;
+    auto idx1 = random_select_single<vidType>(0, d1-1, gen);
     auto v2 = y0y1[idx1];
     counter += intersection_num(y0y1, g.N(v2)) * g.E() * d1;
+  }
   }
   total = counter / num_samples;
 }

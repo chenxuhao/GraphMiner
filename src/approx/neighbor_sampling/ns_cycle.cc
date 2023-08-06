@@ -17,40 +17,45 @@ int main(int argc, char* argv[]) {
 
   auto m = g.init_edgelist(true);
   std::cout << "num_edges: " << m << "\n";
-  __int128_t counter = 0;
+  double counter = 0;
   int num_threads = 1;
   #pragma omp parallel
   {
     num_threads = omp_get_num_threads();
   }
   std::cout << "OpenMP (" << num_threads << " threads)\n";
+  std::uniform_int_distribution<eidType> edge_dist(0, m-1);
+  auto num_samples_per_thread = num_samples / num_threads;
  
   Timer t;
   t.Start();
-  std::vector<eidType> edges(num_samples);
-  random_select_batch<eidType>(0, m-1, num_samples, edges);
-  #pragma omp parallel for reduction(+ : counter) //schedule(dynamic, 1)
-  for (eidType i = 0; i < num_samples; i++) {
-    uint64_t scale = m;
-    auto eid = edges[i];
+  #pragma omp parallel reduction(+ : counter)
+  {
+  std::random_device rd;
+  rd_engine gen(rd());
+  for (eidType i = 0; i < num_samples_per_thread; i++) {
+    auto eid = edge_dist(gen);
+    double scale = m;
     auto v0 = g.get_src(eid);
     auto v1 = g.get_dst(eid);
     VertexSet vs;
     vs.add(v0);
     vs.add(v1);
-    vidType v;
+    sort_vertexset(vs);
+    vidType v = v1;
     vidType c;
     for (int j = 2; j < k; j++) {
       if (j == k-1) {
         VertexSet candidate_set;
-        difference_set(candidate_set, g.N(vs[j-1]), vs, v1);
+        difference_set(candidate_set, g.N(v), vs, v1);
         scale *= intersection_num(candidate_set, g.N(v0));
         break;
       } else {
         VertexSet candidate_set;
-        difference_set(candidate_set, g.N(vs[j-1]), vs, v0);
+        difference_set(candidate_set, g.N(v), vs, v0);
         c = candidate_set.size();
-        auto id = random_select_single(0, c-1);
+        if (c < 1) { scale = 0; break; }
+        auto id = random_select_single(0, c-1, gen);
         v = candidate_set[id];
       }
       if (c == 0) {
@@ -58,9 +63,11 @@ int main(int argc, char* argv[]) {
         break;
       }
       vs.add(v);
+      sort_vertexset(vs);
       scale *= c;
     }
     counter += scale;
+  }
   }
   // scale down by number of samples
   uint64_t total = counter / num_samples;
@@ -68,3 +75,4 @@ int main(int argc, char* argv[]) {
   std::cout << "runtime = " << t.Seconds() << " sec\n";
   std::cout << "Estimated count " << FormatWithCommas(total) << "\n";
 }
+

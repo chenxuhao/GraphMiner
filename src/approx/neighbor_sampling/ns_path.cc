@@ -8,8 +8,6 @@ void sample_path_sb(Graph &g, int k, eidType num_samples, uint64_t &total); // w
 void sample_path(Graph &g, int k, eidType num_samples, uint64_t &total);
 void sample_path_ASAP(Graph &g, int k, eidType num_samples, uint64_t &total);
 
-void sort_vertexset(VertexSet &vs) { auto ptr = vs.data(); auto set_size = vs.size(); std::sort(ptr, ptr+set_size); }
-
 int main(int argc, char* argv[]) {
   if (argc < 4) {
     std::cout << "Usage: " << argv[0] << " <graph> <path_nodes> <num_samples>\n";
