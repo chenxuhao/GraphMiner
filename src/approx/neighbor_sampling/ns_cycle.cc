@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
   Timer t;
   t.Start();
   std::vector<eidType> edges(num_samples);
-  random_select_batch<eidType>(0, m, num_samples, edges);
+  random_select_batch<eidType>(0, m-1, num_samples, edges);
   #pragma omp parallel for reduction(+ : counter) //schedule(dynamic, 1)
   for (eidType i = 0; i < num_samples; i++) {
     uint64_t scale = m;
@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
         VertexSet candidate_set;
         difference_set(candidate_set, g.N(vs[j-1]), vs, v0);
         c = candidate_set.size();
-        auto id = random_select_single(0, c);
+        auto id = random_select_single(0, c-1);
         v = candidate_set[id];
       }
       if (c == 0) {
