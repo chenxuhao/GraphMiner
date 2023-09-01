@@ -6,6 +6,7 @@ CLANGXX=/home/azliu/build/bin/clang++
 # all: tc_omp_base tc_cilk_base tc_cilk_custom
 # all: tc_omp_base tc_omp_a0 tc_cilk_base 
 all: tc_omp_base tc_omp_a0
+# all: VertexSet.o
 
 tc_omp_base: $(OBJS) omp_base.o
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) omp_base.o -o $@ -lgomp -L$(OPENBLAS_DIR)/lib -lopenblas

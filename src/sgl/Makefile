@@ -3,7 +3,8 @@ INCLUDES+=-I$(MGPU_DIR)
 INCLUDES+=-I./cpu_kernels -I./gpu_kernels 
 OBJS+=pattern.o
 NVFLAGS+=--expt-extended-lambda
-all: sgl_omp_base sgl_gpu_base sgl_multigpu
+all: sgl_omp_base 
+# all: sgl_gpu_base sgl_multigpu
 
 # baseline version, add make USE_SET_OPS=1 when make
 sgl_omp_base: $(OBJS) omp_base.o
