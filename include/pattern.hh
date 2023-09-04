@@ -44,7 +44,8 @@ private:
 
 public:
   Pattern() : Pattern("", false) { }
-  Pattern(std::string name) : name_(name) { }
+  Pattern(std::string name) : Pattern(name, 0, 0) { }
+  Pattern(std::string name, int nv, int ne) : name_(name), num_vertices(nv), num_edges(ne) { }
   Pattern(std::string filename, bool is_labeled) : 
       name_(""), has_label(is_labeled), core_length_(0) {
     read_adj_file(filename);
@@ -52,16 +53,35 @@ public:
     set_name();
   }
   ~Pattern() {}
+  bool is_clique() const { return num_vertices>1 && num_edges == (num_vertices-1)*num_vertices/2; }
+  bool is_path() const { return num_edges == num_vertices-1; }
+  bool is_chain() const { return num_edges == num_vertices-1; }
   bool is_wedge() const { return name_ == "wedge"; }
   bool is_triangle() const { return name_ == "triangle"; }
+  // 4-motif
   bool is_diamond() const { return name_ == "diamond"; }
   bool is_rectangle() const { return name_ == "rectangle"; }
+  bool is_tailedtriangle() const { return name_ == "tailedtriangle"; }
+  bool is_4path() const { return name_ == "4path"; }
+  bool is_3star() const { return name_ == "3star"; }
+  // 5-motif
+  bool is_5path() const { return name_ == "5path"; }
   bool is_pentagon() const { return name_ == "pentagon"; }
   bool is_house() const { return name_ == "house"; }
+  bool is_semihouse() const { return name_ == "semihouse"; }
+  bool is_closedhouse() const { return name_ == "closedhouse"; }
+  bool is_hourglass() const { return name_ == "hourglass"; }
+  bool is_taileddiamond() const { return name_ == "taileddiamond"; }
+  bool is_taileddiamond2() const { return name_ == "taileddiamond2"; }
+  // 6-motif
+  bool is_6path() const { return name_ == "6path"; }
+  bool is_dumbbell() const { return name_ == "dummbell"; }
+
+  // colorful patterns
   bool is_4color_square() const { return name_ == "4color-square"; }
+
   bool is_connected(vidType u, vidType v) const;
   void read_adj_file(std::string inputfile);
-
   std::string get_name() const { return name_; }
   int size() const { return num_vertices; }
   int sizeEdges() const { return num_edges; }
