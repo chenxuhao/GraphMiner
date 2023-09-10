@@ -159,6 +159,9 @@ public:
   vidType difference_set_edgeinduced(vidType v, vidType u, vlabel_t label, VertexSet& result);
   vidType difference_set_edgeinduced(VertexSet& vs, vidType u, vlabel_t label, VertexSet& result);
 
+  // degeneracy ordering
+  vector<int> degeneracy_ordering();
+
   // print graph information
   void print_meta_data() const;
   void print_graph() const;
