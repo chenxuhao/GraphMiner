@@ -1,9 +1,10 @@
-#export LD_LIBRARY_PATH=/usr/local/OpenBLAS/build/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/usr/local/openblas/lib:$LD_LIBRARY_PATH
 #export KMP_AFFINITY=scatter
 export KMP_AFFINITY=disabled
 export KMP_LIBRARY=turnaround
 export KMP_BLOCKTIME=0
 export OMP_NUM_THREADS=20
+export OPENBLAS_NUM_THREADS=4
 
 export CUDA_HOME=/usr/local/cuda
 #CUDA_HOME=/org/centers/cdgc/cuda/cuda-10.2
@@ -25,8 +26,11 @@ export MKL_DIR=/opt/apps/sysnet/intel/20.0/mkl
 
 export GCC_HOME=/usr/lib/gcc/x86_64-linux-gnu/8
 export TBB_HOME=/opt/intel/oneapi/tbb/latest
-export CILK_HOME=/home/cxh/OpenCilk/build
-export CILK_CLANG=/home/cxh/OpenCilk/build/lib/clang/14.0.6
+# export CILK_HOME=/home/cxh/OpenCilk/build
+# export CILK_CLANG=/home/cxh/OpenCilk/build/lib/clang/14.0.6
+export CILK_HOME=/home/azliu/build
+export CILK_CLANG=/home/azliu/build/lib/clang/14.0.6
+
 export PAPI_HOME=/usr/local/papi-6.0.0
 #export CUB_DIR=../../cub
 #export MGPU_DIR=../../moderngpu
