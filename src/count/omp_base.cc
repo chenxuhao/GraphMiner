@@ -46,6 +46,8 @@ void ScSolver(Graph &g, Pattern &p, uint64_t &total, int, int) {
   // 6-motifs
   } else if (p.is_6path()) {
     #include "6path.h"
+  } else if (p.is_sct()) {
+    #include "sct.h"
   } else {
     std::cout << "Not implemented\n";
   }

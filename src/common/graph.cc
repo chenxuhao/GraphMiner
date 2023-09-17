@@ -728,3 +728,49 @@ void Graph::computeKCore() {
   }
 }
 
+vector<int> Graph::degeneracy_ordering() {
+  int nv = size();
+  int md = get_max_degree();
+  std::vector<int> vertices(nv);          // Vertices sorted by degree.
+  std::vector<int> position(nv);          // The position of vertices in vertices array.
+  std::vector<int> degree_bin(md+1, 0);   // Degree from 0 to max_degree.
+  std::vector<int> offset(md+1);          // The offset in vertices array according to degree.
+  std::vector<int> d(nv);
+  
+  for (int i = 0; i < nv; ++i) {
+    int degree = get_degree(i);
+    d[i] = degree;
+    degree_bin[degree] += 1;
+  }
+  int start = 0;
+  for (int i = 0; i < md+1; ++i) {
+    offset[i] = start;
+    start += degree_bin[i];
+  }
+  for (int i = 0; i < nv; ++i) {
+    int degree = get_degree(i);
+    position[i] = offset[degree];
+    vertices[position[i]] = i;
+    offset[degree] += 1;
+  }
+  for (int i = md; i > 0; --i) {
+    offset[i] = offset[i - 1];
+  }
+  offset[0] = 0;
+  for (int i = 0; i < nv; ++i) {
+    vidType v = vertices[i];
+    for (vidType u: N(v)) {
+      if (position[u] > position[v]) {
+        int pos_w = offset[d[u]];
+        vidType w = vertices[pos_w];
+        if (u != w) {
+          swap(vertices[position[u]], vertices[pos_w]);
+          swap(position[u], position[w]);
+        }
+        offset[d[u]--]++;
+        offset[d[v]--]++;
+      }
+    }
+  }
+  return position;
+}

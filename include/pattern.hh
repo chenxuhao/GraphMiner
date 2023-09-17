@@ -80,6 +80,9 @@ public:
   // colorful patterns
   bool is_4color_square() const { return name_ == "4color-square"; }
 
+  // sct
+  bool is_sct() const { return name_ == "sct"; }
+
   bool is_connected(vidType u, vidType v) const;
   void read_adj_file(std::string inputfile);
   std::string get_name() const { return name_; }
