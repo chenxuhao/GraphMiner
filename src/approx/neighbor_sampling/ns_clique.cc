@@ -51,6 +51,9 @@ void sample_clique(Graph &g, int k, eidType num_samples, uint64_t &total) {
     double scale = m;
     auto v0 = g.get_src(eid);
     auto v1 = g.get_dst(eid);
+    auto d0 = g.get_degree(v0);
+    auto d1 = g.get_degree(v1);
+    if (d0 < k-1 || d1 < k-1) continue;
     VertexSet temp[2];
     intersection(g.N(v0), g.N(v1), temp[0]);
     vidType c = temp[0].size();
@@ -61,6 +64,7 @@ void sample_clique(Graph &g, int k, eidType num_samples, uint64_t &total) {
     }
     auto idx0 = random_select_single<vidType>(0, c-1, gen);
     vidType v = temp[0][idx0];
+    if (g.get_degree(v) < k-1) continue;
     scale *= c;
     for (int j = 2; j < k-1; j++) {
       temp[(j+1)%2].clear();
@@ -73,6 +77,7 @@ void sample_clique(Graph &g, int k, eidType num_samples, uint64_t &total) {
         auto id = random_select_single<vidType>(0, c-1, gen);
         v = temp[(j+1)%2][id];
       }
+      if (g.get_degree(v) < k-1) { scale = 0; break; }
       if (c == 0) { scale = 0; break; }
       scale *= c;
     }
