@@ -21,8 +21,10 @@ void SglSolver(Graph &g, Pattern &p, uint64_t &total, int, int) {
     #include "diamond_bj.h"
   //} else if (p.is_pentagon()) {
   //  #include "pentagon_bj.h"
-  //} else if (p.is_hourglass()) {
-  //  #include "hourglass_bj.h"
+  } else if (p.is_hourglass()) {
+    #include "hourglass_bj.h"
+  } else if (p.is_dumbbell()) {
+    #include "dumbbell_bj.h"
   } else {
     std::cout << "Not implemented\n";
   }

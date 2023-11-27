@@ -121,7 +121,35 @@ public:
     return idx_out;
   }
 
-  vidType intersect_ns_except(const VertexSet &other, vidType upper, vidType ancestor) const {
+  VertexSet intersect_except(const VertexSet &other, vidType ancestor) const {
+    VertexSet out;
+    vidType idx_l = 0, idx_r = 0;
+    while(idx_l < set_size && idx_r < other.set_size) {
+      vidType left = ptr[idx_l];
+      vidType right = other.ptr[idx_r];
+      if(left <= right) idx_l++;
+      if(right <= left) idx_r++;
+      if(left == right && left != ancestor) out.ptr[out.set_size++] = left;
+    }
+    return out;
+  }
+
+  VertexSet intersect_bound_except(const VertexSet &other, vidType upper, vidType ancestor) const {
+    VertexSet out;
+    vidType idx_l = 0, idx_r = 0;
+    while(idx_l < set_size && idx_r < other.set_size) {
+      vidType left = ptr[idx_l];
+      vidType right = other.ptr[idx_r];
+      if(left >= upper) break;
+      if(right >= upper) break;
+      if(left <= right) idx_l++;
+      if(right <= left) idx_r++;
+      if(left == right && left != ancestor) out.ptr[out.set_size++] = left;
+    }
+    return out;
+  }
+
+  vidType intersect_ns_bound_except(const VertexSet &other, vidType upper, vidType ancestor) const {
     vidType idx_l = 0, idx_r = 0, idx_out = 0;
     while(idx_l < set_size && idx_r < other.set_size) {
       vidType left = ptr[idx_l];
@@ -135,7 +163,7 @@ public:
     return idx_out;
   }
 
-  vidType intersect_except(const VertexSet &other, vidType ancestor) const {
+  vidType intersect_ns_except(const VertexSet &other, vidType ancestor) const {
     vidType idx_l = 0, idx_r = 0, idx_out = 0;
     while(idx_l < set_size && idx_r < other.set_size) {
       vidType left = ptr[idx_l];
@@ -147,7 +175,7 @@ public:
     return idx_out;
   }
 
-  vidType intersect_except(const VertexSet &other, vidType ancestorA, vidType ancestorB) const {
+  vidType intersect_ns_except(const VertexSet &other, vidType ancestorA, vidType ancestorB) const {
     vidType idx_l = 0, idx_r = 0, idx_out = 0;
     while(idx_l < set_size && idx_r < other.set_size) {
       vidType left = ptr[idx_l];
@@ -155,6 +183,40 @@ public:
       if(left <= right) idx_l++;
       if(right <= left) idx_r++;
       if(left == right && left != ancestorA && left != ancestorB) idx_out++;
+    }
+    return idx_out;
+  }
+
+  vidType intersect_ns_except(const VertexSet &other, VertexList &nodes) const {
+    vidType idx_l = 0, idx_r = 0, idx_out = 0;
+    while(idx_l < set_size && idx_r < other.set_size) {
+      vidType left = ptr[idx_l];
+      vidType right = other.ptr[idx_r];
+      if(left <= right) idx_l++;
+      if(right <= left) idx_r++;
+      if(left == right) {
+        bool found = false;
+        for (auto w : nodes) if (left == w) { found = true; break; }
+        if (!found) idx_out++;
+      }
+    }
+    return idx_out;
+  }
+
+  vidType intersect_ns_bound_except(const VertexSet &other, vidType upper, VertexList &nodes) const {
+    vidType idx_l = 0, idx_r = 0, idx_out = 0;
+    while(idx_l < set_size && idx_r < other.set_size) {
+      vidType left = ptr[idx_l];
+      vidType right = other.ptr[idx_r];
+      if(left >= upper) break;
+      if(right >= upper) break;
+      if(left <= right) idx_l++;
+      if(right <= left) idx_r++;
+      if(left == right) {
+        bool found = false;
+        for (auto w : nodes) if (left == w) { found = true; break; }
+        if (!found) idx_out++;
+      }
     }
     return idx_out;
   }
@@ -240,16 +302,28 @@ inline uint64_t intersection_num(const VertexSet& a, const VertexSet& b, vidType
   return a.intersect_ns(b, up);
 }
 
-inline uint64_t intersection_num_except(const VertexSet& a, const VertexSet& b, vidType ancestor) {
+inline VertexSet intersection_set_except(const VertexSet& a, const VertexSet& b, vidType ancestor) {
   return a.intersect_except(b, ancestor);
 }
 
+inline uint64_t intersection_num_except(const VertexSet& a, const VertexSet& b, vidType ancestor) {
+  return a.intersect_ns_except(b, ancestor);
+}
+
 inline uint64_t intersection_num_except(const VertexSet& a, const VertexSet& b, vidType ancestorA, vidType ancestorB) {
-  return a.intersect_except(b, ancestorA, ancestorB);
+  return a.intersect_ns_except(b, ancestorA, ancestorB);
+}
+
+inline uint64_t intersection_num_except(const VertexSet& a, const VertexSet& b, VertexList &nodes) {
+  return a.intersect_ns_except(b, nodes);
 }
 
 inline uint64_t intersection_num_bound_except(const VertexSet& a, const VertexSet& b, vidType up, vidType ancestor) {
-  return a.intersect_ns_except(b, up, ancestor);
+  return a.intersect_ns_bound_except(b, up, ancestor);
+}
+
+inline uint64_t intersection_num_bound_except(const VertexSet& a, const VertexSet& b, vidType up, VertexList &nodes) {
+  return a.intersect_ns_bound_except(b, up, nodes);
 }
 
 inline VertexSet bounded(const VertexSet&a, vidType up) {

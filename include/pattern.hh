@@ -75,7 +75,7 @@ public:
   bool is_taileddiamond2() const { return name_ == "taileddiamond2"; }
   // 6-motif
   bool is_6path() const { return name_ == "6path"; }
-  bool is_dumbbell() const { return name_ == "dummbell"; }
+  bool is_dumbbell() const { return name_ == "dumbbell"; }
 
   // colorful patterns
   bool is_4color_square() const { return name_ == "4color-square"; }
