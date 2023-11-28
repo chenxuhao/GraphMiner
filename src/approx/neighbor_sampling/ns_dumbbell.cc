@@ -1,7 +1,7 @@
 #include "graph.h"
 #include "sample.hh"
 
-void sample_house(Graph &g, eidType num_samples, uint64_t &total);
+void sample_dumbbell(Graph &g, eidType num_samples, uint64_t &total);
 
 int main(int argc, char* argv[]) {
   if (argc < 3) {
@@ -16,14 +16,15 @@ int main(int argc, char* argv[]) {
   Timer t;
   t.Start();
   uint64_t total = 0;
-  sample_house(g, num_samples, total);
+  sample_dumbbell(g, num_samples, total);
   t.Stop();
   std::cout << "Runtime = " << t.Seconds() << " sec\n";
   std::cout << "Estimated count " << FormatWithCommas(total) << "\n";
 }
 
-void sample_house(Graph &g, eidType num_samples, uint64_t &total) {
+void sample_dumbbell(Graph &g, eidType num_samples, uint64_t &total) {
   auto m = g.init_edgelist(true);
+  std::cout << "m = " << m << "\n";
   double counter = 0;
   int num_threads = 1;
   #pragma omp parallel
@@ -34,8 +35,9 @@ void sample_house(Graph &g, eidType num_samples, uint64_t &total) {
  
   std::uniform_int_distribution<eidType> edge_dist(0, m-1);
   auto num_samples_per_thread = num_samples / num_threads; 
+  int64_t success_sample = 0;
 
-  #pragma omp parallel reduction(+ : counter)
+  #pragma omp parallel reduction(+ : counter,success_sample)
   {
   std::random_device rd;
   rd_engine gen(rd());
@@ -47,32 +49,40 @@ void sample_house(Graph &g, eidType num_samples, uint64_t &total) {
     if (d0 < 3) continue;
     auto d1 = g.get_degree(v1);
     if (d1 < 3) continue;
-    auto y0y1 = g.N(v0) & g.N(v1);
-    auto c0 = y0y1.size();
+    VertexSet vs1;
+    vs1.add(v1);
+    auto y0n1 = difference_set(g.N(v0), vs1);
+    auto c0 = y0n1.size();
     if (c0 < 1) continue;
     auto idx0 = random_select_single<vidType>(0, c0-1, gen);
-    auto v2 = y0y1[idx0];
-    auto u = v1 > v2 ? v2 : v1;
-    auto w = v1 > v2 ? v1 : v2;
-    VertexSet vs12;
-    vs12.add(u);
-    vs12.add(w);
-    auto candidate_v3 = difference_set(g.N(v0), vs12);
-    auto c1 = candidate_v3.size();
+    auto v2 = y0n1[idx0];
+    auto y0y2 = intersection_set(y0n1, g.N(v2), v2);
+    auto c1 = y0y2.size();
     if (c1 < 1) continue;
     auto idx1 = random_select_single<vidType>(0, c1-1, gen);
-    auto v3 = candidate_v3[idx1];
-    u = v0 > v2 ? v2 : v0;
-    w = v0 > v2 ? v0 : v2;
-    VertexSet vs02;
-    vs02.add(u);
-    vs02.add(w);
-    auto candidate_v4 = difference_set(g.N(v1), vs02);
-    auto c2 = intersection_num(g.N(v3), candidate_v4);
+    auto v3 = y0y2[idx1];
+
+    VertexSet vs0;
+    vs0.add(v0);
+    vs0.add(v2);
+    vs0.add(v3);
+    auto y1n0 = difference_set(g.N(v1), vs0);
+    auto c2 = y1n0.size();
     if (c2 < 1) continue;
+    auto idx2 = random_select_single<vidType>(0, c2-1, gen);
+    auto v4 = y1n0[idx2];
+    auto y1y4 = intersection_set(y1n0, g.N(v4), v4);
+    auto c3 = y1y4.size();
+    if (c3 < 1) continue;
+    //auto idx3 = random_select_single<vidType>(0, c3-1, gen);
+    //auto v5 = y1y4[idx3];
+    //std::cout << "sample succeed!\n";
+    success_sample += 1;
+
     double scale = m;
-    counter += scale * c0 * c1 * c2;
+    counter += scale * c0 * c1 * c2 * c3;
   }
   }
+  std::cout << "successful samples = " << success_sample << " sccess_rate = " << double(success_sample) / double(num_samples) << "\n";
   total = counter / num_samples;
 }

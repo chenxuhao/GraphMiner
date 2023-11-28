@@ -4,7 +4,7 @@ VPATH += ../../common
 BIN=../../../bin
 INCLUDES = -I../../../include
 
-all: ns_path ns_clique ns_cycle ns_house
+all: ns_path ns_clique ns_cycle ns_house ns_dumbbell
 
 %.o: %.cc
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $<
@@ -23,6 +23,10 @@ ns_cycle: $(OBJS) ns_cycle.o
 
 ns_house: $(OBJS) ns_house.o
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) ns_house.o -o $@ -lgomp
+	mv $@ $(BIN)
+
+ns_dumbbell: $(OBJS) ns_dumbbell.o
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) ns_dumbbell.o -o $@ -lgomp
 	mv $@ $(BIN)
 
 clean:
