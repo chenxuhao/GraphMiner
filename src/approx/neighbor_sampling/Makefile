@@ -4,7 +4,7 @@ VPATH += ../../common
 BIN=../../../bin
 INCLUDES = -I../../../include
 
-all: ns_path ns_clique ns_cycle ns_house ns_dumbbell
+all: ns_path ns_clique ns_cycle ns_house ns_dumbbell ns_3star2star
 
 %.o: %.cc
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $<
@@ -21,12 +21,28 @@ ns_cycle: $(OBJS) ns_cycle.o
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) ns_cycle.o -o $@ -lgomp
 	mv $@ $(BIN)
 
+ns_diamond: $(OBJS) ns_diamond.o
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) ns_diamond.o -o $@ -lgomp
+	mv $@ $(BIN)
+
+ns_tailedtri: $(OBJS) ns_tailedtri.o
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) ns_tailedtri.o -o $@ -lgomp
+	mv $@ $(BIN)
+
+ns_star: $(OBJS) ns_star.o
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) ns_star.o -o $@ -lgomp
+	mv $@ $(BIN)
+
 ns_house: $(OBJS) ns_house.o
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) ns_house.o -o $@ -lgomp
 	mv $@ $(BIN)
 
 ns_dumbbell: $(OBJS) ns_dumbbell.o
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) ns_dumbbell.o -o $@ -lgomp
+	mv $@ $(BIN)
+
+ns_3star2star: $(OBJS) ns_3star2star.o
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) ns_3star2star.o -o $@ -lgomp
 	mv $@ $(BIN)
 
 clean:

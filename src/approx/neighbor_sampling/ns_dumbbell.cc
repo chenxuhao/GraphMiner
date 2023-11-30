@@ -49,6 +49,7 @@ void sample_dumbbell(Graph &g, eidType num_samples, uint64_t &total) {
     if (d0 < 3) continue;
     auto d1 = g.get_degree(v1);
     if (d1 < 3) continue;
+
     VertexSet vs1;
     vs1.add(v1);
     auto y0n1 = difference_set(g.N(v0), vs1);
