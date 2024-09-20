@@ -1,4 +1,8 @@
-### Approximate Graph Pattern Mining at Scale
+## ScaleMine: Accurate and Fast Approximate Graph Pattern Mining at Scale
+
+@Anna [update artifact instructions here]
+
+### References
 
 * [Sampling from Large Graphs](https://cs.stanford.edu/~jure/pubs/sampling-kdd06.pdf) KDD 2006 [GitHub](https://github.com/Ashish7129/Graph_Sampling)
 
